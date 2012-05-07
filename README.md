@@ -82,14 +82,25 @@ Supported attribute types:
 
     ::string, :text, :integer, :float, :datetime, :boolean
 
-Now we can create products:
+Now we can test our products:
 
     $ rails c
-    SimpleProduct.create(name: 'Book', code: '#1', price: 2.75, description: 'Some words...', active: true)
-    =>
-    GroupProduct.create(name: 'Furniture', price: 79.95, total: 2)
-    =>
+    > SimpleProduct.create(name: 'Book', code: '#1', price: 2.75, description: 'Some words...', active: true) 
+    > GroupProduct.create(name: 'Furniture', price: 79.95, total: 2)
+    >
+    > p SimpleProduct.first.hydra_attribute_names
+    => ["Book", "#1", 2.75, "Some words...", true]
+    > p SimpleProduct.first.hydra_attribute_types
+    => [:string, :float, :text, :boolean]
+    >
+    > product = GroupProduct.first
+    > p product.hydra_attribute_names.map { |a| product.send(a) }
+    => ["Book", "#1", 2.75, "Some words...", true]  
   
+
+## Plans for the next release:
+* Add more complex filters on attributes
+* Add attribute sets feature
 
 ## Contributing
 
