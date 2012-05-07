@@ -1,8 +1,8 @@
 # hydra_attribute
 
-hydra_attribue allows to use 
+hydra_attribute allows to use
 [EAV database structure](http://en.wikipedia.org/wiki/Entity%E2%80%93attribute%E2%80%93value_model) for ActiveRecord models
-and is compatibile with active_record >= 3.1. 
+and is compatible with active_record >= 3.1.
 
 ## Requirements
 active_record >= 3.1

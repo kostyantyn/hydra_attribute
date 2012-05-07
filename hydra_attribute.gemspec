@@ -4,8 +4,8 @@ require File.expand_path('../lib/hydra_attribute/version', __FILE__)
 Gem::Specification.new do |gem|
   gem.authors       = ["Kostyantyn Stepanyuk"]
   gem.email         = ["kostya.stepanyuk@gmail.com"]
-  gem.description   = "This gem extends ActiveRecord to use EAV structure data."
-  gem.summary       = "This gem extends ActiveRecord to use EAV structure data."
+  gem.description   = "hydra_attribute allows to use EAV database structure for ActiveRecord models."
+  gem.summary       = "hydra_attribute allows to use EAV database structure for ActiveRecord models."
   gem.homepage      = ""
 
   gem.files         = `git ls-files`.split($\)
