@@ -1,0 +1,11 @@
+# Change default hydra_attribute configurations
+HydraAttribute.setup do |config|
+  # Add prefix for all attribute tables
+  # config.table_prefix = 'hydra_'
+
+  # Add prefix for has_many associations
+  # config.association_prefix = 'hydra_'
+
+  # Wrap all associated models in HydraAttribute module
+  # config.use_module_for_associated_models = true
+end

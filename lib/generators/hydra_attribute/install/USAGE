@@ -1,0 +1,8 @@
+Description:
+  This generator generate the default initializer file.
+
+Usage:
+  rails generate hydra_attribute:install
+
+  This will create:
+    config/initializers/hydra_attribute.rb
