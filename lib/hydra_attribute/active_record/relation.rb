@@ -44,7 +44,7 @@ module HydraAttribute
         conn             = klass.connection
         quoted_ref_alias = conn.quote_column_name(ref_alias)
 
-        self.joins_values += [[
+        [[
           "#{hydra_join_type(value)} JOIN",
           conn.quote_table_name(hydra_ref_table(name)),
           'AS',
@@ -78,7 +78,7 @@ module HydraAttribute
       end
 
       def hydra_ref_alias(name, value)
-        hydra_ref_table(name) + hydra_join_type(value) + name.to_s
+        hydra_ref_table(name) + '_' + hydra_join_type(value).downcase + '_' + name.to_s
       end
 
       def hydra_join_type(value)
