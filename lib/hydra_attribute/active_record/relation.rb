@@ -4,6 +4,7 @@ module HydraAttribute
       define_method HydraAttribute.config.relation_execute_method do
         records = super()
         if records.many?
+          # TODO base class should not know about his child class
           records.first.class.base_class.hydra_attribute_types.each do |type|
             relation = HydraAttribute.config.association(type)
             record   = records.detect { |record| record.class.reflect_on_association(relation).present? }

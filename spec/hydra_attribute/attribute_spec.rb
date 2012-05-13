@@ -50,28 +50,12 @@ describe HydraAttribute::Attribute do
       klass.hydra_attribute_names.should == [:value1, :value2]
     end
 
-    it 'should define #hydra_attribute_names' do
-      klass.hydra_attribute_names.should == []
-      klass.instance_variable_get(:@hydra_attributes)[:key1] << :value1
-      klass.instance_variable_get(:@hydra_attributes)[:key2] << :value2
-      klass.instance_variable_get(:@hydra_attributes)[:key3] << :value1
-      klass.new.hydra_attribute_names.should == [:value1, :value2]
-    end
-
     it 'should define .hydra_attribute_types' do
       klass.hydra_attribute_names.should == []
       klass.instance_variable_get(:@hydra_attributes)[:key1] << :value1
       klass.instance_variable_get(:@hydra_attributes)[:key2] << :value2
       klass.instance_variable_get(:@hydra_attributes)[:key3] << :value1
       klass.hydra_attribute_types.should == [:key1, :key2, :key3]
-    end
-
-    it 'should define #hydra_attribute_types' do
-      klass.hydra_attribute_names.should == []
-      klass.instance_variable_get(:@hydra_attributes)[:key1] << :value1
-      klass.instance_variable_get(:@hydra_attributes)[:key2] << :value2
-      klass.instance_variable_get(:@hydra_attributes)[:key3] << :value1
-      klass.new.hydra_attribute_types.should == [:key1, :key2, :key3]
     end
 
     describe 'should define #hydra_attribute_model' do

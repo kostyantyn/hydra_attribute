@@ -18,6 +18,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency('activerecord', '>= 3.1.0')
 
   gem.add_development_dependency('rspec')
+  gem.add_development_dependency('cucumber')
   gem.add_development_dependency('sqlite3')
   gem.add_development_dependency('database_cleaner')
   gem.add_development_dependency('appraisal')

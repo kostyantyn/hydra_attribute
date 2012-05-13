@@ -30,12 +30,6 @@ module HydraAttribute
         hydra_attributes.keys
       end
 
-      [:hydra_attribute_names, :hydra_attribute_types].each do |method|
-        klass.send :define_method, method do
-          self.class.send(method)
-        end
-      end
-
       klass.send :define_method, :hydra_attribute_model do |name, type|
         attributes = send(HydraAttribute.config.association(type))
         attributes.detect { |a| a.name.to_sym == name } || attributes.build(name: name)
