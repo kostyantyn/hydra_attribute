@@ -5,32 +5,29 @@ module HydraAttribute
     end
 
     def build
-      [@klass, @klass.base_class].each do |klass|
-        define_reflection_methods(klass) unless defined_reflection?(klass)
-      end
-
+      define_reflection_methods unless defined_reflection?
       save_attribute
       define_attribute_methods
     end
 
     private
 
-    def defined_reflection?(klass)
-      klass.instance_variable_defined?(:@hydra_attributes)
+    def defined_reflection?
+      @klass.instance_variable_defined?(:@hydra_attributes)
     end
 
-    def define_reflection_methods(klass)
-      hydra_attributes = klass.instance_variable_set(:@hydra_attributes, Hash.new { |h, k| h[k] = [] })
+    def define_reflection_methods
+      hydra_attributes = @klass.instance_variable_set(:@hydra_attributes, Hash.new { |h, k| h[k] = [] })
 
-      klass.define_singleton_method :hydra_attribute_names do
+      @klass.define_singleton_method :hydra_attribute_names do
         hydra_attributes.values.flatten.uniq
       end
 
-      klass.define_singleton_method :hydra_attribute_types do
+      @klass.define_singleton_method :hydra_attribute_types do
         hydra_attributes.keys
       end
 
-      klass.send :define_method, :hydra_attribute_model do |name, type|
+      @klass.send :define_method, :hydra_attribute_model do |name, type|
         attributes = send(HydraAttribute.config.association(type))
         attributes.detect { |a| a.name.to_sym == name } || attributes.build(name: name)
       end
@@ -47,9 +44,7 @@ module HydraAttribute
     end
 
     def save_attribute
-      [@klass, @klass.base_class].each do |klass|
-        klass.instance_variable_get(:@hydra_attributes)[@type] << @name
-      end
+      @klass.instance_variable_get(:@hydra_attributes)[@type] << @name
     end
   end
 end

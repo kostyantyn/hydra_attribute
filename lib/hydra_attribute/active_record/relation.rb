@@ -4,13 +4,8 @@ module HydraAttribute
       define_method HydraAttribute.config.relation_execute_method do
         records = super()
         if records.many?
-          # TODO base class should not know about his child class
-          records.first.class.base_class.hydra_attribute_types.each do |type|
-            relation = HydraAttribute.config.association(type)
-            record   = records.detect { |record| record.class.reflect_on_association(relation).present? }
-            if record and !record.association(relation).loaded?
-              ::ActiveRecord::Associations::Preloader.new(records, relation).run
-            end
+          group_hydra_records_by_type(records).each_value do |hydra_hash|
+            ::ActiveRecord::Associations::Preloader.new(hydra_hash[:records], hydra_hash[:association]).run if hydra_hash[:records].any?
           end
         end
         records
@@ -34,6 +29,8 @@ module HydraAttribute
           super(opts, *rest)
         end
       end
+
+      private
 
       def build_hydra_joins_values(name, value)
         ref_alias = hydra_ref_alias(name, value)
@@ -85,6 +82,23 @@ module HydraAttribute
       def hydra_join_type(value)
         value.nil? ? 'LEFT' : 'INNER'
       end
+
+      def hydra_hash_with_associations
+        SUPPORT_TYPES.each_with_object({}) do |type, hash|
+          hash[type] = {association: HydraAttribute.config.association(type), records: []}
+        end
+      end
+
+      def group_hydra_records_by_type(records)
+        records.each_with_object(hydra_hash_with_associations) do |record, hydra_hash|
+          if record.class.instance_variable_defined?(:@hydra_attributes) # not all classes have defined hydra attributes
+            record.class.hydra_attribute_types.each do |type|
+              hydra_hash[type][:records] << record unless record.association(hydra_hash[type][:association]).loaded?
+            end
+          end
+        end
+      end
+
     end
   end
 end

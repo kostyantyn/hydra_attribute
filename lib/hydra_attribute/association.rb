@@ -23,8 +23,8 @@ module HydraAttribute
 
     def add_association_for_class
       assoc = config.association(@type)
-      unless @klass.base_class.reflect_on_association(assoc)
-        @klass.base_class.has_many assoc, as: :entity, class_name: config.associated_model_name(@type), autosave: true
+      unless @klass.reflect_on_association(assoc)
+        @klass.has_many assoc, as: :entity, class_name: config.associated_model_name(@type), autosave: true
       end
     end
 
@@ -33,11 +33,7 @@ module HydraAttribute
     end
 
     def namespace
-      if config.use_module_for_associated_models
-        HydraAttribute
-      else
-        Object
-      end
+      config.use_module_for_associated_models ? HydraAttribute : Object
     end
   end
 end

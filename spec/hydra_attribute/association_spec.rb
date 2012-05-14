@@ -11,16 +11,12 @@ describe HydraAttribute::Association do
 
   let(:klass) do
     Class.new do
-      define_singleton_method :base_class do
-        @base_class ||= Class.new do
-          @reflection = {}
-          define_singleton_method :reflect_on_association do |assoc|
-            @reflection[assoc]
-          end
-          define_singleton_method :has_many do |assoc, options|
-            @reflection[assoc] = options
-          end
-        end
+      @reflection = {}
+      define_singleton_method :reflect_on_association do |assoc|
+        @reflection[assoc]
+      end
+      define_singleton_method :has_many do |assoc, options|
+        @reflection[assoc] = options
       end
     end
   end
@@ -82,17 +78,17 @@ describe HydraAttribute::Association do
   end
 
   describe '#add_association_for_class' do
-    it 'should add has_many association for base_class' do
+    it 'should add has_many association for class' do
       association.send(:add_association_for_class)
-      reflection = klass.base_class.reflect_on_association(:hydra_string_attributes)
-      reflection[:as].should.should  == :entity
+      reflection = klass.reflect_on_association(:hydra_string_attributes)
+      reflection[:as].should  == :entity
       reflection[:class_name].should == 'HydraAttribute::StringAttribute'
       reflection[:autosave].should be_true
     end
 
     it 'should not add twice the same has_many association' do
       association.send(:add_association_for_class)
-      klass.base_class.should_not_receive(:has_many)
+      klass.should_not_receive(:has_many)
       association.send(:add_association_for_class)
     end
   end

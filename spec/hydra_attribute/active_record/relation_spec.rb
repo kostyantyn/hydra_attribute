@@ -3,17 +3,6 @@ require 'spec_helper'
 describe HydraAttribute::ActiveRecord::Relation do
   def record_class(loaded_associations = false)
     Class.new do
-      define_singleton_method :base_class do
-        @base_class ||= Class.new do
-          define_singleton_method :hydra_attribute_types do
-            [:string]
-          end
-        end
-      end
-
-      define_singleton_method :reflect_on_association do |_|
-        true
-      end
 
       @hydra_attributes = {string: [:code]}
       define_singleton_method :hydra_attribute_types do
@@ -83,19 +72,91 @@ describe HydraAttribute::ActiveRecord::Relation do
   end
 
   describe '#build_hydra_joins_values' do
-    before do
-      module HydraAttribute
-        class StringAttribute
-          def self.table_name
-            'hydra_string_attributes'
+    def build_connection
+      klass = Class.new do
+        define_method :quote_column_name do |column|
+          column.to_s
+        end
+
+        define_method :quote_table_name do |table|
+          table.to_s
+        end
+
+        define_method :quote do |value|
+          %Q("#{value.to_s}")
+        end
+      end
+      klass.new
+    end
+
+    def build_class(connection)
+      Class.new do
+        define_singleton_method :connection do
+          connection
+        end
+
+        define_singleton_method :quoted_table_name do
+          'hydra_string_attributes'
+        end
+
+        define_singleton_method :quoted_primary_key do
+          'id'
+        end
+
+        define_singleton_method :base_class do
+          Class.new do
+            define_singleton_method :name do
+              'BaseClass'
+            end
           end
         end
       end
     end
 
-    after { HydraAttribute.send :remove_const, :StringAttribute }
+    let(:sub_class) { build_class(build_connection) }
 
+    before do
+      klass.define_singleton_method :hydra_ref_alias do |name, value|
+        "#{name}_#{value}"
+      end
 
+      klass.define_singleton_method :hydra_ref_table do |name|
+        "table_#{name}"
+      end
+
+      sub = sub_class
+      klass.define_singleton_method :klass do
+        sub
+      end
+    end
+
+    describe 'method is called in the first' do
+      describe 'value is nil' do
+        let(:value) { nil }
+        let(:sql)   { 'LEFT JOIN table_name AS name_ ON hydra_string_attributes.id = name_.entity_id AND name_.entity_type = "BaseClass" AND name_.name = "name"' }
+
+        it 'should return array with one SQL query element' do
+          klass.send(:build_hydra_joins_values, :name, value).should == [sql]
+        end
+      end
+
+      describe 'value is not nil' do
+        let(:value) { 'value' }
+        let(:sql)   { 'INNER JOIN table_name AS name_value ON hydra_string_attributes.id = name_value.entity_id AND name_value.entity_type = "BaseClass" AND name_value.name = "name"' }
+
+        it 'should return array with one SQL query element' do
+          klass.send(:build_hydra_joins_values, :name, value).should == [sql]
+        end
+      end
+    end
+
+    describe 'method is called in the first' do
+      before { klass.send(:build_hydra_joins_values, :name, :value) }
+
+      it 'should return empty array' do
+        klass.send(:build_hydra_joins_values, :name, :value).should be_empty
+      end
+    end
   end
 
   describe '#build_hydra_where_options' do
@@ -112,7 +173,7 @@ describe HydraAttribute::ActiveRecord::Relation do
     after { HydraAttribute.send :remove_const, :StringAttribute }
 
     it 'should create where options with table namespace' do
-      klass.build_hydra_where_options(:code, 'abc').should == {hydra_string_attributes_inner_code: { value: 'abc' }}
+      klass.send(:build_hydra_where_options, :code, 'abc').should == {hydra_string_attributes_inner_code: { value: 'abc' }}
     end
   end
 
@@ -130,7 +191,7 @@ describe HydraAttribute::ActiveRecord::Relation do
     after { HydraAttribute.send :remove_const, :StringAttribute }
 
     it 'should return class by attribute name' do
-      klass.hydra_ref_class(:code).should == HydraAttribute::StringAttribute
+      klass.send(:hydra_ref_class, :code).should == HydraAttribute::StringAttribute
     end
   end
 
@@ -148,7 +209,7 @@ describe HydraAttribute::ActiveRecord::Relation do
     after { HydraAttribute.send :remove_const, :StringAttribute }
 
     it 'should return table name' do
-      klass.hydra_ref_table(:code).should == 'hydra_string_attributes'
+      klass.send(:hydra_ref_table, :code).should == 'hydra_string_attributes'
     end
   end
 
@@ -169,7 +230,7 @@ describe HydraAttribute::ActiveRecord::Relation do
       let(:value) { nil }
 
       it 'should return generated alias name' do
-        klass.hydra_ref_alias(:code, value).should == 'hydra_string_attributes_left_code'
+        klass.send(:hydra_ref_alias, :code, value).should == 'hydra_string_attributes_left_code'
       end
     end
 
@@ -177,7 +238,7 @@ describe HydraAttribute::ActiveRecord::Relation do
       let(:value) { '' }
 
       it 'should return generated alias name' do
-        klass.hydra_ref_alias(:code, value).should == 'hydra_string_attributes_inner_code'
+        klass.send(:hydra_ref_alias, :code, value).should == 'hydra_string_attributes_inner_code'
       end
     end
   end
@@ -187,7 +248,7 @@ describe HydraAttribute::ActiveRecord::Relation do
       let(:value) { nil }
 
       it 'should return "LEFT"' do
-        klass.hydra_join_type(value).should == 'LEFT'
+        klass.send(:hydra_join_type, value).should == 'LEFT'
       end
     end
 
@@ -195,7 +256,59 @@ describe HydraAttribute::ActiveRecord::Relation do
       let(:value) { '' }
 
       it 'should return "INNER"' do
-        klass.hydra_join_type(value).should == 'INNER'
+        klass.send(:hydra_join_type, value).should == 'INNER'
+      end
+    end
+  end
+
+  describe '#hydra_hash_with_associations' do
+    let(:values) do
+      HydraAttribute::SUPPORT_TYPES.map do |type|
+        {association: HydraAttribute.config.association(type), records: []}
+      end
+    end
+
+    it 'should return prepared hash with association and empty records by types' do
+      hydra_hash = klass.send(:hydra_hash_with_associations)
+      hydra_hash.keys.should   =~ HydraAttribute::SUPPORT_TYPES
+      hydra_hash.values.should =~ values
+    end
+  end
+
+  describe '#group_hydra_records_by_type' do
+    def build_record(type, loaded = false)
+      klass = Class.new do
+        @hydra_attributes = [type]
+      end
+
+      klass.define_singleton_method :hydra_attribute_types do
+        @hydra_attributes
+      end
+
+      klass.send :define_method, :association do |_|
+        Class.new do
+          define_singleton_method :loaded? do
+            loaded
+          end
+        end
+      end
+
+      klass.new
+    end
+
+    let(:simple_record)       { Class.new.new                }
+    let(:hydra_string_record) { build_record(:string, false) }
+    let(:hydra_text_record)   { build_record(:text, false)   }
+    let(:hydra_float_record)  { build_record(:float, true)   }
+
+    it 'should group records by hydra type' do
+      group_records = klass.send(:group_hydra_records_by_type, [simple_record, hydra_string_record, hydra_text_record, hydra_float_record])
+      group_records.each do |key, value|
+        case key
+        when :string then value[:records].should == [hydra_string_record]
+        when :text   then value[:records].should == [hydra_text_record]
+        else value[:records].should be_empty
+        end
       end
     end
   end

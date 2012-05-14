@@ -31,7 +31,6 @@ Feature: helper hydra attribute methods
       | SimpleProduct | hydra_attribute_names | should_not | title active launch                 |
       | GroupProduct  | hydra_attribute_names | should     | price title active launch           |
       | GroupProduct  | hydra_attribute_names | should_not | code info                           |
-      | Product       | hydra_attribute_names | should     | code price info title active launch |
 
     Scenarios: hydra attribute types
       | class         | method                | behavior   | param                                      |
@@ -39,4 +38,3 @@ Feature: helper hydra attribute methods
       | SimpleProduct | hydra_attribute_types | should_not | integer boolean datetime                   |
       | GroupProduct  | hydra_attribute_types | should     | integer string boolean datetime            |
       | GroupProduct  | hydra_attribute_types | should_not | text float                                 |
-      | Product       | hydra_attribute_types | should     | string float text integer boolean datetime |

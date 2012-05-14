@@ -1,19 +1,11 @@
 require 'spec_helper'
 
 describe HydraAttribute::Attribute do
-  let(:klass) do
-    Class.new do
-      define_singleton_method :base_class do
-        @base_class ||= Class.new
-      end
-    end
-  end
-
+  let(:klass)     { Class.new }
   let(:attribute) { HydraAttribute::Attribute.new(klass, :name, :string) }
 
   describe '#build' do
     it 'should call required methods' do
-      attribute.should_receive(:define_reflection_methods)
       attribute.should_receive(:define_reflection_methods)
       attribute.should_receive(:save_attribute)
       attribute.should_receive(:define_attribute_methods)
@@ -25,16 +17,16 @@ describe HydraAttribute::Attribute do
   describe '#defined_reflection?' do
     it 'should return true if class has defined @hydra_attributes' do
       klass.instance_variable_set(:@hydra_attributes, nil)
-      attribute.should be_defined_reflection(klass)
+      attribute.should be_defined_reflection
     end
 
     it 'should return false if class has not defined @hydra_attributes' do
-      attribute.should_not be_defined_reflection(klass)
+      attribute.should_not be_defined_reflection
     end
   end
 
   describe '#define_reflection_methods' do
-    before { attribute.send(:define_reflection_methods, klass) }
+    before { attribute.send(:define_reflection_methods) }
 
     it 'should define @hydra_attributes for class' do
       klass.instance_variable_get(:@hydra_attributes).should == {}
@@ -109,16 +101,12 @@ describe HydraAttribute::Attribute do
     before do
       attribute.instance_variable_set(:@type, :type)
       attribute.instance_variable_set(:@name, :name)
-      [klass, klass.base_class].each do |object|
-        object.instance_variable_set(:@hydra_attributes, Hash.new{ |h, k| h[k] = [] })
-      end
+      klass.instance_variable_set(:@hydra_attributes, Hash.new{ |h, k| h[k] = [] })
     end
 
     it 'should save attribute name and type in @hydra_attributes' do
       attribute.send(:save_attribute)
-      [klass, klass.base_class].each do |object|
-        object.instance_variable_get(:@hydra_attributes)[:type].should == [:name]
-      end
+      klass.instance_variable_get(:@hydra_attributes)[:type].should == [:name]
     end
   end
 end
