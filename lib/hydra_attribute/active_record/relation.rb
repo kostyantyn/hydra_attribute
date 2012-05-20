@@ -22,7 +22,7 @@ module HydraAttribute
               relation.where_values += build_where(build_hydra_where_options(name, value))
               relation
             else
-              relation.where(name => value)
+              super(name => value)
             end
           end
         else

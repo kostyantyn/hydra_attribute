@@ -27,9 +27,9 @@ Feature: hydra attribute associations
 
   Scenario: hydra attribute associations should be included for collection with more then one record
     Given create models:
-      | model         | attributes |
-      | SimpleProduct | code=1     |
-      | SimpleProduct | code=2     |
+      | model         | attributes       |
+      | SimpleProduct | code=[integer:1] |
+      | SimpleProduct | code=[integer:2] |
     When load all "SimpleProduct" records
     Then records "should" have loaded associations:
       | association             |
@@ -38,8 +38,8 @@ Feature: hydra attribute associations
 
   Scenario: hydra attribute associations should not be included for collection with one record
     Given create models:
-      | model        | attributes |
-      | GroupProduct | price=2.75 |
+      | model        | attributes         |
+      | GroupProduct | price=[float:2.75] |
     When load all "GroupProduct" records
     Then records "should_not" have loaded associations:
       | association              |
@@ -50,8 +50,8 @@ Feature: hydra attribute associations
   Scenario: all hydra attribute associations should be included if we load records from base class
     Given create models:
       | model         | attributes |
-      | SimpleProduct | code=1     |
-      | GroupProduct  | price=7    |
+      | SimpleProduct | code=[integer:1]  |
+      | GroupProduct  | price=[integer:7] |
     When load all "Product" records
     Then "SimpleProduct" records "should" have loaded associations:
       | association             |
