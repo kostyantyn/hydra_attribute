@@ -1,4 +1,4 @@
-Feature: hydra attribute query conditions
+Feature: hydra attribute where conditions
   When filter by hydra attribute and this value is not nil
   Then the correct hydra attribute table should be joined and filter by this value should be added
 
