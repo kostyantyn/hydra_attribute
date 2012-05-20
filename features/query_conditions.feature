@@ -52,13 +52,13 @@ Feature: hydra attribute query conditions
 
   Scenario: add filter by several fields including both the hydra and general attributes
     Given create models:
-      | model         | attributes                                                                                                                   |
-      | SimpleProduct | name=[string:toy] code=[string:1] title=[string:story] price=[float:2.45] active=[boolean:true]                              |
-      | SimpleProduct | name=[string:toy] code=[string:2] title=[string:story] price=[float:2.45] active=[boolean:true]               summary=[nil:] |
-      | SimpleProduct | name=[string:toy] code=[string:3] title=[string:story] price=[float:2.45] active=[boolean:true]  state=[nil:] summary=[nil:] |
-      | SimpleProduct | name=[string:toy] code=[string:4]                      price=[float:2.45] active=[boolean:false] state=[nil:] summary=[nil:] |
-      | SimpleProduct |                   code=[string:5]                      price=[float:2.45] active=[boolean:true]  state=[nil:] summary=[nil:] |
-      | SimpleProduct | name=[string:toy] code=[string:6]                      price=[float:2.46] active=[boolean:true]  state=[nil:] summary=[nil:] |
+      | model         | attributes                                                                                                                                   |
+      | SimpleProduct | name=[string:toy] code=[string:1] title=[string:story] price=[float:2.45] active=[boolean:true]               info=[string:]                 |
+      | SimpleProduct | name=[string:toy] code=[string:2] title=[string:story] price=[float:2.45] active=[boolean:true]               info=[string:a] summary=[nil:] |
+      | SimpleProduct | name=[string:toy] code=[string:3] title=[string:story] price=[float:2.45] active=[boolean:true]  state=[nil:] info=[string:a] summary=[nil:] |
+      | SimpleProduct | name=[string:toy] code=[string:4]                      price=[float:2.45] active=[boolean:false] state=[nil:] info=[string:a] summary=[nil:] |
+      | SimpleProduct |                   code=[string:5]                      price=[float:2.45] active=[boolean:true]  state=[nil:] info=[string:a] summary=[nil:] |
+      | SimpleProduct | name=[string:toy] code=[string:6]                      price=[float:2.46] active=[boolean:true]  state=[nil:] info=[string:a] summary=[nil:] |
     When filter "SimpleProduct" by:
       | field   | value          |
       | name    | [string:toy]   |
@@ -66,9 +66,9 @@ Feature: hydra attribute query conditions
       | summary | [nil:]         |
       | price   | [string:2.45]  |
       | active  | [boolean:true] |
+      | info    | [string:a]     |
       | state   | [nil:]         |
-    Then should be selected "3" records:
+    Then should be selected "2" records:
       | field | value      |
-      | code  | [string:1] |
       | code  | [string:2] |
       | code  | [string:3] |

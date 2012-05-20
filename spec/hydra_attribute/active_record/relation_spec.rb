@@ -32,6 +32,10 @@ describe HydraAttribute::ActiveRecord::Relation do
       define_method :klass do
         records.first.class
       end
+
+      define_method :where do |*|
+        self
+      end
     end
   end
 
@@ -67,6 +71,77 @@ describe HydraAttribute::ActiveRecord::Relation do
         it 'should return two record' do
           klass.send(HydraAttribute.config.relation_execute_method).should have(2).records
         end
+      end
+    end
+  end
+
+  describe '#where' do
+    let(:ancestor) do
+      m = relation_function(records)
+      m.class_eval do
+        attr_writer :where_values
+
+        def where_values
+          @where_values ||= []
+        end
+
+        alias_method :joins_values,  :where_values
+        alias_method :joins_values=, :where_values=
+
+        define_method :where do |opts, *rest|
+          relation = clone
+          relation.where_values += ["opts: #{opts.inspect} - rest: #{rest.inspect}"]
+          relation
+        end
+      end
+      m
+    end
+
+    before do
+      klass.class_eval do
+        class << self
+          define_method :build_hydra_joins_values do |name, value|
+            ["join-#{name}-#{value}"]
+          end
+
+          define_method :build_hydra_where_options do |name, value|
+            ["where-#{name}-#{value}"]
+          end
+
+          define_method :build_where do |param|
+            param
+          end
+        end
+      end
+    end
+
+    describe 'first param is Hash' do
+      let(:params) { {title: 1} }
+
+      describe 'hash has not hydra attribute' do
+        it 'should call rails native "where" method' do
+          klass.where(params).where_values.join.should == %q(opts: {:title=>1} - rest: [])
+        end
+      end
+
+      describe 'hash has hydra attribute' do
+        let(:params) { {title: 1, code: 2, name: 3} }
+
+        it 'should call both native and overwritten "where" method' do
+          condition  = %q(opts: {:title=>1} - rest: [])
+          condition += ' join-code-2 where-code-2 '
+          condition += %q(opts: {:name=>3} - rest: [])
+
+          klass.where(params).where_values.join(' ').should == condition
+        end
+      end
+    end
+
+    describe 'first param is not Hash' do
+      let(:params) { 'name = 1' }
+
+      it 'should call rails native "where" method' do
+        klass.where(params).where_values.join.should == %q(opts: "name = 1" - rest: [])
       end
     end
   end

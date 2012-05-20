@@ -1,6 +1,10 @@
 module HydraAttribute
   module ActiveRecord
     module Relation
+      def self.extended(base)
+        base.singleton_class.send :alias_method_chain, :where, :hydra_attribute
+      end
+
       define_method HydraAttribute.config.relation_execute_method do
         records = super()
         if records.many?
@@ -11,7 +15,7 @@ module HydraAttribute
         records
       end
 
-      def where(opts, *rest)
+      def where_with_hydra_attribute(opts, *rest)
         return self if opts.blank?
 
         if opts.is_a?(Hash)
@@ -22,11 +26,11 @@ module HydraAttribute
               relation.where_values += build_where(build_hydra_where_options(name, value))
               relation
             else
-              super(name => value)
+              relation.where_without_hydra_attribute(name => value)
             end
           end
         else
-          super(opts, *rest)
+          where_without_hydra_attribute(opts, *rest)
         end
       end
 
