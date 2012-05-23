@@ -34,17 +34,67 @@ module HydraAttribute
         end
       end
 
+      def order(*args)
+        return self if args.blank?
+
+        relation = clone
+        relation.hydra_order_values |= (args.flatten & klass.hydra_attribute_names)
+        relation.order_values += (args.flatten - klass.hydra_attribute_names)
+        relation
+      end
+
+      if ::ActiveRecord::VERSION::MINOR > 1
+        def reorder(*args)
+          return self if args.blank?
+
+          relation = clone
+          relation.hydra_order_values = []
+          relation.reordering_value = true
+          relation.order_values = args.flatten
+          relation
+        end
+      end
+
+      # Should lazy join appropriate hydra tables for order fields
+      # because it is impossible to predict what join type should be used
+      def build_arel
+        # should not care about double #joins_values modification
+        # because #arel method is cacheable
+        hydra_order_values.each do |attribute|
+          join_alias = hydra_ref_alias(attribute, 'inner')
+          join_alias = hydra_ref_alias(attribute, nil) unless hydra_join_values.has_key?(join_alias)
+
+          self.joins_values += build_hydra_joins_values(attribute, nil) unless hydra_join_values.has_key?(join_alias)
+          self.order_values += [klass.connection.quote_table_name(join_alias) + '.' + klass.connection.quote_column_name('value')]
+        end
+
+        super
+      end
+
+      protected
+
+      def hydra_join_values
+        @hydra_join_values ||= {}
+      end
+
+      def hydra_order_values
+        @hydra_order_values ||= []
+      end
+
+      def hydra_order_values=(value)
+        @hydra_order_values = value
+      end
+
       private
 
       def build_hydra_joins_values(name, value)
         ref_alias = hydra_ref_alias(name, value)
 
-        @hydra_join_values ||= {}
-        return [] if @hydra_join_values.has_key?(ref_alias)
-        @hydra_join_values[ref_alias] = value
+        return [] if hydra_join_values.has_key?(ref_alias)
+        hydra_join_values[ref_alias] = value
 
         conn             = klass.connection
-        quoted_ref_alias = conn.quote_column_name(ref_alias)
+        quoted_ref_alias = conn.quote_table_name(ref_alias)
 
         [[
           "#{hydra_join_type(value)} JOIN",
@@ -71,7 +121,7 @@ module HydraAttribute
       end
 
       def hydra_ref_class(name)
-        type = klass.hydra_attribute_types.find { |type| klass.instance_variable_get(:@hydra_attributes)[type].include?(name) }
+        type = klass.hydra_attribute_types.find { |type| klass.hydra_attributes[type].include?(name) }
         HydraAttribute.config.associated_model_name(type).constantize
       end
 

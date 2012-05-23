@@ -10,7 +10,7 @@ end
 
 Given /^create model class "([^"]+)" as "([^"]+)" with hydra attributes:$/ do |klass, sti_class, table|
   Object.const_set klass, Class.new(Object.const_get(sti_class)) {
-    hydra_attributes do |hydra|
+    define_hydra_attributes do |hydra|
       table.hashes.each do |hash|
         hydra.send(hash[:type], hash[:name].to_sym)
       end

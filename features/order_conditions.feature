@@ -19,7 +19,7 @@ Feature: order conditions by hydra attributes
       | type    | name  |
       | integer | code  |
       | integer | state |
-      | string  | info  |
+      | string  | title |
 
   Scenario Outline: order by one field
     Given create models:
@@ -40,18 +40,16 @@ Feature: order conditions by hydra attributes
 
   Scenario Outline: order by several fields
     Given create models:
-      | model         | attributes                                                         |
-      | SimpleProduct | name=[string:c] code=[integer:1] state=[integer:1] info=[string:b] |
-      | SimpleProduct | name=[string:b] code=[integer:2] state=[integer:2] info=[string:a] |
-      | SimpleProduct | name=[string:a] code=[integer:3] state=[integer:3] info=[string:c] |
+      | model         | attributes                                                          |
+      | SimpleProduct | name=[string:c] code=[integer:1] state=[integer:1] title=[string:b] |
+      | SimpleProduct | name=[string:b] code=[integer:2] state=[integer:2] title=[string:a] |
+      | SimpleProduct | name=[string:a] code=[integer:3] state=[integer:3] title=[string:c] |
     When order "SimpleProduct" records by "<attributes>"
     Then "first" record should have "<first>"
     And "last" record should have "<last>"
 
     Scenarios: order conditions
-      | attributes | first            | last             |
-      | name state | code=[integer:3] | code=[integer:1] |
-
-
-
-  Scenario: order by field with already joined table
+      | attributes  | first            | last             |
+      | name state  | code=[integer:3] | code=[integer:1] |
+      | state title | code=[integer:1] | code=[integer:3] |
+      | title state | code=[integer:2] | code=[integer:3] |

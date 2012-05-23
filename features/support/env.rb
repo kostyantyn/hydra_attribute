@@ -9,9 +9,14 @@ ActiveRecord::Base.extend(HydraAttribute::ActiveRecord)
 DatabaseCleaner.strategy = :truncation
 
 Before do
+  HydraAttribute::SUPPORT_TYPES.each do |type|
+    const = HydraAttribute.config.associated_const_name(type)
+    HydraAttribute.send(:remove_const, const) if HydraAttribute.const_defined?(const)
+  end
+  ActiveSupport::Dependencies::Reference.clear!
   DatabaseCleaner.start
 end
 
-After do |_|
+After do
   DatabaseCleaner.clean
 end

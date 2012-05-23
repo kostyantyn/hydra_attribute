@@ -13,6 +13,10 @@ describe HydraAttribute::ActiveRecord::Relation do
         [:code]
       end
 
+      define_singleton_method :hydra_attributes do
+        @hydra_attributes
+      end
+
       define_method :association do |_|
         Class.new do
           define_singleton_method :loaded? do
@@ -75,6 +79,8 @@ describe HydraAttribute::ActiveRecord::Relation do
     end
   end
 
+  # TODO should not add save join twice
+  # Model.where(name: [1,2]).where(name: [2, 3])
   describe '#where' do
     let(:ancestor) do
       m = relation_function(records)

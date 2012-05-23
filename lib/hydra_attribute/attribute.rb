@@ -17,14 +17,18 @@ module HydraAttribute
     end
 
     def define_reflection_methods
-      hydra_attributes = @klass.instance_variable_set(:@hydra_attributes, Hash.new { |h, k| h[k] = [] })
+      @klass.instance_variable_set(:@hydra_attributes, Hash.new { |h, k| h[k] = [] })
+
+      @klass.define_singleton_method :hydra_attributes do
+        @hydra_attributes.dup
+      end
 
       @klass.define_singleton_method :hydra_attribute_names do
-        hydra_attributes.values.flatten.uniq
+        @hydra_attributes.values.flatten.uniq
       end
 
       @klass.define_singleton_method :hydra_attribute_types do
-        hydra_attributes.keys
+        @hydra_attributes.keys
       end
 
       @klass.send :define_method, :hydra_attribute_model do |name, type|
