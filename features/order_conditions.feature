@@ -53,3 +53,21 @@ Feature: order conditions by hydra attributes
       | name state  | code=[integer:3] | code=[integer:1] |
       | state title | code=[integer:1] | code=[integer:3] |
       | title state | code=[integer:2] | code=[integer:3] |
+
+  Scenario Outline: order by already joined field
+    Given create models:
+      | model         | attributes                                          |
+      | SimpleProduct | code=[integer:1] state=[integer:1]                  |
+      | SimpleProduct | code=[integer:2]                   title=[nil:]     |
+      | SimpleProduct | code=[integer:3] state=[integer:1] title=[string:a] |
+    When filter "SimpleProduct" records by "<filter>"
+    And order "SimpleProduct" records by "<order>"
+    Then total records should be "<count>"
+    And "first" record should have "<first>"
+    And "last" record should have "<last>"
+
+  Scenarios:
+    | filter            | order      | count | first            | last             |
+    | state=[integer:1] | state code | 2     | code=[integer:1] | code=[integer:3] |
+    | state=[nil:]      | state code | 1     | code=[integer:2] | code=[integer:2] |
+    | title=[nil:]      | title code | 2     | code=[integer:1] | code=[integer:2] |

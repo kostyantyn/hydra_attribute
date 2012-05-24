@@ -7,6 +7,11 @@ When /^filter "([^"]+)" by:$/ do |klass, table|
   @records  = Object.const_get(klass).where(condition)
 end
 
+When /^filter "([^"]+)" records by "([^"]+)"$/ do |klass, attribute|
+  name, value = typecast_attribute(attribute)
+  @records = Object.const_get(klass).where(name => value)
+end
+
 When /^order "([^"]+)" records by "([^"]+)"$/ do |klass, attributes|
   @records = Object.const_get(klass)
   reverse  = false
@@ -25,12 +30,15 @@ Then /^"(first|last)" record should have "([^"]+)"$/ do |method, attribute|
   @records.send(method).send(name).should == value
 end
 
-Then /^should be selected "(\d+)" records:$/ do |length, table|
-  @records.should have(length.to_i).items
+Then /^records should have the following attributes:$/ do |table|
   table.hashes.each do |hash|
     record = @records.detect { |r| r.send(hash[:field]) == typecast_value(hash[:value]) }
     record.should_not be_nil
   end
+end
+
+Then /^total records should be "([^"]+)"$/ do |count|
+  @records.should have(count.to_i).items
 end
 
 Then /^records "(should|should_not)" have loaded associations:$/ do |should, table|

@@ -35,34 +35,28 @@ module HydraAttribute
       end
 
       def order(*args)
-        return self if args.blank?
+        relation = super(*(args.flatten - klass.hydra_attribute_names))
 
-        relation = clone
-        relation.hydra_order_values |= (args.flatten & klass.hydra_attribute_names)
-        relation.order_values += (args.flatten - klass.hydra_attribute_names)
+        if (attributes = args.flatten & klass.hydra_attribute_names).any?
+          relation = clone if relation.equal?(self)
+          relation.hydra_order_values |= attributes
+        end
+
         relation
       end
 
-      if ::ActiveRecord::VERSION::MINOR > 1
-        def reorder(*args)
-          return self if args.blank?
-
-          relation = clone
-          relation.hydra_order_values = []
-          relation.reordering_value = true
-          relation.order_values = args.flatten
-          relation
-        end
+      def reorder(*args)
+        relation = super(*args)
+        relation.hydra_order_values = [] unless relation.equal?(self)
+        relation
       end
 
       # Should lazy join appropriate hydra tables for order fields
       # because it is impossible to predict what join type should be used
       def build_arel
-        # should not care about double #joins_values modification
-        # because #arel method is cacheable
         hydra_order_values.each do |attribute|
-          join_alias = hydra_ref_alias(attribute, 'inner')
-          join_alias = hydra_ref_alias(attribute, nil) unless hydra_join_values.has_key?(join_alias)
+          join_alias = hydra_ref_alias(attribute, 'inner') # alias for inner join
+          join_alias = hydra_ref_alias(attribute, nil) unless hydra_join_values.has_key?(join_alias) # alias for left join
 
           self.joins_values += build_hydra_joins_values(attribute, nil) unless hydra_join_values.has_key?(join_alias)
           self.order_values += [klass.connection.quote_table_name(join_alias) + '.' + klass.connection.quote_column_name('value')]

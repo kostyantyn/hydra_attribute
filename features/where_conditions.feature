@@ -31,7 +31,8 @@ Feature: hydra attribute where conditions
     When filter "SimpleProduct" by:
       | field | value         |
       | price | [string:2.75] |
-    Then should be selected "2" records:
+    Then total records should be "2"
+    And records should have the following attributes:
       | field | value      |
       | code  | [string:1] |
       | code  | [string:2] |
@@ -45,7 +46,8 @@ Feature: hydra attribute where conditions
     When filter "SimpleProduct" by:
       | field | value  |
       | price | [nil:] |
-    Then should be selected "2" records:
+    Then total records should be "2"
+    And records should have the following attributes:
       | field | value      |
       | code  | [string:1] |
       | code  | [string:3] |
@@ -68,7 +70,8 @@ Feature: hydra attribute where conditions
       | active  | [boolean:true] |
       | info    | [string:a]     |
       | state   | [nil:]         |
-    Then should be selected "2" records:
+    Then total records should be "2"
+    And records should have the following attributes:
       | field | value      |
       | code  | [string:2] |
       | code  | [string:3] |

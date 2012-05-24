@@ -14,7 +14,7 @@ module HydraAttribute
 
       def typecast_attribute(attribute)
         name, schema = attribute.split('=')
-        [name, typecast_value(schema)]
+        [name.to_sym, typecast_value(schema)]
       end
 
       def typecast_attributes(*attributes)
