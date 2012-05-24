@@ -22,6 +22,7 @@ module HydraAttribute
           opts.inject(self) do |relation, (name, value)|
             if klass.hydra_attribute_names.include?(name)
               relation = relation.clone
+              # TODO hydra_join_values always blank because the relation object is cloned but the method is called from current scope
               relation.joins_values += build_hydra_joins_values(name, value)
               relation.where_values += build_where(build_hydra_where_options(name, value))
               relation
