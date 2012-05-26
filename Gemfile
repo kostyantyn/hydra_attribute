@@ -1,4 +1,3 @@
-source 'https://rubygems.org'
+source :rubygems
 
-# Specify your gem's dependencies in hydra_attribute.gemspec
 gemspec
