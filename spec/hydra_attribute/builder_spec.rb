@@ -6,8 +6,12 @@ describe HydraAttribute::Builder do
   let!(:builder) { HydraAttribute::Builder.new(klass) }
 
   describe '#initialzie' do
-    it 'should extend base class with HydraAttribute::Scoped module' do
-      klass.singleton_class.should include(HydraAttribute::ActiveRecord::Scoping)
+    it 'should include HydraAttribute::ActiveRecord::Scoping to class' do
+      klass.should include(HydraAttribute::ActiveRecord::Scoping)
+    end
+
+    it 'should include HydraAttribute::AttributeHelpers to class' do
+      klass.should include(HydraAttribute::AttributeHelpers)
     end
 
     it 'should respond to all supported types' do

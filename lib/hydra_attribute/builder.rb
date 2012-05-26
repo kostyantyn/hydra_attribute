@@ -3,7 +3,11 @@ module HydraAttribute
     attr_reader :klass
 
     def initialize(klass)
-      @klass = klass.extend(ActiveRecord::Scoping)
+      @klass = klass
+      @klass.class_eval do
+        include ActiveRecord::Scoping
+        include AttributeHelpers
+      end
     end
 
     SUPPORT_TYPES.each do |type|

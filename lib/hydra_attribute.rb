@@ -1,5 +1,5 @@
 module HydraAttribute
-  SUPPORT_TYPES = [:string, :text, :integer, :float, :datetime, :boolean]
+  SUPPORT_TYPES = [:string, :text, :integer, :float, :boolean, :datetime]
 
   class << self
     def config
@@ -17,6 +17,7 @@ require 'hydra_attribute/version'
 require 'hydra_attribute/configuration'
 require 'hydra_attribute/association'
 require 'hydra_attribute/attribute'
+require 'hydra_attribute/attribute_helpers'
 require 'hydra_attribute/builder'
 require 'hydra_attribute/migration'
 require 'hydra_attribute/active_record'

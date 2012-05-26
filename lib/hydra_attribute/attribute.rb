@@ -7,37 +7,11 @@ module HydraAttribute
     end
 
     def build
-      define_reflection_methods unless defined_reflection?
-      save_attribute
       define_attribute_methods
+      save_attribute
     end
 
     private
-
-    def defined_reflection?
-      klass.instance_variable_defined?(:@hydra_attributes)
-    end
-
-    def define_reflection_methods
-      klass.instance_variable_set(:@hydra_attributes, {})
-
-      klass.define_singleton_method :hydra_attributes do
-        @hydra_attributes.dup
-      end
-
-      klass.define_singleton_method :hydra_attribute_names do
-        hydra_attributes.keys
-      end
-
-      klass.define_singleton_method :hydra_attribute_types do
-        hydra_attributes.values.uniq
-      end
-
-      klass.send :define_method, :hydra_attribute_model do |name, type|
-        collection = send(HydraAttribute.config.association(type))
-        collection.detect { |model| model.name.to_sym == name } || collection.build(name: name)
-      end
-    end
 
     def define_attribute_methods
       m = Module.new
