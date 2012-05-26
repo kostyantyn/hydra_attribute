@@ -4,7 +4,7 @@ describe HydraAttribute::ActiveRecord::Relation do
   def record_class(loaded_associations = false)
     Class.new do
 
-      @hydra_attributes = {string: [:code]}
+      @hydra_attributes = {code: :string}
       define_singleton_method :hydra_attribute_types do
         [:string]
       end
@@ -79,8 +79,6 @@ describe HydraAttribute::ActiveRecord::Relation do
     end
   end
 
-  # TODO should not add save join twice
-  # Model.where(name: [1,2]).where(name: [2, 3])
   describe '#where' do
     let(:ancestor) do
       m = relation_function(records)
@@ -119,7 +117,17 @@ describe HydraAttribute::ActiveRecord::Relation do
           end
         end
       end
+
+      module HydraAttribute
+        class StringAttribute
+          def self.table_name
+            'hydra_string_attributes'
+          end
+        end
+      end
     end
+
+    after { HydraAttribute.send :remove_const, :StringAttribute }
 
     describe 'first param is Hash' do
       let(:params) { {title: 1} }
@@ -211,31 +219,21 @@ describe HydraAttribute::ActiveRecord::Relation do
       end
     end
 
-    describe 'method is called in the first' do
-      describe 'value is nil' do
-        let(:value) { nil }
-        let(:sql)   { 'LEFT JOIN table_name AS name_ ON hydra_string_attributes.id = name_.entity_id AND name_.entity_type = "BaseClass" AND name_.name = "name"' }
+    describe 'value is nil' do
+      let(:value) { nil }
+      let(:sql)   { 'LEFT JOIN table_name AS name_ ON hydra_string_attributes.id = name_.entity_id AND name_.entity_type = "BaseClass" AND name_.name = "name"' }
 
-        it 'should return array with one SQL query element' do
-          klass.send(:build_hydra_joins_values, :name, value).should == [sql]
-        end
-      end
-
-      describe 'value is not nil' do
-        let(:value) { 'value' }
-        let(:sql)   { 'INNER JOIN table_name AS name_value ON hydra_string_attributes.id = name_value.entity_id AND name_value.entity_type = "BaseClass" AND name_value.name = "name"' }
-
-        it 'should return array with one SQL query element' do
-          klass.send(:build_hydra_joins_values, :name, value).should == [sql]
-        end
+      it 'should return array with one SQL query element' do
+        klass.send(:build_hydra_joins_values, :name, value).should == [sql]
       end
     end
 
-    describe 'method is called in the first' do
-      before { klass.send(:build_hydra_joins_values, :name, :value) }
+    describe 'value is not nil' do
+      let(:value) { 'value' }
+      let(:sql)   { 'INNER JOIN table_name AS name_value ON hydra_string_attributes.id = name_value.entity_id AND name_value.entity_type = "BaseClass" AND name_value.name = "name"' }
 
-      it 'should return empty array' do
-        klass.send(:build_hydra_joins_values, :name, :value).should be_empty
+      it 'should return array with one SQL query element' do
+        klass.send(:build_hydra_joins_values, :name, value).should == [sql]
       end
     end
   end
@@ -358,12 +356,10 @@ describe HydraAttribute::ActiveRecord::Relation do
 
   describe '#group_hydra_records_by_type' do
     def build_record(type, loaded = false)
-      klass = Class.new do
-        @hydra_attributes = [type]
-      end
+      klass = Class.new
 
       klass.define_singleton_method :hydra_attribute_types do
-        @hydra_attributes
+        [type]
       end
 
       klass.send :define_method, :association do |_|
@@ -377,13 +373,12 @@ describe HydraAttribute::ActiveRecord::Relation do
       klass.new
     end
 
-    let(:simple_record)       { Class.new.new                }
     let(:hydra_string_record) { build_record(:string, false) }
     let(:hydra_text_record)   { build_record(:text, false)   }
     let(:hydra_float_record)  { build_record(:float, true)   }
 
     it 'should group records by hydra type' do
-      group_records = klass.send(:group_hydra_records_by_type, [simple_record, hydra_string_record, hydra_text_record, hydra_float_record])
+      group_records = klass.send(:group_hydra_records_by_type, [hydra_string_record, hydra_text_record, hydra_float_record])
       group_records.each do |key, value|
         case key
         when :string then value[:records].should == [hydra_string_record]

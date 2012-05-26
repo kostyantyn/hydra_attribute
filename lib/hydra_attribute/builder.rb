@@ -1,17 +1,18 @@
 module HydraAttribute
   class Builder
+    attr_reader :klass
+
     def initialize(klass)
-      @klass = klass
-      @klass.base_class.extend(Scoped) unless @klass.base_class.singleton_class.include?(Scoped)
+      @klass = klass.extend(ActiveRecord::Scoping)
     end
 
     SUPPORT_TYPES.each do |type|
       define_method(type) do |*attributes|
-        Association.new(@klass, type).build
+        Association.new(klass, type).build
 
 
         attributes.each do |attribute|
-          Attribute.new(@klass, attribute, type).build
+          Attribute.new(klass, attribute, type).build
         end
       end
     end

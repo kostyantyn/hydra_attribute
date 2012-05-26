@@ -5,9 +5,6 @@ Feature: hydra attribute associations
   When loaded collection hasn't records or has only one
   Then hydra attribute association should not be loaded automatically
 
-  When records were loaded via base class and total of records are more than one
-  Then all records should have loaded hydra attribute associations which are described in class
-
   Background: create models and describe hydra attributes
     Given removed constants if they exist:
       | name          |
@@ -46,20 +43,3 @@ Feature: hydra attribute associations
       | hydra_float_attributes   |
       | hydra_string_attributes  |
       | hydra_boolean_attributes |
-
-  Scenario: all hydra attribute associations should be included if we load records from base class
-    Given create models:
-      | model         | attributes |
-      | SimpleProduct | code=[integer:1]  |
-      | GroupProduct  | price=[integer:7] |
-    When load all "Product" records
-    Then "SimpleProduct" records "should" have loaded associations:
-      | association             |
-      | hydra_string_attributes |
-      | hydra_float_attributes  |
-    And "GroupProduct" records "should" have loaded associations:
-      | association              |
-      | hydra_float_attributes   |
-      | hydra_string_attributes  |
-      | hydra_boolean_attributes |
-

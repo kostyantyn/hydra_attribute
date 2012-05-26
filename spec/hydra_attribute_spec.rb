@@ -1,13 +1,13 @@
 require 'spec_helper'
 
 describe HydraAttribute do
-  around { HydraAttribute.instance_variable_set(:@config, nil) }
-
   describe '.config' do
-    before { HydraAttribute::Config.should_receive(:new).twice }
+    it 'should return and instance of HydraAttribute::Configuration' do
+      HydraAttribute.config.should be_a_kind_of(HydraAttribute::Configuration)
+    end
 
-    it 'should return cached config instance' do
-      2.times { HydraAttribute.config }
+    it 'should cache config object' do
+      HydraAttribute.config.should be_equal(HydraAttribute.config)
     end
   end
 

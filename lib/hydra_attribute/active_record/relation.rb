@@ -112,7 +112,7 @@ module HydraAttribute
       end
 
       def hydra_ref_class(name)
-        type = klass.hydra_attribute_types.find { |type| klass.hydra_attributes[type].include?(name) }
+        type = klass.hydra_attributes[name]
         HydraAttribute.config.associated_model_name(type).constantize
       end
 
@@ -136,10 +136,8 @@ module HydraAttribute
 
       def group_hydra_records_by_type(records)
         records.each_with_object(hydra_hash_with_associations) do |record, hydra_hash|
-          if record.class.instance_variable_defined?(:@hydra_attributes) # not all classes have defined hydra attributes
-            record.class.hydra_attribute_types.each do |type|
-              hydra_hash[type][:records] << record unless record.association(hydra_hash[type][:association]).loaded?
-            end
+          record.class.hydra_attribute_types.each do |type|
+            hydra_hash[type][:records] << record unless record.association(hydra_hash[type][:association]).loaded?
           end
         end
       end

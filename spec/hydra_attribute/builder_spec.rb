@@ -2,20 +2,12 @@ require 'spec_helper'
 
 describe HydraAttribute::Builder do
 
-  let(:klass) do
-    Class.new do
-      define_singleton_method :base_class do
-        @base_class ||= Class.new
-      end
-    end
-  end
-
-
+  let(:klass)    { Class.new }
   let!(:builder) { HydraAttribute::Builder.new(klass) }
 
   describe '#initialzie' do
     it 'should extend base class with HydraAttribute::Scoped module' do
-      klass.base_class.singleton_class.should include(HydraAttribute::Scoped)
+      klass.singleton_class.should include(HydraAttribute::ActiveRecord::Scoping)
     end
 
     it 'should respond to all supported types' do

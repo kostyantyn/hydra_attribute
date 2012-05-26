@@ -18,7 +18,13 @@ Given /^create model class "([^"]+)" as "([^"]+)" with hydra attributes:$/ do |k
   }
 end
 
-Then /^class "([^"]+)"::"([^"]+)" "(should|should_not)" have "([^"]+)"$/ do |klass, method, behavior, params|
+Then /^class "([^"]+)"::"([^"]+)" "(should|should_not)" have "([^"]+)" array$/ do |klass, method, behavior, params|
   klass = Object.const_get(klass)
   klass.send(method).send(behavior) =~ params.split.map(&:to_sym)
+end
+
+Then /^class "([^"]+)"::"([^"]+)" "(should|should_not)" have "([^"]+)" hash$/ do |klass, method, behavior, params|
+  klass = Object.const_get(klass)
+  array = params.split.map{ |item| item.split('=').map(&:to_sym) }
+  klass.send(method).send(behavior) == Hash[array]
 end

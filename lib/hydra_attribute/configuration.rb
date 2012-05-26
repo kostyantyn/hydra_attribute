@@ -1,6 +1,6 @@
 module HydraAttribute
   class Configuration
-    def self.option(name, default_value)
+    def self.add_setting(name, default_value)
       attr_writer name
 
       define_method name do
@@ -13,9 +13,9 @@ module HydraAttribute
       end
     end
 
-    option :table_prefix,                     'hydra_'
-    option :association_prefix,               'hydra_'
-    option :use_module_for_associated_models, true
+    add_setting :table_prefix,                     'hydra_'
+    add_setting :association_prefix,               'hydra_'
+    add_setting :use_module_for_associated_models, true
 
     def table_name(type)
       "#{table_prefix}#{type}_attributes".to_sym

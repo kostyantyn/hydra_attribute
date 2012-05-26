@@ -28,26 +28,26 @@ describe HydraAttribute::Attribute do
   describe '#define_reflection_methods' do
     before { attribute.send(:define_reflection_methods) }
 
-    it 'should define @hydra_attributes for class' do
+    it 'should define .hydra_attributes for class' do
       klass.instance_variable_get(:@hydra_attributes).should == {}
-      klass.instance_variable_get(:@hydra_attributes)[:key] << :value
-      klass.instance_variable_get(:@hydra_attributes).should == {key: [:value]}
+      klass.instance_variable_get(:@hydra_attributes)[:key] = :value
+      klass.hydra_attributes.should == {key: :value}
     end
 
     it 'should define .hydra_attribute_names' do
       klass.hydra_attribute_names.should == []
-      klass.instance_variable_get(:@hydra_attributes)[:key1] << :value1
-      klass.instance_variable_get(:@hydra_attributes)[:key2] << :value2
-      klass.instance_variable_get(:@hydra_attributes)[:key3] << :value1
-      klass.hydra_attribute_names.should == [:value1, :value2]
+      klass.instance_variable_get(:@hydra_attributes)[:key1] = :value1
+      klass.instance_variable_get(:@hydra_attributes)[:key2] = :value2
+      klass.instance_variable_get(:@hydra_attributes)[:key3] = :value1
+      klass.hydra_attribute_names.should == [:key1, :key2, :key3]
     end
 
     it 'should define .hydra_attribute_types' do
       klass.hydra_attribute_names.should == []
-      klass.instance_variable_get(:@hydra_attributes)[:key1] << :value1
-      klass.instance_variable_get(:@hydra_attributes)[:key2] << :value2
-      klass.instance_variable_get(:@hydra_attributes)[:key3] << :value1
-      klass.hydra_attribute_types.should == [:key1, :key2, :key3]
+      klass.instance_variable_get(:@hydra_attributes)[:key1] = :value1
+      klass.instance_variable_get(:@hydra_attributes)[:key2] = :value2
+      klass.instance_variable_get(:@hydra_attributes)[:key3] = :value1
+      klass.hydra_attribute_types.should == [:value1, :value2]
     end
 
     describe 'should define #hydra_attribute_model' do
@@ -99,14 +99,14 @@ describe HydraAttribute::Attribute do
 
   describe '#store_attribute' do
     before do
-      attribute.instance_variable_set(:@type, :type)
       attribute.instance_variable_set(:@name, :name)
-      klass.instance_variable_set(:@hydra_attributes, Hash.new{ |h, k| h[k] = [] })
+      attribute.instance_variable_set(:@type, :type)
+      klass.instance_variable_set(:@hydra_attributes, {})
     end
 
     it 'should save attribute name and type in @hydra_attributes' do
       attribute.send(:save_attribute)
-      klass.instance_variable_get(:@hydra_attributes)[:type].should == [:name]
+      klass.instance_variable_get(:@hydra_attributes)[:name].should == :type
     end
   end
 end

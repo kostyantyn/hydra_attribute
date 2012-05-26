@@ -23,18 +23,26 @@ Feature: helper hydra attribute methods
       | datetime | launch |
 
   Scenario Outline: hydra attribute helpers
-    Then class "<class>"::"<method>" "<behavior>" have "<param>"
+    Then class "<class>"::"<method>" "<behavior>" have "<param>" hash
+
+    Scenarios: hydra attributes
+      | class         | method           | behavior | param                                                     |
+      | SimpleProduct | hydra_attributes | should   | code=string price=float info=text                         |
+      | GroupProduct  | hydra_attributes | should   | price=integer title=string active=boolean launch=datetime |
+
+  Scenario Outline: hydra attribute helpers
+    Then class "<class>"::"<method>" "<behavior>" have "<param>" array
 
     Scenarios: hydra attribute names
-      | class         | method                | behavior   | param                               |
-      | SimpleProduct | hydra_attribute_names | should     | code price info                     |
-      | SimpleProduct | hydra_attribute_names | should_not | title active launch                 |
-      | GroupProduct  | hydra_attribute_names | should     | price title active launch           |
-      | GroupProduct  | hydra_attribute_names | should_not | code info                           |
+      | class         | method                | behavior   | param                     |
+      | SimpleProduct | hydra_attribute_names | should     | code price info           |
+      | SimpleProduct | hydra_attribute_names | should_not | title active launch       |
+      | GroupProduct  | hydra_attribute_names | should     | price title active launch |
+      | GroupProduct  | hydra_attribute_names | should_not | code info                 |
 
     Scenarios: hydra attribute types
-      | class         | method                | behavior   | param                                      |
-      | SimpleProduct | hydra_attribute_types | should     | string float text                          |
-      | SimpleProduct | hydra_attribute_types | should_not | integer boolean datetime                   |
-      | GroupProduct  | hydra_attribute_types | should     | integer string boolean datetime            |
-      | GroupProduct  | hydra_attribute_types | should_not | text float                                 |
+      | class         | method                | behavior   | param                           |
+      | SimpleProduct | hydra_attribute_types | should     | string float text               |
+      | SimpleProduct | hydra_attribute_types | should_not | integer boolean datetime        |
+      | GroupProduct  | hydra_attribute_types | should     | integer string boolean datetime |
+      | GroupProduct  | hydra_attribute_types | should_not | text float                      |
