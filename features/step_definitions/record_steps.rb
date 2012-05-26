@@ -8,12 +8,21 @@ When /^filter "([^"]+)" by:$/ do |klass, table|
 end
 
 When /^filter "([^"]+)" records by "([^"]+)"$/ do |klass, attribute|
+  @records = Object.const_get(klass)
+  step %Q(filter records by "#{attribute}")
+end
+
+When /^filter records by "([^"]+)"$/ do |attribute|
   name, value = typecast_attribute(attribute)
-  @records = Object.const_get(klass).where(name => value)
+  @records = @records.where(name => value)
 end
 
 When /^order "([^"]+)" records by "([^"]+)"$/ do |klass, attributes|
   @records = Object.const_get(klass)
+  step %Q(order records by "#{attributes}")
+end
+
+When /^order records by "([^"]+)"$/ do |attributes|
   reverse  = false
   fields   = attributes.split.inject([]) do |items, attribute|
     name, direction = attribute.split('=')

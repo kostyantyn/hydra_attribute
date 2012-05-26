@@ -61,7 +61,7 @@ Feature: order conditions by hydra attributes
       | SimpleProduct | code=[integer:2]                   title=[nil:]     |
       | SimpleProduct | code=[integer:3] state=[integer:1] title=[string:a] |
     When filter "SimpleProduct" records by "<filter>"
-    And order "SimpleProduct" records by "<order>"
+    And order records by "<order>"
     Then total records should be "<count>"
     And "first" record should have "<first>"
     And "last" record should have "<last>"
