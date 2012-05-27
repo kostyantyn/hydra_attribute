@@ -21,7 +21,8 @@ require 'hydra_attribute/attribute_helpers'
 require 'hydra_attribute/builder'
 require 'hydra_attribute/migration'
 require 'hydra_attribute/active_record'
-require 'hydra_attribute/active_record/relation'
 require 'hydra_attribute/active_record/scoping'
+require 'hydra_attribute/active_record/relation/query_methods'
+require 'hydra_attribute/active_record/relation'
 
 require 'hydra_attribute/railtie' if defined?(Rails)

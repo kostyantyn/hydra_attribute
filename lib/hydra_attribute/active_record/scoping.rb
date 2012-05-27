@@ -5,7 +5,9 @@ module HydraAttribute
 
       module ClassMethods
         def scoped(options = nil)
-          super(options).extend(Relation)
+          relation = super(options)
+          relation.singleton_class.send :include, Relation
+          relation
         end
       end
     end
