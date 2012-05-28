@@ -12,26 +12,18 @@ describe HydraAttribute::ActiveRecord::Relation::QueryMethods do
   let(:relation) { mock(klass: relation_class, where: nil) }
 
   before do
+    relation.singleton_class.send :include, ::ActiveRecord::QueryMethods
     relation.singleton_class.send :include, HydraAttribute::ActiveRecord::Relation::QueryMethods
   end
 
   describe '#where' do
     let(:relation) do
       mock_relation = mock(klass: relation_class)
-      mock_relation.stub(:where_values)              { @where_values ||= []          }
-      mock_relation.stub(:where_values=)             { |value| @where_values = value }
-      mock_relation.stub(:joins_values)              { @joins_values ||= []          }
-      mock_relation.stub(:joins_values=)             { |value| @joins_values = value }
+      mock_relation.instance_variable_set(:@where_values, [])
+      mock_relation.instance_variable_set(:@joins_values, [])
       mock_relation.stub(:build_hydra_joins_values)  { |name, value| ["join-#{name}-#{value}"]  }
       mock_relation.stub(:build_hydra_where_options) { |name, value| ["where-#{name}-#{value}"] }
-      mock_relation.stub(:build_where)               { |value| value }
-
-      mock_relation.stub(:where) do |opts, *rest|
-        relation = mock_relation.clone
-        relation.where_values += ["opts: #{opts.inspect} - rest: #{rest.inspect}"]
-        relation
-      end
-
+      mock_relation.stub(:build_where)               { |value, *rest| ["#{value} #{rest}"] }
       mock_relation
     end
 
@@ -54,7 +46,10 @@ describe HydraAttribute::ActiveRecord::Relation::QueryMethods do
 
       describe 'hash has not hydra attribute' do
         it 'should call rails native "where" method' do
-          relation.where(params).where_values.join.should == %q(opts: {:title=>1} - rest: [])
+          object = relation.where(params)
+          object.where_values.should        == ['{:title=>1} [[]]']
+          object.joins_values.should        == []
+          object.hydra_joins_aliases.should == []
         end
       end
 
@@ -62,14 +57,10 @@ describe HydraAttribute::ActiveRecord::Relation::QueryMethods do
         let(:params) { {title: 1, code: 2, name: 3} }
 
         it 'should call both native and overwritten "where" method' do
-          joins = 'join-code-2'
-          where = %q(opts: {:title=>1} - rest: [])
-          where += ' where-code-2 '
-          where += %q(opts: {:name=>3} - rest: [])
-
           copy_relation = relation.where(params)
-          copy_relation.where_values.join(' ').should == where
-          copy_relation.joins_values.join(' ').should == joins
+          copy_relation.where_values.should        == ['{:title=>1} [[]]', 'where-code-2 []', '{:name=>3} [[]]']
+          copy_relation.joins_values.should        == ['join-code-2']
+          copy_relation.hydra_joins_aliases.should == ['hydra_string_attributes_inner_code']
         end
       end
     end
@@ -78,21 +69,20 @@ describe HydraAttribute::ActiveRecord::Relation::QueryMethods do
       let(:params) { 'name = 1' }
 
       it 'should call rails native "where" method' do
-        relation.where(params).where_values.join.should == %q(opts: "name = 1" - rest: [])
+        copy_relation = relation.where(params)
+        copy_relation.where_values.should        == ['name = 1 [[]]']
+        copy_relation.joins_values.should        == []
+        copy_relation.hydra_joins_aliases.should == []
       end
     end
   end
 
-  describe '#order' do
-    it 'should order'
-  end
-
-  describe '#reorder' do
-    it 'should reorder'
-  end
-
   describe '#build_arel' do
-    it 'should build arel'
+    it 'should be implemented'
+  end
+
+  describe '#build_order_values_for_arel' do
+    it 'should be implemented'
   end
 
   describe '#build_hydra_joins_values' do

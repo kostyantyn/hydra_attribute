@@ -17,12 +17,12 @@ When /^filter records by "([^"]+)"$/ do |attribute|
   @records = @records.where(name => value)
 end
 
-When /^order "([^"]+)" records by "([^"]+)"$/ do |klass, attributes|
+When /^(order|reorder) "([^"]+)" records by "([^"]+)"$/ do |sort_method, klass, attributes|
   @records = Object.const_get(klass)
-  step %Q(order records by "#{attributes}")
+  step %Q(#{sort_method} records by "#{attributes}")
 end
 
-When /^order records by "([^"]+)"$/ do |attributes|
+When /^(order|reorder) records by "([^"]+)"$/ do |sort_method, attributes|
   reverse  = false
   fields   = attributes.split.inject([]) do |items, attribute|
     name, direction = attribute.split('=')
@@ -30,7 +30,7 @@ When /^order records by "([^"]+)"$/ do |attributes|
     items << name.to_sym
   end
 
-  @records = @records.order(fields)
+  @records = @records.send(sort_method, fields)
   @records = @records.reverse_order if reverse
 end
 

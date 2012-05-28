@@ -8,6 +8,9 @@ Feature: order conditions by hydra attributes
   When order by several attributes
   Then order all of them by ascending
 
+  When reorder by attributes
+  Then old hydra attributes should be removed and new should be added
+
   Background: create models and describe hydra attributes
     Given removed constants if they exist:
       | name          |
@@ -66,8 +69,25 @@ Feature: order conditions by hydra attributes
     And "first" record should have "<first>"
     And "last" record should have "<last>"
 
-  Scenarios:
-    | filter            | order      | count | first            | last             |
-    | state=[integer:1] | state code | 2     | code=[integer:1] | code=[integer:3] |
-    | state=[nil:]      | state code | 1     | code=[integer:2] | code=[integer:2] |
-    | title=[nil:]      | title code | 2     | code=[integer:1] | code=[integer:2] |
+    Scenarios:
+      | filter            | order      | count | first            | last             |
+      | state=[integer:1] | state code | 2     | code=[integer:1] | code=[integer:3] |
+      | state=[nil:]      | state code | 1     | code=[integer:2] | code=[integer:2] |
+      | title=[nil:]      | title code | 2     | code=[integer:1] | code=[integer:2] |
+
+  Scenario Outline: reorder by hydra attributes
+    Given create models:
+      | model         | attributes                                        |
+      | SimpleProduct | code=[integer:1] name=[string:a] title=[string:c] |
+      | SimpleProduct | code=[integer:2] name=[string:b] title=[string:b] |
+      | SimpleProduct | code=[integer:3] name=[string:c] title=[string:a] |
+    When order "SimpleProduct" records by "<order>"
+    And reorder records by "<reorder>"
+    Then total records should be "<count>"
+    And "first" record should have "<first>"
+    And "last" record should have "<last>"
+
+    Scenarios:
+      | order | reorder    | count | first            | last             |
+      | title | name title | 3     | code=[integer:1] | code=[integer:3] |
+      | name  | title name | 3     | code=[integer:3] | code=[integer:1] |

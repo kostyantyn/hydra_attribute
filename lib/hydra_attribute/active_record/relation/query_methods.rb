@@ -4,7 +4,17 @@ module HydraAttribute
       module QueryMethods
         extend ActiveSupport::Concern
 
+        MULTI_VALUE_METHODS = [:hydra_joins_aliases]
+
         included do
+          attr_writer *MULTI_VALUE_METHODS
+
+          MULTI_VALUE_METHODS.each do |value|
+            class_eval <<-EOS, __FILE__, __LINE__ + 1
+              def #{value}; @#{value} ||= [] end
+            EOS
+          end
+
           alias_method_chain :where, :hydra_attribute
         end
 
@@ -15,7 +25,7 @@ module HydraAttribute
             opts.inject(self) do |relation, (name, value)|
               if klass.hydra_attribute_names.include?(name)
                 relation = relation.clone
-                relation.hydra_joins_values << hydra_ref_alias(name, value)
+                relation.hydra_joins_aliases << hydra_ref_alias(name, value)
                 relation.joins_values       += build_hydra_joins_values(name, value)
                 relation.where_values       += build_where(build_hydra_where_options(name, value))
                 relation
@@ -28,52 +38,30 @@ module HydraAttribute
           end
         end
 
-        def order(*args)
-          relation = super(*(args.flatten - klass.hydra_attribute_names))
-
-          if (attributes = args.flatten & klass.hydra_attribute_names).any?
-            relation = clone if relation.equal?(self)
-            relation.hydra_order_values += attributes
-          end
-
-          relation
-        end
-
-        def reorder(*args)
-          relation = super(*args)
-          relation.hydra_order_values = [] unless relation.equal?(self)
-          relation
-        end
-
-        # Should lazy join appropriate hydra tables for order fields
-        # because it is impossible to predict what join type should be used
+        # Update hydra attribute name and join appropriate table
         def build_arel
-          hydra_order_values.each do |attribute|
-            join_alias = hydra_ref_alias(attribute, 'inner') # alias for inner join
-            join_alias = hydra_ref_alias(attribute, nil) unless hydra_joins_values.include?(join_alias) # alias for left join
+          @order_values = build_order_values_for_arel(@order_values)
 
-            self.joins_values += build_hydra_joins_values(attribute, nil) unless hydra_joins_values.include?(join_alias)
-            self.order_values += [klass.connection.quote_table_name(join_alias) + '.' + klass.connection.quote_column_name('value')]
+          if instance_variable_defined?(:@reorder_value) and instance_variable_get(:@reorder_value).present? # 3.1.x
+            @reorder_value = build_order_values_for_arel(@reorder_value)
           end
 
           super
         end
 
-        protected
-
-        def hydra_joins_values
-          @hydra_joins_values ||= []
-        end
-
-        def hydra_order_values
-          @hydra_order_values ||= []
-        end
-
-        def hydra_order_values=(value)
-          @hydra_order_values = value
-        end
-
         private
+
+        def build_order_values_for_arel(collection)
+          collection.map do |attribute|
+            next attribute unless klass.hydra_attribute_names.include?(attribute)
+
+            join_alias = hydra_ref_alias(attribute, 'inner') # alias for inner join
+            join_alias = hydra_ref_alias(attribute, nil) unless hydra_joins_aliases.include?(join_alias) # alias for left join
+
+            @joins_values += build_hydra_joins_values(attribute, nil) unless hydra_joins_aliases.include?(join_alias)
+            klass.connection.quote_table_name(join_alias) + '.' + klass.connection.quote_column_name('value')
+          end
+        end
 
         def build_hydra_joins_values(name, value)
           ref_alias        = hydra_ref_alias(name, value)
