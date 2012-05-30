@@ -6,7 +6,7 @@ module HydraAttribute
       module ClassMethods
         def scoped(options = nil)
           relation = super(options)
-          relation.singleton_class.send :include, Relation
+          relation.singleton_class.send(:include, Relation) unless relation.is_a?(Relation)
           relation
         end
       end
