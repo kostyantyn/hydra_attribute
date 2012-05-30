@@ -78,11 +78,62 @@ describe HydraAttribute::ActiveRecord::Relation::QueryMethods do
   end
 
   describe '#build_arel' do
-    it 'should be implemented'
+    let(:arel) { mock.as_null_object }
+
+    let(:relation) do
+      mock_relation = mock(klass: relation_class, where: nil, build_select: nil)
+      mock_relation.stub_chain(:table, :from).and_return(arel)
+      mock_relation.instance_variable_set(:@joins_values, [])
+      mock_relation.instance_variable_set(:@where_values, [])
+      mock_relation.instance_variable_set(:@having_values, [])
+      mock_relation.instance_variable_set(:@group_values, [])
+      mock_relation.instance_variable_set(:@select_values, [])
+      mock_relation
+    end
+
+    it 'should update @order_values before generate the arel object' do
+      relation.stub(build_order_values_for_arel: %w(build_order))
+      relation.build_arel.should == arel
+      relation.instance_variable_get(:@order_values).should == %w(build_order)
+    end
   end
 
   describe '#build_order_values_for_arel' do
-    it 'should be implemented'
+    let(:connection) do
+      conn = mock
+      conn.stub(:quote_column_name) { |column| column.to_s        }
+      conn.stub(:quote)             { |value| %Q("#{value.to_s}") }
+      conn.stub(:quote_table_name)  { |table| table.to_s          }
+      conn
+    end
+
+    let(:relation_class) do
+      mock(connection: connection, hydra_attribute_names: [:code, :title, :price])
+    end
+
+    let(:relation) do
+      mock_relation = mock(klass: relation_class)
+      mock_relation.stub(where: mock_relation)
+      mock_relation.stub(:hydra_ref_alias)          { |name, value| "#{name}_#{value}"        }
+      mock_relation.stub(:build_hydra_joins_values) { |name, value| ["#{name}_#{value}_join"] }
+      mock_relation.instance_variable_set(:@joins_values, [])
+      mock_relation.instance_variable_set(:@hydra_joins_aliases, %w(code_inner title_))
+      mock_relation
+    end
+
+    describe 'collection has not hydra attributes' do
+      it 'should return the same collection' do
+        relation.send(:build_order_values_for_arel, [:name, :zone]).should == [:name, :zone]
+        relation.joins_values.should == []
+      end
+    end
+
+    describe 'collection has hydra attributes' do
+      it 'should change hydra attributes and join hydra tables' do
+        relation.send(:build_order_values_for_arel, [:name, :code, :title, :price]).should == [:name, 'code_inner.value', 'title_.value', 'price_.value']
+        relation.joins_values.should == %w(price__join)
+      end
+    end
   end
 
   describe '#build_hydra_joins_values' do
