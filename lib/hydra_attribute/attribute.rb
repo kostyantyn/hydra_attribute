@@ -16,9 +16,9 @@ module HydraAttribute
     def define_attribute_methods
       m = Module.new
       m.class_eval <<-EOS, __FILE__, __LINE__ + 1
-        def #{name};        hydra_attribute_model(:#{name}, :#{type}).value          end
-        def #{name}=(value) hydra_attribute_model(:#{name}, :#{type}).value = value  end
-        def #{name}?;       hydra_attribute_model(:#{name}, :#{type}).value.present? end
+        def #{name};        hydra_attribute_model(:#{name}, :#{type}).value         end
+        def #{name}=(value) hydra_attribute_model(:#{name}, :#{type}).value = value end
+        def #{name}?;       hydra_attribute_model(:#{name}, :#{type}).value?        end
       EOS
       klass.send :include, m
     end
