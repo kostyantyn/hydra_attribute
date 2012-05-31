@@ -26,8 +26,8 @@ module HydraAttribute
               if klass.hydra_attribute_names.include?(name)
                 relation = relation.clone
                 relation.hydra_joins_aliases << hydra_ref_alias(name, value)
-                relation.joins_values       += build_hydra_joins_values(name, value)
-                relation.where_values       += build_where(build_hydra_where_options(name, value))
+                relation.joins_values += build_hydra_joins_values(name, value)
+                relation.where_values += build_where(build_hydra_where_options(name, value))
                 relation
               else
                 relation.where_without_hydra_attribute(name => value)
