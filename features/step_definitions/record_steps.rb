@@ -2,6 +2,10 @@ When /^load all "([^"]+)" records$/ do |klass|
   @records = Object.const_get(klass).all
 end
 
+When /^select "(first|last)" "([^"]+)" record$/ do |method, klass|
+  @record = Object.const_get(klass).send(method)
+end
+
 When /^filter "([^"]+)" by:$/ do |klass, table|
   condition = table.hashes.each_with_object({}) { |item, hash| hash[item[:field].to_sym] = typecast_value(item[:value]) }
   @records  = Object.const_get(klass).where(condition)
@@ -32,6 +36,18 @@ When /^(order|reorder) records by "([^"]+)"$/ do |sort_method, attributes|
 
   @records = @records.send(sort_method, fields)
   @records = @records.reverse_order if reverse
+end
+
+Then /^record should have the following ((?:hydra )?attributes(?: before type cast)?) "([^"]+)" in attribute hash$/ do |method, attributes|
+  method = method.gsub(/\s+/, '_')
+  typecast_attributes(attributes).each do |(name, value)|
+    @record.send(method)[name.to_s].should == value
+  end
+end
+
+Then /^record (read attribute(?: before type cast)?) "([^"]+)" and value should be "([^"]+)"$/ do |method, attribute, value|
+  method = method.gsub(/\s+/, '_')
+  @record.send(method, attribute).should == typecast_value(value)
 end
 
 Then /^"(first|last)" record should have "([^"]+)"$/ do |method, attribute|

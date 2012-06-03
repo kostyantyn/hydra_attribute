@@ -6,7 +6,7 @@ module HydraAttribute
       @klass = klass
       @klass.class_eval do
         include ActiveRecord::Scoping
-        include AttributeHelpers
+        include ActiveRecord::AttributeMethods
       end
     end
 

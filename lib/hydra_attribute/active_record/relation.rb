@@ -2,7 +2,10 @@ module HydraAttribute
   module ActiveRecord
     module Relation
       extend ActiveSupport::Concern
-      include QueryMethods
+
+      included do
+        include QueryMethods
+      end
 
       define_method HydraAttribute.config.relation_execute_method do
         records = super()
