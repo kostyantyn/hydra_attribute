@@ -12,34 +12,50 @@ Feature: define hydra attributes
       | Product       |
     And create model class "Product"
     And create model class "SimpleProduct" as "Product" with hydra attributes:
-      | type   | name  |
-      | string | code  |
-      | float  | price |
+      | type   | name |
+      | string | code |
     And create model class "GroupProduct" as "Product" with hydra attributes:
-      | type    | name   |
-      | float   | price  |
-      | string  | title  |
-      | boolean | active |
+      | type    | name  |
+      | float   | price |
 
   Scenario Outline: models should respond to hydra attributes
     Then model "<model>" should "<respond>" to "<attributes>"
 
-    Scenarios: model SimpleProduct should respond to own hydra attributes
-      | model         | respond | attributes          |
-      | SimpleProduct | should  | code code= code?    |
-      | SimpleProduct | should  | price price= price? |
-
-    Scenarios: model SimpleProduct should not respond to other hydra attributes
-      | model         | respond    | attributes             |
-      | SimpleProduct | should_not | title title= title?    |
-      | SimpleProduct | should_not | active active= active? |
-
-    Scenarios: model GroupProduct should respond to own hydra attributes
-      | model        | respond | attributes             |
-      | GroupProduct | should  | price price= price?    |
-      | GroupProduct | should  | title title= title?    |
-      | GroupProduct | should  | active active= active? |
-
-    Scenarios: model GroupProduct should not respond to other hydra attributes
-      | model        | respond    | attributes       |
-      | GroupProduct | should_not | code code= code? |
+    Scenarios: model should respond to own hydra attributes
+      | model         | respond    | attributes              |
+      | SimpleProduct | should     | code                    |
+      | SimpleProduct | should     | code=                   |
+      | SimpleProduct | should     | code?                   |
+      | SimpleProduct | should     | code_before_type_cast   |
+      | SimpleProduct | should     | code_changed?           |
+      | SimpleProduct | should     | code_change             |
+      | SimpleProduct | should     | code_will_change!       |
+      | SimpleProduct | should     | code_was                |
+      | SimpleProduct | should     | reset_code!             |
+      | SimpleProduct | should_not | price                   |
+      | SimpleProduct | should_not | price=                  |
+      | SimpleProduct | should_not | price?                  |
+      | SimpleProduct | should_not | price_before_type_cast  |
+      | SimpleProduct | should_not | price_changed?          |
+      | SimpleProduct | should_not | price_change            |
+      | SimpleProduct | should_not | price_will_change!      |
+      | SimpleProduct | should_not | price_was               |
+      | SimpleProduct | should_not | reset_price!            |
+      | GroupProduct  | should     | price                   |
+      | GroupProduct  | should     | price=                  |
+      | GroupProduct  | should     | price?                  |
+      | GroupProduct  | should     | price_before_type_cast  |
+      | GroupProduct  | should     | price_changed?          |
+      | GroupProduct  | should     | price_change            |
+      | GroupProduct  | should     | price_will_change!      |
+      | GroupProduct  | should     | price_was               |
+      | GroupProduct  | should     | reset_price!            |
+      | GroupProduct  | should_not | code                    |
+      | GroupProduct  | should_not | code=                   |
+      | GroupProduct  | should_not | code?                   |
+      | GroupProduct  | should_not | code_before_type_cast   |
+      | GroupProduct  | should_not | code_changed?           |
+      | GroupProduct  | should_not | code_change             |
+      | GroupProduct  | should_not | code_will_change!       |
+      | GroupProduct  | should_not | code_was                |
+      | GroupProduct  | should_not | reset_code!             |
