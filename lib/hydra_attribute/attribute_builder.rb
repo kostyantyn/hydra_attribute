@@ -36,7 +36,7 @@ module HydraAttribute
 
         body = "hydra_attribute_model(:#{name}, :#{type}).#{send}"
         if current.end_with?('=')
-          body = "v = #{body}; @hydra_attribute_names << :#{name}; v"
+          body = "v = #{body}; @hydra_attribute_names << :#{name} unless @hydra_attribute_names.include?(:#{name}); v"
         else
           body.insert(0, "missing_attribute('#{name}', caller) unless @hydra_attribute_names.include?(:#{name}); ")
         end
