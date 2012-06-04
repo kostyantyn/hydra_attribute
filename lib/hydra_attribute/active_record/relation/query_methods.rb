@@ -38,7 +38,6 @@ module HydraAttribute
           end
         end
 
-        # Update hydra attribute name and join appropriate table
         def build_arel
           @order_values = build_order_values_for_arel(@order_values)
 

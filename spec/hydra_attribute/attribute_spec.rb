@@ -13,7 +13,28 @@ describe HydraAttribute::Attribute do
   end
 
   describe '#define_attribute_methods' do
-    before { attribute.send(:define_attribute_methods) }
+    let(:matcher_get) do
+      mock_matcher = mock
+      mock_matcher.stub(:method_name) { |value| value.to_s }
+      mock_matcher
+    end
+
+    let(:matcher_set) do
+      mock_matcher = mock
+      mock_matcher.stub(:method_name) { |value| "#{value}=" }
+      mock_matcher
+    end
+
+    let(:matcher_query) do
+      mock_matcher = mock
+      mock_matcher.stub(:method_name) { |value| "#{value}?" }
+      mock_matcher
+    end
+
+    before do
+      klass.stub(attribute_method_matchers: [matcher_get, matcher_set, matcher_query])
+      attribute.send(:define_attribute_methods)
+    end
 
     it 'should respond to #name' do
       klass.new.should respond_to(:name)
