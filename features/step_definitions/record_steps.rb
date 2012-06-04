@@ -38,6 +38,10 @@ When /^(order|reorder) records by "([^"]+)"$/ do |sort_method, attributes|
   @records = @records.reverse_order if reverse
 end
 
+When /^"([^"]+)" select only the following columns "([^"]+)"$/ do |klass, columns|
+  @records = Object.const_get(klass).select(columns.split(/\s+/).map(&:to_sym))
+end
+
 Then /^record should have the following ((?:hydra )?attributes(?: before type cast)?) "([^"]+)" in attribute hash$/ do |method, attributes|
   method = method.gsub(/\s+/, '_')
   typecast_attributes(attributes).each do |(name, value)|
@@ -59,6 +63,21 @@ Then /^records should have the following attributes:$/ do |table|
   table.hashes.each do |hash|
     record = @records.detect { |r| r.send(hash[:field]) == typecast_value(hash[:value]) }
     record.should_not be_nil
+  end
+end
+
+Then /^records should have only the following "([^"]+)" names$/ do |attributes|
+  @records.each do |record|
+    record.attributes.keys.should == attributes.split(/\s+/)
+  end
+end
+
+Then /^records should raise "([^"]+)" when call the following "([^"]+)"$/ do |error, methods|
+  error_class = error.constantize
+  @records.each do |record|
+    methods.split(/\s+/).each do |method|
+      lambda { record.send(method) }.should raise_error(error_class)
+    end
   end
 end
 

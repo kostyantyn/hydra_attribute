@@ -19,24 +19,31 @@ module HydraAttribute
     def define_attribute_methods
       m = Module.new
       @klass.attribute_method_matchers.each do |matcher|
-        defn = matcher.method_name(name)
-        send = matcher.method_name(:value)
+        current = matcher.method_name(name)
+        target  = matcher.method_name(:value)
 
-        if defn =~ NAME_COMPILABLE_REGEXP
-          defn = "def #{defn}(*args)"
+        if current =~ NAME_COMPILABLE_REGEXP
+          defn = "def #{current}(*args)"
         else
-          defn = "define_method(:'#{defn}') do |*args|"
+          defn = "define_method(:'#{current}') do |*args|"
         end
 
-        if send =~ CALL_COMPILABLE_REGEXP
-          send = "#{send}(*args)"
+        if target =~ CALL_COMPILABLE_REGEXP
+          send = "#{target}(*args)"
         else
-          send = "send(:'#{send}', *args)"
+          send = "send(:'#{target}', *args)"
+        end
+
+        body = "hydra_attribute_model(:#{name}, :#{type}).#{send}"
+        if current.end_with?('=')
+          body = "v = #{body}; @hydra_attribute_names << :#{name}; v"
+        else
+          body.insert(0, "missing_attribute('#{name}', caller) unless @hydra_attribute_names.include?(:#{name}); ")
         end
 
         m.class_eval <<-EOS, __FILE__, __LINE__ + 1
           #{defn}
-            hydra_attribute_model(:#{name}, :#{type}).#{send}
+            #{body}
           end
         EOS
       end

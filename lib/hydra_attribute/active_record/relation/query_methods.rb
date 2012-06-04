@@ -4,7 +4,7 @@ module HydraAttribute
       module QueryMethods
         extend ActiveSupport::Concern
 
-        MULTI_VALUE_METHODS = [:hydra_joins_aliases]
+        MULTI_VALUE_METHODS = [:hydra_joins_aliases, :hydra_select_values]
 
         included do
           attr_writer *MULTI_VALUE_METHODS
@@ -41,8 +41,19 @@ module HydraAttribute
         def build_arel
           @order_values = build_order_values_for_arel(@order_values)
 
-          if instance_variable_defined?(:@reorder_value) and instance_variable_get(:@reorder_value).present? # 3.1.x
+          if instance_variable_defined?(:@reorder_value) and instance_variable_get(:@reorder_value).present? # for compatibility with 3.1.x
             @reorder_value = build_order_values_for_arel(@reorder_value)
+          end
+
+          @hydra_select_values = @select_values & klass.hydra_attribute_names
+          @select_values       = (@select_values - klass.hydra_attribute_names).map { |column| prepend_table_name_for(column) }
+
+          # force add ID for preloading hydra attributes
+          if @hydra_select_values.any?
+            if @select_values.none? { |v| same_columns?(v, klass.primary_key) }
+              @select_values << prepend_table_name_for(klass.primary_key)
+              @id_for_hydra_attributes = true
+            end
           end
 
           super
@@ -50,15 +61,35 @@ module HydraAttribute
 
         private
 
+        def same_columns?(current, other)
+          current, other = current.to_s, other.to_s
+          current == other || current.include?(".#{other}") || current.include?(".#{klass.connection.quote_column_name(other)}")
+        end
+
         def build_order_values_for_arel(collection)
           collection.map do |attribute|
-            next attribute unless klass.hydra_attribute_names.include?(attribute)
+            if klass.hydra_attribute_names.include?(attribute)
+              join_alias = hydra_ref_alias(attribute, 'inner') # alias for inner join
+              join_alias = hydra_ref_alias(attribute, nil) unless hydra_joins_aliases.include?(join_alias) # alias for left join
 
-            join_alias = hydra_ref_alias(attribute, 'inner') # alias for inner join
-            join_alias = hydra_ref_alias(attribute, nil) unless hydra_joins_aliases.include?(join_alias) # alias for left join
+              @joins_values += build_hydra_joins_values(attribute, nil) unless hydra_joins_aliases.include?(join_alias)
+              klass.connection.quote_table_name(join_alias) + '.' + klass.connection.quote_column_name('value')
+            else
+              prepend_table_name_for(attribute)
+            end
+          end
+        end
 
-            @joins_values += build_hydra_joins_values(attribute, nil) unless hydra_joins_aliases.include?(join_alias)
-            klass.connection.quote_table_name(join_alias) + '.' + klass.connection.quote_column_name('value')
+        def prepend_table_name_for(column)
+          case column
+          when Symbol, String
+            if column.to_s.include?('.') or column.to_s.include?(')')
+              column
+            else
+              klass.quoted_table_name + '.' + klass.connection.quote_column_name(column.to_s)
+            end
+          else
+            column
           end
         end
 
