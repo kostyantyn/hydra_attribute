@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe HydraAttribute::Association do
+describe HydraAttribute::AssociationBuilder do
   def remove_association
     [::HydraAttribute, ::Object].each do |klass|
       klass.send(:remove_const, :StringAttribute) if klass.constants.include?(:StringAttribute)
@@ -22,7 +22,7 @@ describe HydraAttribute::Association do
   end
 
   let(:type)        { :string }
-  let(:association) { HydraAttribute::Association.new(klass, type) }
+  let(:association) { HydraAttribute::AssociationBuilder.new(klass, type) }
 
   describe '#buld' do
     it 'should call #build_associated_model and build_association' do

@@ -1,5 +1,5 @@
 module HydraAttribute
-  class Association
+  class AssociationBuilder
 
     def initialize(klass, type)
       @klass, @type = klass, type

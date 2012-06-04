@@ -1,5 +1,5 @@
 module HydraAttribute
-  class Attribute
+  class AttributeBuilder
     NAME_COMPILABLE_REGEXP = /\A[a-zA-Z_]\w*[!?=]?\z/
     CALL_COMPILABLE_REGEXP = /\A[a-zA-Z_]\w*[!?]?\z/
 

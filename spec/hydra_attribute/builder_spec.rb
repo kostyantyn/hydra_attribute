@@ -26,8 +26,8 @@ describe HydraAttribute::Builder do
     let(:attribute_instance)   { mock(:attribute_instance) }
 
     before do
-      HydraAttribute::Association.should_receive(:new).with(klass, :string).and_return(association_instance)
-      HydraAttribute::Attribute.should_receive(:new).with(klass, :name, :string).and_return(attribute_instance)
+      HydraAttribute::AssociationBuilder.should_receive(:new).with(klass, :string).and_return(association_instance)
+      HydraAttribute::AttributeBuilder.should_receive(:new).with(klass, :name, :string).and_return(attribute_instance)
 
       [association_instance, attribute_instance].each { |instance| instance.should_receive(:build) }
     end

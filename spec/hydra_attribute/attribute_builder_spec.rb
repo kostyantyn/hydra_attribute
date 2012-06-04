@@ -1,8 +1,8 @@
 require 'spec_helper'
 
-describe HydraAttribute::Attribute do
+describe HydraAttribute::AttributeBuilder do
   let(:klass)     { Class.new }
-  let(:attribute) { HydraAttribute::Attribute.new(klass, :name, :string) }
+  let(:attribute) { HydraAttribute::AttributeBuilder.new(klass, :name, :string) }
 
   describe '#build' do
     it 'should call required methods' do

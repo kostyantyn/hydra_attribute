@@ -15,8 +15,8 @@ end
 
 require 'hydra_attribute/version'
 require 'hydra_attribute/configuration'
-require 'hydra_attribute/association'
-require 'hydra_attribute/attribute'
+require 'hydra_attribute/association_builder'
+require 'hydra_attribute/attribute_builder'
 require 'hydra_attribute/builder'
 require 'hydra_attribute/migration'
 require 'hydra_attribute/attribute_helpers'

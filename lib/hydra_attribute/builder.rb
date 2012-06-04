@@ -11,14 +11,15 @@ module HydraAttribute
     end
 
     SUPPORT_TYPES.each do |type|
-      define_method(type) do |*attributes|
-        Association.new(klass, type).build
+      class_eval <<-EOS, __FILE__, __LINE__ + 1
+        def #{type}(*attributes)
+          AssociationBuilder.new(klass, :#{type}).build
 
-
-        attributes.each do |attribute|
-          Attribute.new(klass, attribute, type).build
+          attributes.each do |attribute|
+            AttributeBuilder.new(klass, attribute, :#{type}).build
+          end
         end
-      end
+      EOS
     end
   end
 end
