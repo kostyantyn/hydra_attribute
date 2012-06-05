@@ -25,7 +25,7 @@ module HydraAttribute
     def add_association_for_class
       assoc = config.association(@type)
       unless @klass.reflect_on_association(assoc)
-        @klass.has_many assoc, as: :entity, class_name: config.associated_model_name(@type), autosave: true
+        @klass.has_many assoc, as: :entity, class_name: config.associated_model_name(@type), autosave: true, dependent: :destroy
       end
     end
 
