@@ -1,106 +1,117 @@
 # hydra_attribute
 
-hydra_attribute allows to use
-[EAV database structure](http://en.wikipedia.org/wiki/Entity%E2%80%93attribute%E2%80%93value_model) for ActiveRecord models
-and is compatible with active_record >= 3.1.
+hydra_attribute is an implementation of
+[EAV pattern](http://en.wikipedia.org/wiki/Entity–attribute–value_model) for ActiveRecord models.
 
 ## Requirements
-active_record >= 3.1
+* ruby >= 1.9.2
+* active_record >= 3.1
 
 ## Installation
 
-Add this line to your application's Gemfile:
-    
-    gem 'hydra_attribute'
-
-And then execute:
-    
-    $ bundle
+Add the following line to Gemfile:
+```ruby
+gem 'hydra_attribute'
+```
+and run `bundle install` from your shell.
     
 After successful installation run rails generator:
-    
-    $ rails generate hydra_attribute:install
-    
+```shell
+rails generate hydra_attribute:install
+```
+
 This command generates hydra_attribute initializer:
-    
-    HydraAttribute.setup do |config|
-      # Add prefix for all attribute tables
-      # config.table_prefix = 'hydra_'
+```ruby    
+HydraAttribute.setup do |config|
+  # Add prefix for all attribute tables
+  # config.table_prefix = 'hydra_'
       
-      # Add prefix for has_many associations
-      # config.association_prefix = 'hydra_'
+  # Add prefix for has_many associations
+  # config.association_prefix = 'hydra_'
       
-      # Wrap all associated models in HydraAttribute module
-      # config.use_module_for_associated_models = true
-    end
-    
+  # Wrap all associated models in HydraAttribute module
+  # config.use_module_for_associated_models = true
+end
+```
+
 And the last step is to generate db:migration:
-
-    $ rails generate migration create_hydra_attrubute_tables
-    
-    # migration should look like this:
-    class CreateHydraAttributeTables < ActiveRecord::Migration
-      def up
-        HydraAttribute::Migration.new(self).migrate
-      end
+```shell
+rails generate migration create_hydra_attrubute_tables
+```    
+Migration should look like this:
+```ruby    
+class CreateHydraAttributeTables < ActiveRecord::Migration
+  def up
+    HydraAttribute::Migration.new(self).migrate
+  end
       
-      def down
-        HydraAttribute::Migration.new(self).rollback
-      end
-    end
-
+  def down
+    HydraAttribute::Migration.new(self).rollback
+  end
+end
+```
 ## Usage
 
-Describe EAV attributes in models:
+##### Generate model
+```shell
+rails generate model Product type:string name:string
+rails generate model SimpleProduct --migration=false --parent=Product
+rake db:migrate
+```
+
+##### Describe EAV attributes
+```ruby
+class SimpleProduct < Product
+  attr_accessible :name, :title, :code, :quantity, :price, :active, :description
   
-    # app/models/product.rb
-    class Product < ActiveRecord::Base
-    end
-    
-    # app/models/simple_product.rb
-    class SimpleProduct < ActiveRecord::Base
-      hydra_attributes do |hydra|
-        hydra.string  :name, :code
-        hydra.float   :price
-        hydra.text    :description
-        hydra.boolean :active
-      end
-    end
-    
-    # app/models/group_product.rb
-    class GroupProduct < ActiveRecord::Base
-      hydra_attributes do |hydra|
-        hydra.string  :name
-        hydra.float   :price
-        hydra.integer :total
-      end
-    end
-    
-**hydra_attributes** helper generates EAV attributes with for current model.  
-  
-Supported attribute types:
+  define_hydra_attributes do |hydra|
+    hydra.string  :title, :code
+    hydra.integer :quantity 
+    hydra.float   :price
+    hydra.boolean :active
+    hydra.text    :description
+  end
+end
+```
 
-    ::string, :text, :integer, :float, :datetime, :boolean
+##### Create some products
+```shell
+SimpleProduct.create(name: 'Book', title: 'book', code: '100', quantity: 5, price: 2.75, active: true,  description: '...')
+SimpleProduct.create(name: 'Book', title: 'book', code: '101', quantity: 5, price: 3.75, active: true,  description: '...')
+SimpleProduct.create(name: 'Book', title: 'book', code: '102', quantity: 4, price: 4.50, active: false, description: '...')
+SimpleProduct.create(name: 'Book', title: nil,    code: '103', quantity: 3, price: 4.50, active: true,  description: '...')
+SimpleProduct.create(name: 'Book',                code: '104', quantity: 2, price: 5.00, active: true,  description: '...')
+```
 
-Now we can test our products:
+##### "where"
+```shell
+SimpleProduct.where(name: 'Book', quantity: 5, price: 2.75).first.attributes
+=> {"id"=>1, "type"=>"SimpleProduct", "name"=>"Book", "created_at"=>Tue, 05 Jun 2012 23:13:21 UTC +00:00, "updated_at"=>Tue, 05 Jun 2012 23:13:21 UTC +00:00, "title"=>"book", "code"=>"100", "quantity"=>5, "price"=>2.75, "active"=>true, "description"=>"..."} 
 
-    $ rails c
-    > SimpleProduct.create(name: 'Book', code: '#1', price: 2.75, description: 'Some words...', active: true) 
-    > GroupProduct.create(name: 'Furniture', price: 79.95, total: 2)
-    >
-    > p SimpleProduct.first.hydra_attribute_names
-    => ["Book", "#1", 2.75, "Some words...", true]
-    > p SimpleProduct.first.hydra_attribute_types
-    => [:string, :float, :text, :boolean]
-    >
-    > product = GroupProduct.first
-    > p product.hydra_attribute_names.map { |a| product.send(a) }
-    => ["Book", "#1", 2.75, "Some words...", true]  
-  
+SimpleProduct.where(title: 'book', active: false).first.attributes
+=> {"id"=>3, "type"=>"SimpleProduct", "name"=>"Book", "created_at"=>Tue, 05 Jun 2012 23:13:50 UTC +00:00, "updated_at"=>Tue, 05 Jun 2012 23:13:50 UTC +00:00, "title"=>"book", "code"=>"102", "quantity"=>4, "price"=>4.5, "active"=>false, "description"=>"..."}
 
-## Plans for the next release:
-* Add more complex filters on attributes
-* Add attribute sets feature
+SimpleProduct.where(title: nil).first.attributes
+=> {"id"=>4, "type"=>"SimpleProduct", "name"=>"Book", "created_at"=>Tue, 05 Jun 2012 23:13:50 UTC +00:00, "updated_at"=>Tue, 05 Jun 2012 23:13:50 UTC +00:00, "title"=>nil, "code"=>"103", "quantity"=>3, "price"=>4.5, "active"=>true, "description"=>"..."} 
+
+SimpleProduct.where(title: nil).last.attributes
+=> {"id"=>5, "type"=>"SimpleProduct", "name"=>"Book", "created_at"=>Tue, 05 Jun 2012 23:13:51 UTC +00:00, "updated_at"=>Tue, 05 Jun 2012 23:13:51 UTC +00:00, "title"=>nil, "code"=>"104", "quantity"=>2, "price"=>5.0, "active"=>true, "description"=>"..."}
+```
+
+##### "order" and "reverse_order"
+```shell
+SimpleProduct.order(:code).first.attributes
+=> {"id"=>1, "type"=>"SimpleProduct", "name"=>"Book", "created_at"=>Tue, 05 Jun 2012 23:30:48 UTC +00:00, "updated_at"=>Tue, 05 Jun 2012 23:30:49 UTC +00:00, "title"=>"book", "code"=>"100", "quantity"=>5, "price"=>2.75, "active"=>true, "description"=>"..."} 
+
+SimpleProduct.order(:code).reverse_order.first.attributes
+=> {"id"=>5, "type"=>"SimpleProduct", "name"=>"Book", "created_at"=>Tue, 05 Jun 2012 23:30:51 UTC +00:00, "updated_at"=>Tue, 05 Jun 2012 23:30:51 UTC +00:00, "title"=>nil, "code"=>"104", "quantity"=>2, "price"=>5.0, "active"=>true, "description"=>"..."} 
+```
+
+##### "select"
+```shell
+SimpleProduct.select([:code, :price]).map(&:attributes)
+=> [{"code"=>"100", "price"=>2.75}, {"code"=>"101", "price"=>3.75}, {"code"=>"102", "price"=>4.5}, {"code"=>"103", "price"=>4.5}, {"code"=>"104", "price"=>5.0}]
+```
 
 ## Contributing
 
