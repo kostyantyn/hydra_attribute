@@ -46,12 +46,12 @@ module HydraAttribute
           end
 
           @hydra_select_values = @select_values & klass.hydra_attribute_names
-          @select_values       = (@select_values - klass.hydra_attribute_names).map { |column| prepend_table_name_for(column) }
+          @select_values       = (@select_values - klass.hydra_attribute_names).map { |column| hydra_attr_helper.prepend_table_name(column) }
 
           # force add ID for preloading hydra attributes
           if @hydra_select_values.any?
-            if @select_values.none? { |v| same_columns?(v, klass.primary_key) }
-              @select_values << prepend_table_name_for(klass.primary_key)
+            if @select_values.none? { |v| hydra_attr_helper.attr_eq_column?(v, klass.primary_key) }
+              @select_values << hydra_attr_helper.prepend_table_name(klass.primary_key)
               @id_for_hydra_attributes = true
             end
           end
@@ -59,11 +59,36 @@ module HydraAttribute
           super
         end
 
+        class Helper
+          attr_reader :relation, :klass, :connection
+
+          def initialize(relation)
+            @relation, @klass, @connection = relation, relation.klass, relation.connection
+          end
+
+          def attr_eq_column?(attr, column)
+            attr, column = attr.to_s, column.to_s
+            attr == column || attr.end_with?(".#{column}") || attr.end_with?(".#{connection.quote_column_name(column)}")
+          end
+
+          def prepend_table_name(column)
+            case column
+            when Symbol, String
+              if column.to_s.include?('.') or column.to_s.include?(')')
+                column
+              else
+                klass.quoted_table_name + '.' + connection.quote_column_name(column.to_s)
+              end
+            else
+              column
+            end
+          end
+        end
+
         private
 
-        def same_columns?(current, other)
-          current, other = current.to_s, other.to_s
-          current == other || current.include?(".#{other}") || current.include?(".#{klass.connection.quote_column_name(other)}")
+        def hydra_attr_helper
+          @hydra_attr_helper ||= Helper.new(self)
         end
 
         def build_order_values_for_arel(collection)
@@ -75,21 +100,8 @@ module HydraAttribute
               @joins_values += build_hydra_joins_values(attribute, nil) unless hydra_joins_aliases.include?(join_alias)
               klass.connection.quote_table_name(join_alias) + '.' + klass.connection.quote_column_name('value')
             else
-              prepend_table_name_for(attribute)
+              hydra_attr_helper.prepend_table_name(attribute)
             end
-          end
-        end
-
-        def prepend_table_name_for(column)
-          case column
-          when Symbol, String
-            if column.to_s.include?('.') or column.to_s.include?(')')
-              column
-            else
-              klass.quoted_table_name + '.' + klass.connection.quote_column_name(column.to_s)
-            end
-          else
-            column
           end
         end
 
