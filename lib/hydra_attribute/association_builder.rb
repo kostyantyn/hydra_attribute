@@ -17,6 +17,7 @@ module HydraAttribute
       unless namespace.const_defined?(const)
         klass = namespace.const_set(const, Class.new(::ActiveRecord::Base))
         klass.table_name = config.table_name(@type)
+        klass.attr_accessible :name, :value
         klass.belongs_to :entity, polymorphic: true, touch: true, autosave: true
       end
     end
