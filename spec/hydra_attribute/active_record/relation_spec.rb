@@ -4,13 +4,13 @@ describe HydraAttribute::ActiveRecord::Relation do
   def record_class(loaded_associations = false)
     Class.new do
 
-      @hydra_attributes = {code: :string}
+      @hydra_attributes = {'code' => :string}
       define_singleton_method :hydra_attribute_types do
         [:string]
       end
 
       define_singleton_method :hydra_attribute_names do
-        [:code]
+        ['code']
       end
 
       define_singleton_method :hydra_attributes do
@@ -29,6 +29,18 @@ describe HydraAttribute::ActiveRecord::Relation do
 
   def relation_function(records)
     Module.new do
+      define_method :loaded? do
+        false
+      end
+
+      define_method :select_values do
+        []
+      end
+
+      define_method :hydra_select_values do
+        []
+      end
+
       define_method HydraAttribute.config.relation_execute_method do
         records
       end

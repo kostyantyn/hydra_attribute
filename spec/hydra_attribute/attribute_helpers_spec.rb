@@ -1,5 +1,5 @@
 require 'spec_helper'
-
+__END__
 describe HydraAttribute::AttributeHelpers do
   let(:klass) { Class.new { include HydraAttribute::AttributeHelpers } }
 

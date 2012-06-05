@@ -10,8 +10,8 @@ describe HydraAttribute::Builder do
       klass.should include(HydraAttribute::ActiveRecord::Scoping)
     end
 
-    it 'should include HydraAttribute::AttributeHelpers to class' do
-      klass.should include(HydraAttribute::AttributeHelpers)
+    it 'should include HydraAttribute::ActiveRecord::AttributeMethods to class' do
+      klass.should include(HydraAttribute::ActiveRecord::AttributeMethods)
     end
 
     it 'should respond to all supported types' do

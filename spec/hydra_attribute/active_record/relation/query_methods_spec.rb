@@ -3,8 +3,8 @@ require 'spec_helper'
 describe HydraAttribute::ActiveRecord::Relation::QueryMethods do
   let(:relation_class) do
     mock(
-      :hydra_attributes      => {code: :string},
-      :hydra_attribute_names => [:code],
+      :hydra_attributes      => {'code' => :string},
+      :hydra_attribute_names => ['code'],
       :hydra_attribute_types => [:string]
     )
   end
@@ -42,23 +42,23 @@ describe HydraAttribute::ActiveRecord::Relation::QueryMethods do
     end
 
     describe 'first param is Hash' do
-      let(:params) { {title: 1} }
+      let(:params) { {'title' => 1} }
 
       describe 'hash has not hydra attribute' do
         it 'should call rails native "where" method' do
           object = relation.where(params)
-          object.where_values.should        == ['{:title=>1} [[]]']
+          object.where_values.should        == ['{"title"=>1} [[]]']
           object.joins_values.should        == []
           object.hydra_joins_aliases.should == []
         end
       end
 
       describe 'hash has hydra attribute' do
-        let(:params) { {title: 1, code: 2, name: 3} }
+        let(:params) { {'title' => 1, 'code' => 2, 'name' => 3} }
 
         it 'should call both native and overwritten "where" method' do
           copy_relation = relation.where(params)
-          copy_relation.where_values.should        == ['{:title=>1} [[]]', 'where-code-2 []', '{:name=>3} [[]]']
+          copy_relation.where_values.should        == ['{"title"=>1} [[]]', 'where-code-2 []', '{"name"=>3} [[]]']
           copy_relation.joins_values.should        == ['join-code-2']
           copy_relation.hydra_joins_aliases.should == ['hydra_string_attributes_inner_code']
         end
@@ -84,6 +84,7 @@ describe HydraAttribute::ActiveRecord::Relation::QueryMethods do
       mock_relation = mock(klass: relation_class, where: nil, build_select: nil)
       mock_relation.stub_chain(:table, :from).and_return(arel)
       mock_relation.instance_variable_set(:@joins_values, [])
+      mock_relation.instance_variable_set(:@order_values, [])
       mock_relation.instance_variable_set(:@where_values, [])
       mock_relation.instance_variable_set(:@having_values, [])
       mock_relation.instance_variable_set(:@group_values, [])
@@ -108,11 +109,11 @@ describe HydraAttribute::ActiveRecord::Relation::QueryMethods do
     end
 
     let(:relation_class) do
-      mock(connection: connection, hydra_attribute_names: [:code, :title, :price])
+      mock(connection: connection, quoted_table_name: 'product', hydra_attribute_names: %w(code title price))
     end
 
     let(:relation) do
-      mock_relation = mock(klass: relation_class)
+      mock_relation = mock(klass: relation_class, connection: connection)
       mock_relation.stub(where: mock_relation)
       mock_relation.stub(:hydra_ref_alias)          { |name, value| "#{name}_#{value}"        }
       mock_relation.stub(:build_hydra_joins_values) { |name, value| ["#{name}_#{value}_join"] }
@@ -123,14 +124,14 @@ describe HydraAttribute::ActiveRecord::Relation::QueryMethods do
 
     describe 'collection has not hydra attributes' do
       it 'should return the same collection' do
-        relation.send(:build_order_values_for_arel, [:name, :zone]).should == [:name, :zone]
+        relation.send(:build_order_values_for_arel, %w(name zone)).should == %w(product.name product.zone)
         relation.joins_values.should == []
       end
     end
 
     describe 'collection has hydra attributes' do
       it 'should change hydra attributes and join hydra tables' do
-        relation.send(:build_order_values_for_arel, [:name, :code, :title, :price]).should == [:name, 'code_inner.value', 'title_.value', 'price_.value']
+        relation.send(:build_order_values_for_arel, %w(name code title price)).should == %w(product.name code_inner.value title_.value price_.value)
         relation.joins_values.should == %w(price__join)
       end
     end
@@ -195,7 +196,7 @@ describe HydraAttribute::ActiveRecord::Relation::QueryMethods do
     after { HydraAttribute.send :remove_const, :StringAttribute }
 
     it 'should create where options with table namespace' do
-      relation.send(:build_hydra_where_options, :code, 'abc').should == {hydra_string_attributes_inner_code: { value: 'abc' }}
+      relation.send(:build_hydra_where_options, 'code', 'abc').should == {'hydra_string_attributes_inner_code' => { value: 'abc' }}
     end
   end
 
@@ -213,7 +214,7 @@ describe HydraAttribute::ActiveRecord::Relation::QueryMethods do
     after { HydraAttribute.send :remove_const, :StringAttribute }
 
     it 'should return class by attribute name' do
-      relation.send(:hydra_ref_class, :code).should == HydraAttribute::StringAttribute
+      relation.send(:hydra_ref_class, 'code').should == HydraAttribute::StringAttribute
     end
   end
 
@@ -231,7 +232,7 @@ describe HydraAttribute::ActiveRecord::Relation::QueryMethods do
     after { HydraAttribute.send :remove_const, :StringAttribute }
 
     it 'should return table name' do
-      relation.send(:hydra_ref_table, :code).should == 'hydra_string_attributes'
+      relation.send(:hydra_ref_table, 'code').should == 'hydra_string_attributes'
     end
   end
 
@@ -252,7 +253,7 @@ describe HydraAttribute::ActiveRecord::Relation::QueryMethods do
       let(:value) { nil }
 
       it 'should return generated alias name' do
-        relation.send(:hydra_ref_alias, :code, value).should == 'hydra_string_attributes_left_code'
+        relation.send(:hydra_ref_alias, 'code', value).should == 'hydra_string_attributes_left_code'
       end
     end
 
@@ -260,7 +261,7 @@ describe HydraAttribute::ActiveRecord::Relation::QueryMethods do
       let(:value) { '' }
 
       it 'should return generated alias name' do
-        relation.send(:hydra_ref_alias, :code, value).should == 'hydra_string_attributes_inner_code'
+        relation.send(:hydra_ref_alias, 'code', value).should == 'hydra_string_attributes_inner_code'
       end
     end
   end
