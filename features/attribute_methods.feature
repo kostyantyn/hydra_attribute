@@ -50,18 +50,21 @@ Feature: helper methods for hydra attributes
       | SimpleProduct | hydra_attributes | should   | code=string price=float note=text                         |
       | GroupProduct  | hydra_attributes | should   | price=integer title=string active=boolean launch=datetime |
 
-  Scenario Outline: class hydra_attribute_names and hydra_attribute_types
-    Then class "<class>"::"<method>" "<behavior>" have "<param>" array
+  Scenario Outline: class hydra_attribute_names
+    Then class "<class>"::"<method>" "<behavior>" have string "<params>" in array
 
     Scenarios: hydra attribute names
-      | class         | method                | behavior   | param                     |
+      | class         | method                | behavior   | params                    |
       | SimpleProduct | hydra_attribute_names | should     | code price note           |
       | SimpleProduct | hydra_attribute_names | should_not | title active launch       |
       | GroupProduct  | hydra_attribute_names | should     | price title active launch |
       | GroupProduct  | hydra_attribute_names | should_not | code note                 |
 
+  Scenario Outline: class hydra_attribute_types
+    Then class "<class>"::"<method>" "<behavior>" have symbol "<params>" in array
+
     Scenarios: hydra attribute types
-      | class         | method                | behavior   | param                           |
+      | class         | method                | behavior   | params                          |
       | SimpleProduct | hydra_attribute_types | should     | string float text               |
       | SimpleProduct | hydra_attribute_types | should_not | integer boolean datetime        |
       | GroupProduct  | hydra_attribute_types | should     | integer string boolean datetime |

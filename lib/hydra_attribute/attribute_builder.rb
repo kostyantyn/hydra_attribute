@@ -6,7 +6,7 @@ module HydraAttribute
     attr_reader :klass, :name, :type
 
     def initialize(klass, name, type)
-      @klass, @name, @type = klass, name, type
+      @klass, @name, @type = klass, name.to_s, type
     end
 
     def build
@@ -34,11 +34,11 @@ module HydraAttribute
           send = "send(:'#{target}', *args)"
         end
 
-        body = "hydra_attribute_model(:#{name}, :#{type}).#{send}"
+        body = "hydra_attribute_model('#{name}', :#{type}).#{send}"
         if current.end_with?('=')
-          body = "v = #{body}; @hydra_attribute_names << :#{name} unless @hydra_attribute_names.include?(:#{name}); v"
+          body = "v = #{body}; @hydra_attribute_names << '#{name}' unless @hydra_attribute_names.include?('#{name}'); v"
         else
-          body.insert(0, "missing_attribute('#{name}', caller) unless @hydra_attribute_names.include?(:#{name}); ")
+          body.insert(0, "missing_attribute('#{name}', caller) unless @hydra_attribute_names.include?('#{name}'); ")
         end
 
         m.class_eval <<-EOS, __FILE__, __LINE__ + 1

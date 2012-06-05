@@ -23,8 +23,8 @@ module HydraAttribute
 
           if opts.is_a?(Hash)
             opts.inject(self) do |relation, (name, value)|
-              if klass.hydra_attribute_names.include?(name)
-                relation = relation.clone
+              if klass.hydra_attribute_names.include?(name.to_s)
+                relation, name = relation.clone, name.to_s
                 relation.hydra_joins_aliases << hydra_ref_alias(name, value)
                 relation.joins_values += build_hydra_joins_values(name, value)
                 relation.where_values += build_where(build_hydra_where_options(name, value))
@@ -39,21 +39,20 @@ module HydraAttribute
         end
 
         def build_arel
-          @order_values = build_order_values_for_arel(@order_values)
+          @order_values = build_order_values_for_arel(@order_values.uniq.reject(&:blank?))
 
           if instance_variable_defined?(:@reorder_value) and instance_variable_get(:@reorder_value).present? # for compatibility with 3.1.x
-            @reorder_value = build_order_values_for_arel(@reorder_value)
+            @reorder_value = build_order_values_for_arel(@reorder_value.uniq.reject(&:blank?))
           end
 
-          @hydra_select_values = @select_values & klass.hydra_attribute_names
-          @select_values       = (@select_values - klass.hydra_attribute_names).map { |column| hydra_attr_helper.prepend_table_name(column) }
+          @hydra_select_values, @select_values = @select_values.partition { |value| klass.hydra_attribute_names.include?(value.to_s) }
+          @hydra_select_values.map!(&:to_s)
+          @select_values.map!{ |value| hydra_attr_helper.prepend_table_name(value) }
 
           # force add ID for preloading hydra attributes
-          if @hydra_select_values.any?
-            if @select_values.none? { |v| hydra_attr_helper.attr_eq_column?(v, klass.primary_key) }
-              @select_values << hydra_attr_helper.prepend_table_name(klass.primary_key)
-              @id_for_hydra_attributes = true
-            end
+          if @hydra_select_values.any? && @select_values.none? { |v| hydra_attr_helper.attr_eq_column?(v, klass.primary_key) }
+            @select_values << hydra_attr_helper.prepend_table_name(klass.primary_key)
+            @id_for_hydra_attributes = true
           end
 
           super
@@ -68,7 +67,13 @@ module HydraAttribute
 
           def attr_eq_column?(attr, column)
             attr, column = attr.to_s, column.to_s
-            attr == column || attr.end_with?(".#{column}") || attr.end_with?(".#{connection.quote_column_name(column)}")
+            [
+              column,
+              "#{klass.table_name}.#{column}",
+              "#{klass.table_name}.#{connection.quote_column_name(column)}",
+              "#{klass.quoted_table_name}.#{column}",
+              "#{klass.quoted_table_name}.#{connection.quote_column_name(column)}"
+            ].include?(attr)
           end
 
           def prepend_table_name(column)
@@ -93,6 +98,7 @@ module HydraAttribute
 
         def build_order_values_for_arel(collection)
           collection.map do |attribute|
+            attribute = attribute.respond_to?(:to_sql) ? attribute.to_sql : attribute.to_s
             if klass.hydra_attribute_names.include?(attribute)
               join_alias = hydra_ref_alias(attribute, 'inner') # alias for inner join
               join_alias = hydra_ref_alias(attribute, nil) unless hydra_joins_aliases.include?(join_alias) # alias for left join
@@ -131,7 +137,7 @@ module HydraAttribute
         end
 
         def build_hydra_where_options(name, value)
-          {hydra_ref_alias(name, value).to_sym => {value: value}}
+          {hydra_ref_alias(name, value) => {value: value}}
         end
 
         def hydra_ref_class(name)
@@ -144,7 +150,7 @@ module HydraAttribute
         end
 
         def hydra_ref_alias(name, value)
-          hydra_ref_table(name) + '_' + hydra_join_type(value).downcase + '_' + name.to_s
+          hydra_ref_table(name) + '_' + hydra_join_type(value).downcase + '_' + name
         end
 
         def hydra_join_type(value)

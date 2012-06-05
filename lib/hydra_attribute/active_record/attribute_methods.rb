@@ -50,7 +50,7 @@ module HydraAttribute
 
       def hydra_attribute_model(name, type)
         collection = send(HydraAttribute.config.association(type))
-        collection.detect { |model| model.name.to_sym == name } || collection.build(name: name)
+        collection.detect { |model| model.name == name } || collection.build(name: name)
       end
 
       def attributes
@@ -62,7 +62,7 @@ module HydraAttribute
           def hydra_#{attr_method}
             @hydra_attribute_names.each_with_object({}) do |name, attributes|
               type = self.class.hydra_attributes[name]
-              attributes[name.to_s] = hydra_attribute_model(name, type).#{attr_method}['value']
+              attributes[name] = hydra_attribute_model(name, type).#{attr_method}['value']
             end
           end
         EOS
