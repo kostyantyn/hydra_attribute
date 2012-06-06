@@ -1,5 +1,5 @@
 Description:
-  This generator generate the default initializer file.
+  This generator generates the default initializer file.
 
 Usage:
   rails generate hydra_attribute:install
