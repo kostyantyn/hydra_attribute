@@ -6,7 +6,7 @@ Gem::Specification.new do |gem|
   gem.email                 = 'kostya.stepanyuk@gmail.com'
   gem.summary               = 'hydra_attribute allows to use EAV database structure for ActiveRecord models.'
   gem.description           = 'hydra_attribute allows to use EAV database structure for ActiveRecord models.'
-  gem.homepage              = ""
+  gem.homepage              = 'https://github.com/kostyantyn/hydra_attribute'
   gem.files                 = `git ls-files`.split("\n")
   gem.test_files            = `git ls-files -- Appraisals {spec,features,gemfiles}/*`.split("\n")
   gem.name                  = "hydra_attribute"
@@ -21,4 +21,5 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency('sqlite3')
   gem.add_development_dependency('database_cleaner')
   gem.add_development_dependency('appraisal')
+  gem.add_development_dependency('rake')
 end
