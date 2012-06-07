@@ -65,12 +65,12 @@ rake db:migrate
 class SimpleProduct < Product
   attr_accessible :name, :title, :code, :quantity, :price, :active, :description
   
-  define_hydra_attributes do |hydra|
-    hydra.string  :title, :code
-    hydra.integer :quantity 
-    hydra.float   :price
-    hydra.boolean :active
-    hydra.text    :description
+  define_hydra_attributes do
+    string  :title, :code
+    integer :quantity
+    float   :price
+    boolean :active
+    text    :description
   end
 end
 ```
