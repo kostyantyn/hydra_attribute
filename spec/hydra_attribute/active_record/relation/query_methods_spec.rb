@@ -284,3 +284,51 @@ describe HydraAttribute::ActiveRecord::Relation::QueryMethods do
     end
   end
 end
+
+describe HydraAttribute::ActiveRecord::Relation::QueryMethods::Helper do
+  let(:relation_class) do
+    mock(table_name: 'entities', quoted_table_name: '"entities"')
+  end
+
+  let(:connection) do
+    mock_connection = mock
+    mock_connection.stub(:quote_column_name) { |column| %Q("#{column}") }
+    mock_connection
+  end
+
+  let(:relation) do
+    mock(klass: relation_class, connection: connection)
+  end
+
+  let(:helper) do
+    HydraAttribute::ActiveRecord::Relation::QueryMethods::Helper.new(relation)
+  end
+
+  describe '#prepend_table_name' do
+    describe 'param is Symbol' do
+      it 'should prepend table name and quote param' do
+        helper.prepend_table_name(:column).should == '"entities"."column"'
+      end
+    end
+
+    describe 'param is String' do
+      describe 'params is a word character (letter, number, underscore)' do
+        it 'should prepend table name and quote param' do
+          helper.prepend_table_name('abc').should == '"entities"."abc"'
+          helper.prepend_table_name('a_c').should == '"entities"."a_c"'
+          helper.prepend_table_name('a1c').should == '"entities"."a1c"'
+          helper.prepend_table_name(' a ').should == '"entities"."a"'
+        end
+      end
+
+      describe 'params is not a word character (letter, number, underscore)' do
+        it 'should return current string' do
+          helper.prepend_table_name('a c').should == 'a c'
+          helper.prepend_table_name('a-c').should == 'a-c'
+          helper.prepend_table_name('(a)').should == '(a)'
+          helper.prepend_table_name('.').should   == '.'
+        end
+      end
+    end
+  end
+end
