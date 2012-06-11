@@ -35,13 +35,5 @@ module HydraAttribute
     def associated_const_name(type)
       "#{type.to_s.titlecase}Attribute".to_sym
     end
-
-    def relation_execute_method
-      if ::ActiveRecord::VERSION::MINOR > 1
-        :exec_queries
-      else
-        :to_a
-      end
-    end
   end
 end

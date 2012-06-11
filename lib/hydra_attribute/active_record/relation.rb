@@ -5,11 +5,15 @@ module HydraAttribute
 
       included do
         include QueryMethods
+
+        target = ::ActiveRecord::VERSION::STRING.starts_with?('3.1.') ? :to_a : :exec_queries
+        alias_method :__old_exec_queries__, target
+        alias_method target, :__exec_queries__
       end
 
-      define_method HydraAttribute.config.relation_execute_method do
+      def __exec_queries__
         return @records if loaded?
-        records = super()
+        records = __old_exec_queries__
         return records if records.empty?
 
         limit_values = select_values.any? || hydra_select_values.any?

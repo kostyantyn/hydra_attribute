@@ -62,35 +62,4 @@ describe HydraAttribute::Configuration do
       config.associated_const_name(:string).should == :StringAttribute
     end
   end
-
-  describe '#relation_execute_method' do
-    after do
-      ::ActiveRecord::VERSION.send(:remove_const, :MINOR)
-      ::ActiveRecord::VERSION.const_set(:MINOR, @old_value)
-    end
-
-    describe 'ActiveRecord::VERSION::MINOR is great than 1' do
-      before do
-        @old_value = ::ActiveRecord::VERSION::MINOR
-        ::ActiveRecord::VERSION.send(:remove_const, :MINOR)
-        ::ActiveRecord::VERSION.const_set(:MINOR, 2)
-      end
-
-      it 'should return :exec_queries' do
-        config.relation_execute_method.should == :exec_queries
-      end
-    end
-
-    describe 'ActiveRecord::VERSION::MINOR is less than or equal 1' do
-      before do
-        @old_value = ::ActiveRecord::VERSION::MINOR
-        ::ActiveRecord::VERSION.send(:remove_const, :MINOR)
-        ::ActiveRecord::VERSION.const_set(:MINOR, 1)
-      end
-
-      it 'should return :to_a' do
-        config.relation_execute_method.should == :to_a
-      end
-    end
-  end
 end

@@ -41,8 +41,14 @@ describe HydraAttribute::ActiveRecord::Relation do
         []
       end
 
-      define_method HydraAttribute.config.relation_execute_method do
+      define_method :exec_queries do
         records
+      end
+
+      if ::ActiveRecord::VERSION::STRING.start_with?('3.1.')
+        define_method :to_a do
+          records
+        end
       end
 
       define_method :klass do
@@ -57,12 +63,25 @@ describe HydraAttribute::ActiveRecord::Relation do
 
   let(:records)  { [record_class.new] }
   let(:ancestor) { relation_function(records) }
-  let(:klass)    { Class.new.extend(ancestor).extend(HydraAttribute::ActiveRecord::Relation) }
+  let(:klass)    do
+    object   = Class.new.send(:include, ancestor)
+    instance = object.new
+    instance.singleton_class.send(:include, HydraAttribute::ActiveRecord::Relation)
+    instance
+  end
 
-  describe "##{HydraAttribute.config.relation_execute_method}" do
+  describe "#exec_queries" do
+    let(:exec_queries) do
+      if ::ActiveRecord::VERSION::STRING.start_with?('3.1.')
+        :to_a
+      else
+        :exec_queries
+      end
+    end
+
     describe 'parent method return one record' do
       it 'should return one record' do
-        klass.send(HydraAttribute.config.relation_execute_method).should have(1).record
+        klass.send(exec_queries).should have(1).record
       end
     end
 
@@ -73,7 +92,7 @@ describe HydraAttribute::ActiveRecord::Relation do
         let(:loaded_associations) { true }
 
         it 'should return two record' do
-          klass.send(HydraAttribute.config.relation_execute_method).should have(2).records
+          klass.send(exec_queries).should have(2).records
         end
       end
 
@@ -85,7 +104,7 @@ describe HydraAttribute::ActiveRecord::Relation do
         end
 
         it 'should return two record' do
-          klass.send(HydraAttribute.config.relation_execute_method).should have(2).records
+          klass.send(exec_queries).should have(2).records
         end
       end
     end

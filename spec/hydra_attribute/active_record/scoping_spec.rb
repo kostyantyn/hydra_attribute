@@ -3,9 +3,13 @@ require 'spec_helper'
 describe HydraAttribute::ActiveRecord::Scoping do
   describe '#scoped' do
     let(:ancestor) do
+      method   = ::ActiveRecord::VERSION::STRING.starts_with?('3.1.') ? :to_a : :exec_queries
+      instance = mock(:instance_relation, where: nil, method => nil)
+
       Module.new do
-        def scoped(*) self end
-        def where(*) self end
+        define_method :scoped do |*|
+          instance
+        end
       end
     end
 
