@@ -93,13 +93,13 @@ describe HydraAttribute::ActiveRecord::Relation::QueryMethods do
     end
 
     it 'should update @order_values before generate the arel object' do
-      relation.stub(build_order_values_for_arel: %w(build_order))
+      relation.stub(build_hydra_values_for_arel: %w(build_order))
       relation.build_arel.should == arel
       relation.instance_variable_get(:@order_values).should == %w(build_order)
     end
   end
 
-  describe '#build_order_values_for_arel' do
+  describe '#build_hydra_values_for_arel' do
     let(:connection) do
       conn = mock
       conn.stub(:quote_column_name) { |column| column.to_s        }
@@ -124,14 +124,14 @@ describe HydraAttribute::ActiveRecord::Relation::QueryMethods do
 
     describe 'collection has not hydra attributes' do
       it 'should return the same collection' do
-        relation.send(:build_order_values_for_arel, %w(name zone)).should == %w(product.name product.zone)
+        relation.send(:build_hydra_values_for_arel, %w(name zone)).should == %w(product.name product.zone)
         relation.joins_values.should == []
       end
     end
 
     describe 'collection has hydra attributes' do
       it 'should change hydra attributes and join hydra tables' do
-        relation.send(:build_order_values_for_arel, %w(name code title price)).should == %w(product.name code_inner.value title_.value price_.value)
+        relation.send(:build_hydra_values_for_arel, %w(name code title price)).should == %w(product.name code_inner.value title_.value price_.value)
         relation.joins_values.should == %w(price__join)
       end
     end

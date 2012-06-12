@@ -39,10 +39,11 @@ module HydraAttribute
         end
 
         def build_arel
-          @order_values = build_order_values_for_arel(@order_values.uniq.reject(&:blank?))
+          @group_values = build_hydra_values_for_arel(@group_values.uniq.reject(&:blank?))
+          @order_values = build_hydra_values_for_arel(@order_values.uniq.reject(&:blank?))
 
           if instance_variable_defined?(:@reorder_value) and instance_variable_get(:@reorder_value).present? # for compatibility with 3.1.x
-            @reorder_value = build_order_values_for_arel(@reorder_value.uniq.reject(&:blank?))
+            @reorder_value = build_hydra_values_for_arel(@reorder_value.uniq.reject(&:blank?))
           end
 
           @hydra_select_values, @select_values = @select_values.partition { |value| klass.hydra_attribute_names.include?(value.to_s) }
@@ -94,7 +95,7 @@ module HydraAttribute
           @hydra_attr_helper ||= Helper.new(self)
         end
 
-        def build_order_values_for_arel(collection)
+        def build_hydra_values_for_arel(collection)
           collection.map do |attribute|
             attribute = attribute.respond_to?(:to_sql) ? attribute.to_sql : attribute.to_s
             if klass.hydra_attribute_names.include?(attribute)
