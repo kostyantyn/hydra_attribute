@@ -114,6 +114,12 @@ SimpleProduct.select([:code, :price]).map(&:attributes)
 => [{"code"=>"100", "price"=>2.75}, {"code"=>"101", "price"=>3.75}, {"code"=>"102", "price"=>4.5}, {"code"=>"103", "price"=>4.5}, {"code"=>"104", "price"=>5.0}]
 ```
 
+##### "group"
+```shell
+SimpleProduct.group(:name, :price).count
+=> {["Book", 2.75]=>1, ["Book", 3.75]=>1, ["Book", 4.5]=>2, ["Book", 5.0]=>1}
+```
+
 ## Contributing
 
 1. Fork it
