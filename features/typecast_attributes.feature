@@ -2,12 +2,7 @@ Feature: create model
   Model should be created with typecast hydra attributes.
 
   Background: create models and describe hydra attributes
-    Given removed constants if they exist:
-      | name          |
-      | GroupProduct  |
-      | SimpleProduct |
-      | Product       |
-    And create model class "Product"
+    Given create model class "Product"
     And create model class "SimpleProduct" as "Product" with hydra attributes:
       | type   | name  |
       | string | code  |

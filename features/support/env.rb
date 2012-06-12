@@ -15,6 +15,9 @@ Before do
     const = HydraAttribute.config.associated_const_name(type)
     HydraAttribute.send(:remove_const, const) if HydraAttribute.const_defined?(const)
   end
+  [:Product, :SimpleProduct, :GroupProduct].each do |const|
+    Object.send(:remove_const, const) if Object.const_defined?(const)
+  end
   ActiveSupport::Dependencies::Reference.clear!
   DatabaseCleaner.start
 end

@@ -12,12 +12,7 @@ Feature: order conditions by hydra attributes
   Then old hydra attributes should be removed and new should be added
 
   Background: create models and describe hydra attributes
-    Given removed constants if they exist:
-      | name          |
-      | GroupProduct  |
-      | SimpleProduct |
-      | Product       |
-    And create model class "Product"
+    Given create model class "Product"
     And create model class "SimpleProduct" as "Product" with hydra attributes:
       | type    | name  |
       | integer | code  |

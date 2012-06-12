@@ -5,12 +5,7 @@ Feature: define hydra attributes
   Model should not respond to hydra attribute if it isn't described in it class.
 
   Background: create models and describe hydra attributes
-    Given removed constants if they exist:
-      | name          |
-      | GroupProduct  |
-      | SimpleProduct |
-      | Product       |
-    And create model class "Product"
+    Given create model class "Product"
     And create model class "SimpleProduct" as "Product" with hydra attributes:
       | type   | name |
       | string | code |

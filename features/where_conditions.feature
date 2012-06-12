@@ -6,12 +6,7 @@ Feature: hydra attribute where conditions
   Then records with nil value should be selected  or records which don't have this hydra attribute
 
   Background: create models and describe hydra attributes
-    Given removed constants if they exist:
-      | name          |
-      | GroupProduct  |
-      | SimpleProduct |
-      | Product       |
-    And create model class "Product"
+    Given create model class "Product"
     And create model class "SimpleProduct" as "Product" with hydra attributes:
       | type    | name    |
       | string  | code    |
