@@ -1,3 +1,6 @@
+**0.2.0 (June 13, 2012)**
+* Implement `group` method for `ActiveRecord::Relation` object 
+
 **0.1.3 (June 11, 2012)**
 * Fix bug when quoted column is passed to `ActiveRecord::Relation` method as a parameter
 
