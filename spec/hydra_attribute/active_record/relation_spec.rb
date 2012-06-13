@@ -55,7 +55,7 @@ describe HydraAttribute::ActiveRecord::Relation do
         let(:records) { [record, record] }
 
         before do
-          ::ActiveRecord::Associations::Preloader.should_receive(:new).with(records, :hydra_string_attributes).and_return(mock(run: records))
+          ::ActiveRecord::Associations::Preloader.should_receive(:new).with(records, :hydra_string_values).and_return(mock(run: records))
         end
 
         it 'should return two record' do

@@ -1,7 +1,7 @@
 PATH
   remote: /Users/kostyantyn/Sites/github/gems/hydra_attribute
   specs:
-    hydra_attribute (0.2.0.beta1)
+    hydra_attribute (0.3.0.beta1)
       activerecord (>= 3.1.0)
 
 GEM

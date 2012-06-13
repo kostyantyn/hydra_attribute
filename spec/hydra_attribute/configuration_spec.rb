@@ -8,7 +8,7 @@ describe HydraAttribute::Configuration do
       before { config.table_prefix = 'table_' }
 
       it 'should return table name' do
-        config.table_name(:string).should == :table_string_attributes
+        config.table_name(:string).should == :table_string_values
       end
     end
 
@@ -16,7 +16,7 @@ describe HydraAttribute::Configuration do
       before { config.table_prefix = '' }
 
       it 'should return table name' do
-        config.table_name(:string).should == :string_attributes
+        config.table_name(:string).should == :string_values
       end
     end
   end
@@ -26,7 +26,7 @@ describe HydraAttribute::Configuration do
       before { config.association_prefix = 'assoc_' }
 
       it 'should return association name' do
-        config.association(:string).should == :assoc_string_attributes
+        config.association(:string).should == :assoc_string_values
       end
     end
 
@@ -34,7 +34,7 @@ describe HydraAttribute::Configuration do
       before { config.association_prefix = '' }
 
       it 'should return association name' do
-        config.association(:string).should == :string_attributes
+        config.association(:string).should == :string_values
       end
     end
   end
@@ -44,7 +44,7 @@ describe HydraAttribute::Configuration do
       before { config.use_module_for_associated_models = true }
 
       it 'should return associated model name' do
-        config.associated_model_name(:string).should == 'HydraAttribute::StringAttribute'
+        config.associated_model_name(:string).should == 'HydraAttribute::StringValue'
       end
     end
 
@@ -52,14 +52,14 @@ describe HydraAttribute::Configuration do
       before { config.use_module_for_associated_models = false }
 
       it 'should return associated model name' do
-        config.associated_model_name(:string).should == 'StringAttribute'
+        config.associated_model_name(:string).should == 'StringValue'
       end
     end
   end
 
   describe '#associated_const_name' do
     it 'should return constant name for new model' do
-      config.associated_const_name(:string).should == :StringAttribute
+      config.associated_const_name(:string).should == :StringValue
     end
   end
 end

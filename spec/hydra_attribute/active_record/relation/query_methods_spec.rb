@@ -29,16 +29,16 @@ describe HydraAttribute::ActiveRecord::Relation::QueryMethods do
 
     before do
       module HydraAttribute
-        class StringAttribute
+        class StringValue
           def self.table_name
-            'hydra_string_attributes'
+            'hydra_string_values'
           end
         end
       end
     end
 
     after do
-      HydraAttribute.send :remove_const, :StringAttribute
+      HydraAttribute.send :remove_const, :StringValue
     end
 
     describe 'first param is Hash' do
@@ -60,7 +60,7 @@ describe HydraAttribute::ActiveRecord::Relation::QueryMethods do
           copy_relation = relation.where(params)
           copy_relation.where_values.should        == ['{"title"=>1} [[]]', 'where-code-2 []', '{"name"=>3} [[]]']
           copy_relation.joins_values.should        == ['join-code-2']
-          copy_relation.hydra_joins_aliases.should == ['hydra_string_attributes_inner_code']
+          copy_relation.hydra_joins_aliases.should == ['hydra_string_values_inner_code']
         end
       end
     end
@@ -151,7 +151,7 @@ describe HydraAttribute::ActiveRecord::Relation::QueryMethods do
         :connection         => connection,
         :base_class         => mock(name: 'BaseClass'),
         :quoted_primary_key => 'id',
-        :quoted_table_name  => 'hydra_string_attributes'
+        :quoted_table_name  => 'hydra_string_values'
       )
     end
 
@@ -165,7 +165,7 @@ describe HydraAttribute::ActiveRecord::Relation::QueryMethods do
 
     describe 'value is nil' do
       let(:value) { nil }
-      let(:sql)   { 'LEFT JOIN table_name AS name_ ON hydra_string_attributes.id = name_.entity_id AND name_.entity_type = "BaseClass" AND name_.name = "name"' }
+      let(:sql)   { 'LEFT JOIN table_name AS name_ ON hydra_string_values.id = name_.entity_id AND name_.entity_type = "BaseClass" AND name_.name = "name"' }
 
       it 'should return array with one SQL query element' do
         relation.send(:build_hydra_joins_values, :name, value).should == [sql]
@@ -174,7 +174,7 @@ describe HydraAttribute::ActiveRecord::Relation::QueryMethods do
 
     describe 'value is not nil' do
       let(:value) { 'value' }
-      let(:sql)   { 'INNER JOIN table_name AS name_value ON hydra_string_attributes.id = name_value.entity_id AND name_value.entity_type = "BaseClass" AND name_value.name = "name"' }
+      let(:sql)   { 'INNER JOIN table_name AS name_value ON hydra_string_values.id = name_value.entity_id AND name_value.entity_type = "BaseClass" AND name_value.name = "name"' }
 
       it 'should return array with one SQL query element' do
         relation.send(:build_hydra_joins_values, :name, value).should == [sql]
@@ -185,75 +185,75 @@ describe HydraAttribute::ActiveRecord::Relation::QueryMethods do
   describe '#build_hydra_where_options' do
     before do
       module HydraAttribute
-        class StringAttribute
+        class StringValue
           def self.table_name
-            'hydra_string_attributes'
+            'hydra_string_values'
           end
         end
       end
     end
 
-    after { HydraAttribute.send :remove_const, :StringAttribute }
+    after { HydraAttribute.send :remove_const, :StringValue }
 
     it 'should create where options with table namespace' do
-      relation.send(:build_hydra_where_options, 'code', 'abc').should == {'hydra_string_attributes_inner_code' => { value: 'abc' }}
+      relation.send(:build_hydra_where_options, 'code', 'abc').should == {'hydra_string_values_inner_code' => { value: 'abc' }}
     end
   end
 
   describe '#hydra_ref_class' do
     before do
       module HydraAttribute
-        class StringAttribute
+        class StringValue
           def self.table_name
-            'hydra_string_attributes'
+            'hydra_string_values'
           end
         end
       end
     end
 
-    after { HydraAttribute.send :remove_const, :StringAttribute }
+    after { HydraAttribute.send :remove_const, :StringValue }
 
     it 'should return class by attribute name' do
-      relation.send(:hydra_ref_class, 'code').should == HydraAttribute::StringAttribute
+      relation.send(:hydra_ref_class, 'code').should == HydraAttribute::StringValue
     end
   end
 
   describe '#hydra_ref_table' do
     before do
       module HydraAttribute
-        class StringAttribute
+        class StringValue
           def self.table_name
-            'hydra_string_attributes'
+            'hydra_string_values'
           end
         end
       end
     end
 
-    after { HydraAttribute.send :remove_const, :StringAttribute }
+    after { HydraAttribute.send :remove_const, :StringValue }
 
     it 'should return table name' do
-      relation.send(:hydra_ref_table, 'code').should == 'hydra_string_attributes'
+      relation.send(:hydra_ref_table, 'code').should == 'hydra_string_values'
     end
   end
 
   describe '#hydra_ref_alias' do
     before do
       module HydraAttribute
-        class StringAttribute
+        class StringValue
           def self.table_name
-            'hydra_string_attributes'
+            'hydra_string_values'
           end
         end
       end
     end
 
-    after { HydraAttribute.send :remove_const, :StringAttribute }
+    after { HydraAttribute.send :remove_const, :StringValue }
 
     describe 'value is nil' do
       let(:value) { nil }
 
       it 'should return generated alias name' do
-        relation.send(:hydra_ref_alias, 'code', value).should == 'hydra_string_attributes_left_code'
+        relation.send(:hydra_ref_alias, 'code', value).should == 'hydra_string_values_left_code'
       end
     end
 
@@ -261,7 +261,7 @@ describe HydraAttribute::ActiveRecord::Relation::QueryMethods do
       let(:value) { '' }
 
       it 'should return generated alias name' do
-        relation.send(:hydra_ref_alias, 'code', value).should == 'hydra_string_attributes_inner_code'
+        relation.send(:hydra_ref_alias, 'code', value).should == 'hydra_string_values_inner_code'
       end
     end
   end

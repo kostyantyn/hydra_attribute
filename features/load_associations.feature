@@ -24,9 +24,9 @@ Feature: hydra attribute associations
       | SimpleProduct | code=[integer:2] |
     When load all "SimpleProduct" records
     Then records "should" have loaded associations:
-      | association             |
-      | hydra_string_attributes |
-      | hydra_float_attributes  |
+      | association         |
+      | hydra_string_values |
+      | hydra_float_values  |
 
   Scenario: hydra attribute associations should not be included for collection with one record
     Given create models:
@@ -34,7 +34,7 @@ Feature: hydra attribute associations
       | GroupProduct | price=[float:2.75] |
     When load all "GroupProduct" records
     Then records "should_not" have loaded associations:
-      | association              |
-      | hydra_float_attributes   |
-      | hydra_string_attributes  |
-      | hydra_boolean_attributes |
+      | association          |
+      | hydra_float_values   |
+      | hydra_string_values  |
+      | hydra_boolean_values |

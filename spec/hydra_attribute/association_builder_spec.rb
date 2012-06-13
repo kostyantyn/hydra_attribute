@@ -3,7 +3,7 @@ require 'spec_helper'
 describe HydraAttribute::AssociationBuilder do
   def remove_association
     [::HydraAttribute, ::Object].each do |klass|
-      klass.send(:remove_const, :StringAttribute) if klass.constants.include?(:StringAttribute)
+      klass.send(:remove_const, :StringValue) if klass.constants.include?(:StringValue)
     end
   end
 
@@ -36,7 +36,7 @@ describe HydraAttribute::AssociationBuilder do
     describe 'use namespace for associated models' do
       it 'should create new model' do
         association.send(:create_associated_model)
-        HydraAttribute.should be_const_defined(:StringAttribute)
+        HydraAttribute.should be_const_defined(:StringValue)
       end
     end
 
@@ -46,7 +46,7 @@ describe HydraAttribute::AssociationBuilder do
 
       it 'should create new model' do
         association.send(:create_associated_model)
-        Object.should be_const_defined(:StringAttribute)
+        Object.should be_const_defined(:StringValue)
       end
     end
 
@@ -61,14 +61,14 @@ describe HydraAttribute::AssociationBuilder do
     describe 'set correct table name' do
       it 'should be :hydra_string_attributes' do
         association.send(:create_associated_model)
-        HydraAttribute::StringAttribute.table_name.should == 'hydra_string_attributes'
+        HydraAttribute::StringValue.table_name.should == 'hydra_string_values'
       end
     end
 
     describe 'set correct belongs_to' do
       it 'should be polymorphic association' do
         association.send(:create_associated_model)
-        reflection = HydraAttribute::StringAttribute.reflect_on_association(:entity)
+        reflection = HydraAttribute::StringValue.reflect_on_association(:entity)
         reflection.macro.should == :belongs_to
         reflection.options[:polymorphic].should be_true
         reflection.options[:touch].should be_true
@@ -80,9 +80,9 @@ describe HydraAttribute::AssociationBuilder do
   describe '#add_association_for_class' do
     it 'should add has_many association for class' do
       association.send(:add_association_for_class)
-      reflection = klass.reflect_on_association(:hydra_string_attributes)
+      reflection = klass.reflect_on_association(:hydra_string_values)
       reflection[:as].should  == :entity
-      reflection[:class_name].should == 'HydraAttribute::StringAttribute'
+      reflection[:class_name].should == 'HydraAttribute::StringValue'
       reflection[:autosave].should be_true
     end
 

@@ -14,7 +14,7 @@ module HydraAttribute
           t.send type, :value
         end
 
-        @migration.add_index table_name, [:entity_id, :entity_type, :name], unique: true, name: "index_#{table_name}_on_attribute"
+        @migration.add_index table_name, [:entity_id, :entity_type, :name], unique: true, name: "composite_index_on_#{table_name}"
       end
     end
 

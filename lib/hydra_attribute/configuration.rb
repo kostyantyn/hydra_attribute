@@ -18,11 +18,11 @@ module HydraAttribute
     add_setting :use_module_for_associated_models, true
 
     def table_name(type)
-      "#{table_prefix}#{type}_attributes".to_sym
+      "#{table_prefix}#{type}_values".to_sym
     end
 
     def association(type)
-      "#{association_prefix}#{type}_attributes".to_sym
+      "#{association_prefix}#{type}_values".to_sym
     end
 
     # Return string for compatibility with ActiveRecord 3.1.x
@@ -33,7 +33,7 @@ module HydraAttribute
     end
 
     def associated_const_name(type)
-      "#{type.to_s.titlecase}Attribute".to_sym
+      "#{type.to_s.titlecase}Value".to_sym
     end
   end
 end
