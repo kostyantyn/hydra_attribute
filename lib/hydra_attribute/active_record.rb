@@ -1,7 +1,7 @@
 module HydraAttribute
   module ActiveRecord
-    def define_hydra_attributes(&block)
-      Builder.new(self).instance_eval(&block)
+    def using_hydra_attributes
+      Builder.new(self).build
     end
   end
 end
