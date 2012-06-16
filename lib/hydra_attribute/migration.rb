@@ -9,19 +9,20 @@ module HydraAttribute
 
     def create_attributes
       create_table :hydra_attributes do |t|
-        t.string :entity_type, limit: 32, null: false
-        t.string :code,        limit: 32, null: false
+        t.string :entity_type,  limit: 32, null: false
+        t.string :name,         limit: 32, null: false
+        t.string :backend_type, limit: 16, null: false
         t.string :default_value
         t.timestamps
       end
-      add_index :hydra_attributes, [:entity_type, :code], unique: true, name: 'hydra_attributes_composite_index'
+      add_index :hydra_attributes, [:entity_type, :name], unique: true, name: 'hydra_attributes_composite_index'
 
       create_table :hydra_sets do |t|
         t.string :entity_type, limit: 32, null: false
-        t.string :code,        limit: 32, null: false
+        t.string :name,        limit: 32, null: false
         t.timestamps
       end
-      add_index :hydra_sets, [:entity_type, :code], unique: true, name: 'hydra_sets_composite_index'
+      add_index :hydra_sets, [:entity_type, :name], unique: true, name: 'hydra_sets_composite_index'
 
       create_table :hydra_attribute_sets do |t|
         t.integer :hydra_attribute_id, null: false

@@ -12,8 +12,6 @@ module HydraAttribute
       add_association
     end
 
-    private
-
     def create_value_model
       value_model = ::HydraAttribute.const_set(model_name, Class.new(::ActiveRecord::Base))
       value_model.table_name = table_name
@@ -23,7 +21,7 @@ module HydraAttribute
     end
 
     def add_association
-      klass.has_many table_name, class_name: class_name, foreign_key: :entity_id, autosave: true, dependent: :delete_all
+      klass.has_many table_name.to_sym, class_name: class_name, foreign_key: :entity_id, autosave: true, dependent: :delete_all
     end
 
     def model_name
