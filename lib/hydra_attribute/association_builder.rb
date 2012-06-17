@@ -21,7 +21,7 @@ module HydraAttribute
     end
 
     def add_association
-      klass.has_many table_name.to_sym, class_name: class_name, foreign_key: :entity_id, autosave: true, dependent: :delete_all
+      klass.has_many association_name, class_name: class_name, foreign_key: :entity_id, autosave: true, dependent: :delete_all
     end
 
     def model_name
@@ -34,6 +34,10 @@ module HydraAttribute
 
     def table_name
       "hydra_#{klass.table_name.singularize}_#{type}_values"
+    end
+
+    def association_name
+      table_name.to_sym
     end
   end
 end

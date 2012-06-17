@@ -9,8 +9,8 @@ module HydraAttribute
       included do
         @hydra_attribute_methods_mutex = Mutex.new
 
-        include Read
-        include BeforeTypeCast
+        # include Read
+        # include BeforeTypeCast
       end
 
       module ClassMethods
@@ -97,44 +97,31 @@ module HydraAttribute
         end
       end
 
-      #def initialize(attributes = nil, options = {})
-      #  @hydra_attributes = self.class.hydra_attributes
-      #  super
-      #end
-      #
-      #def init_with(coder)
-      #  @hydra_attribute_names = self.class.hydra_attributes
-      #  super
-      #end
-      #
-      #def initialize_dup(other)
-      #  if other.instance_variable_defined?(:@hydra_attribute_names)
-      #    @hydra_attribute_names = other.instance_variable_get(:@hydra_attribute_names)
-      #  else
-      #    @hydra_attribute_names = self.class.hydra_attribute_names
-      #  end
-      #  super
-      #end
-      #
-      #def hydra_attribute_model(name, type)
-      #  collection = send(HydraAttribute.config.association(type))
-      #  collection.detect { |model| model.name == name } || collection.build(name: name)
-      #end
-      #
-      #def attributes
-      #  super.merge(hydra_attributes)
-      #end
-      #
-      #%w(attributes attributes_before_type_cast).each do |attr_method|
-      #  module_eval <<-EOS, __FILE__, __LINE__ + 1
-      #    def hydra_#{attr_method}
-      #      @hydra_attribute_names.each_with_object({}) do |name, attributes|
-      #        type = self.class.hydra_attributes[name]
-      #        attributes[name] = hydra_attribute_model(name, type).#{attr_method}['value']
-      #      end
-      #    end
-      #  EOS
-      #end
+      def initialize(attributes = nil, options = {})
+        super
+        initialize_hydra_attributes
+      end
+
+      def initialize_hydra_attributes
+        self.class.hydra_attributes.each do |attribute|
+          send(attribute['name'])
+        end
+      end
+
+      %w(attributes attributes_before_type_cast).each do |method|
+        class_eval <<-EOS, __FILE__, __LINE__ + 1
+          def #{method}
+            SUPPORT_TYPES.each_with_object(super) do |type, attrs|
+              association = AssociationBuilder.new(self.class, type).association_name
+              send(association).each do |model|
+                hydra_attribute = self.class.hydra_attributes.find { |attr| attr['id'] == model.hydra_attribute_id }
+                attrs[hydra_attribute['name']] = model.#{method}['value']
+              end
+            end
+          end
+        EOS
+      end
+
     end
   end
 end

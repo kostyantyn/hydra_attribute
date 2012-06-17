@@ -33,12 +33,12 @@ module HydraAttribute
           end
         end
 
-        if limit_values
-          records.each do |record| # force limit getter methods for hydra attributes
-            record.instance_variable_set(:@hydra_attribute_names, hydra_select_values)
-            record.instance_variable_get(:@attributes).delete('id') if @id_for_hydra_attributes
-          end
-        end
+        #if limit_values
+        #  records.each do |record| # force limit getter methods for hydra attributes
+        #    record.instance_variable_set(:@hydra_attribute_names, hydra_select_values)
+        #    record.instance_variable_get(:@attributes).delete('id') if @id_for_hydra_attributes
+        #  end
+        #end
 
         records
       end
