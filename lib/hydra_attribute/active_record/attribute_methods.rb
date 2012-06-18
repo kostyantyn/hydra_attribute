@@ -8,9 +8,6 @@ module HydraAttribute
 
       included do
         @hydra_attribute_methods_mutex = Mutex.new
-
-        # include Read
-        # include BeforeTypeCast
       end
 
       module ClassMethods
@@ -30,17 +27,18 @@ module HydraAttribute
           @hydra_attributes ||= HydraAttribute.where(entity_type: base_class.model_name).map(&:attributes)
         end
 
-        def hydra_attribute_ids
-          hydra_attributes.map { |hydra_attribute| hydra_attribute['id'] }
+        %w(id name backend_type).each do |prefix|
+          class_eval <<-EOS, __FILE__, __LINE__ + 1
+            def hydra_attribute_#{prefix}s
+              @hydra_attribute_#{prefix}s ||= hydra_attributes.map { |hydra_attribute| hydra_attribute['#{prefix}'] }.uniq
+            end
+          EOS
         end
 
-
-        def hydra_attribute_names
-          hydra_attributes.map { |hydra_attribute| hydra_attribute['name'] }
-        end
-
-        def hydra_attribute_types
-          hydra_attributes.map { |hydra_attribute| hydra_attribute['backend_type'] }.uniq
+        def hydra_attribute_data(identifier)
+          hydra_attributes.find do |hydra_attribute|
+            hydra_attribute['id'] == identifier || hydra_attribute['name'] == identifier
+          end
         end
 
         def define_hydra_attribute_methods
@@ -68,7 +66,7 @@ module HydraAttribute
               send = "send(:'#{target}', *args)"
             end
 
-            body = "hydra_value_model(#{hydra_attribute['id']}, '#{hydra_attribute['backend_type']}').#{send}"
+            body = "hydra_value_model(#{hydra_attribute['id']}).#{send}"
 
             generated_hydra_attribute_methods.module_eval <<-EOS, __FILE__, __LINE__ + 1
               #{defn}
@@ -79,9 +77,10 @@ module HydraAttribute
         end
       end
 
-      def hydra_value_model(hydra_attribute_id, type)
-        collection = send(::HydraAttribute::AssociationBuilder.new(self.class, type).table_name)
-        collection.detect { |model| model.hydra_attribute_id == hydra_attribute_id } || collection.build(hydra_attribute_id: hydra_attribute_id)
+      def hydra_value_model(identifier)
+        hydra_attribute = self.class.hydra_attribute_data(identifier)
+        collection = send(::HydraAttribute::AssociationBuilder.new(self.class, hydra_attribute['backend_type']).table_name)
+        collection.detect { |model| model.hydra_attribute_id == hydra_attribute['id'] } || collection.build(hydra_attribute_id: hydra_attribute['id'])
       end
 
       def method_missing(method, *args, &block)
@@ -117,6 +116,19 @@ module HydraAttribute
                 hydra_attribute = self.class.hydra_attributes.find { |attr| attr['id'] == model.hydra_attribute_id }
                 attrs[hydra_attribute['name']] = model.#{method}['value']
               end
+            end
+          end
+        EOS
+      end
+
+      %w(read_attribute read_attribute_before_type_cast).each do |method|
+        class_eval <<-EOS, __FILE__, __LINE__ + 1
+          def #{method}(attr_name)
+            identifier = attr_name.to_s
+            if self.class.hydra_attribute_names.include?(identifier)
+              hydra_value_model(identifier).#{method}('value')
+            else
+              super
             end
           end
         EOS

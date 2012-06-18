@@ -11,12 +11,15 @@ ActiveRecord::Base.extend(HydraAttribute::ActiveRecord)
 DatabaseCleaner.strategy = :truncation
 
 Before do
-  HydraAttribute::SUPPORT_TYPES.each do |type|
-    const = HydraAttribute.config.associated_const_name(type)
-    HydraAttribute.send(:remove_const, const) if HydraAttribute.const_defined?(const)
-  end
-  [:Product, :SimpleProduct, :GroupProduct].each do |const|
-    Object.send(:remove_const, const) if Object.const_defined?(const)
+  %w(Product SimpleProduct GroupProduct).each do |const|
+    if Object.const_defined?(const)
+      klass = Object.const_get(const)
+      HydraAttribute::SUPPORT_TYPES.each do |type|
+        assoc_model = HydraAttribute::AssociationBuilder.new(klass, type).model_name
+        HydraAttribute.send(:remove_const, assoc_model)
+      end
+      Object.send(:remove_const, const)
+    end
   end
   ActiveSupport::Dependencies::Reference.clear!
   DatabaseCleaner.start

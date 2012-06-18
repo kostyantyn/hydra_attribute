@@ -16,22 +16,22 @@ module HydraAttribute
         records = __old_exec_queries__
         return records if records.empty?
 
-        limit_values = select_values.any? || hydra_select_values.any?
-
-        if records.many?
-          if limit_values
-            hydra_attribute_types = hydra_select_values.map { |value| records.first.class.hydra_attributes[value] }.uniq
-          else
-            hydra_attribute_types = records.first.class.hydra_attribute_types
-          end
-
-          hydra_attribute_types.each do |type|
-            association = HydraAttribute.config.association(type)
-            unless records.first.association(association).loaded?
-              ::ActiveRecord::Associations::Preloader.new(records, association).run
-            end
-          end
-        end
+        #limit_values = select_values.any? || hydra_select_values.any?
+        #
+        #if records.many?
+        #  if limit_values
+        #    hydra_attribute_types = hydra_select_values.map { |value| records.first.class.hydra_attributes[value] }.uniq
+        #  else
+        #    hydra_attribute_types = records.first.class.hydra_attribute_types
+        #  end
+        #
+        #  hydra_attribute_types.each do |type|
+        #    association = HydraAttribute.config.association(type)
+        #    unless records.first.association(association).loaded?
+        #      ::ActiveRecord::Associations::Preloader.new(records, association).run
+        #    end
+        #  end
+        #end
 
         #if limit_values
         #  records.each do |record| # force limit getter methods for hydra attributes
