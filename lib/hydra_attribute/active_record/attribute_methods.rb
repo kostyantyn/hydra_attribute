@@ -96,6 +96,11 @@ module HydraAttribute
         end
       end
 
+      def respond_to?(name, include_private = false)
+        self.class.define_hydra_attribute_methods unless self.class.hydra_attribute_methods_generated?
+        super
+      end
+
       def initialize(attributes = nil, options = {})
         super
         initialize_hydra_attributes
