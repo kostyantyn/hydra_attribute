@@ -9,7 +9,7 @@ Feature: create models with hydra attributes
       | Product     | price   | float        | [string:0]          |
       | Product     | active  | boolean      | [string:0]          |
       | Product     | info    | text         | [string:]           |
-      | Product     | started | datetime     | [string:0000-00-00] |
+      | Product     | started | datetime     | [string:2012-01-01] |
     And create class "Product" as "ActiveRecord::Base"
     And call "use_hydra_attributes" inside class "Product"
 
@@ -20,7 +20,7 @@ Feature: create models with hydra attributes
       | price   | [float:0]             |
       | active  | [boolean:false]       |
       | info    | [string:]             |
-      | started | [datetime:0000-00-00] |
+      | started | [datetime:2012-01-01] |
 
   Scenario: create model with several hydra attributes
     Given create "Product" model with attributes as "rows_hash":
@@ -31,7 +31,7 @@ Feature: create models with hydra attributes
       | price   | [nil:]                |
       | active  | [boolean:false]       |
       | info    | [string:]             |
-      | started | [datetime:0000-00-00] |
+      | started | [datetime:2012-01-01] |
 
   Scenario: create model hydra attributes
     Given create "Product" model with attributes as "rows_hash":
@@ -39,11 +39,11 @@ Feature: create models with hydra attributes
       | price   | [string:2]            |
       | active  | [boolean:true]        |
       | info    | [string:b]            |
-      | started | [datetime:2012-01-01] |
+      | started | [datetime:2012-05-05] |
 
     Then last created "Product" should have the following attributes:
       | code    | [string:a]            |
       | price   | [float:2]             |
       | active  | [boolean:true]        |
       | info    | [string:b]            |
-      | started | [datetime:2012-01-01] |
+      | started | [datetime:2012-05-05] |

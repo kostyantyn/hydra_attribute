@@ -101,14 +101,26 @@ module HydraAttribute
         super
       end
 
-      def initialize(attributes = nil, options = {})
-        super
-        initialize_hydra_attributes
+      def initialize(attributes = nil, options = {}, &block)
+        if attributes
+          hydra_attributes = attributes.select { |key| self.class.hydra_attribute_names.include?(key.to_s) }
+          attributes.delete_if { |key| self.class.hydra_attribute_names.include?(key.to_s) }
+        else
+          hydra_attributes = nil
+        end
+
+        super(attributes, options) do
+          initialize_hydra_attributes
+          assign_attributes(hydra_attributes)
+          block.call(self) if block_given?
+        end
       end
 
       def initialize_hydra_attributes
         self.class.hydra_attributes.each do |attribute|
-          send(attribute['name'])
+          unless send("#{attribute['name']}_changed?")
+            send("#{attribute['name']}=", attribute['default_value'])
+          end
         end
       end
 

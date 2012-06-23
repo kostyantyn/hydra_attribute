@@ -28,7 +28,9 @@ Then /^model "([^"]+)" should "(should|should_not)" to "([^"]+)"$/ do |klass, me
 end
 
 Then /^(last|first) created "([^"]+)" (should|should not) have the following attributes:$/ do |method, klass, match, table|
-
+  table.rows_hash.each_with_object(klass.constantize.send(method)) do |(attribute, value), model|
+    model.send(attribute).send(match) == type_cast_value(value)
+  end
 end
 
 #Then /^it should have typecast attributes "([^"]+)"$/ do |attributes|
