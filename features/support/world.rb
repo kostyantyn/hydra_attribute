@@ -1,8 +1,11 @@
 module HydraAttribute
   module Cucumber
     module World
-      def typecast_value(schema)
+      def type_cast_value(schema)
+        return schema unless schema.is_a?(String)
         type, value = schema.gsub(/\[|\]/, '').split(':', 2)
+        return schema if schema == type && value.nil?
+
         case type
         when 'integer'  then value.to_i
         when 'float'    then value.to_f
@@ -13,15 +16,21 @@ module HydraAttribute
         end
       end
 
-      def typecast_attribute(attribute)
+      def type_cast_attribute(attribute)
         name, schema = attribute.split('=')
-        [name.to_sym, typecast_value(schema)]
+        [name, typecast_value(schema)]
       end
 
-      def typecast_attributes(attributes)
+      def type_cast_attributes(attributes)
         attributes.split(/(?<=\])\s+/).flatten.each_with_object({}) do |attribute, hash|
           name, value = typecast_attribute(attribute)
           hash[name]  = value
+        end
+      end
+
+      def type_cast_hash(hash)
+        hash.each do |key, value|
+          hash[key] = type_cast_value(value)
         end
       end
     end

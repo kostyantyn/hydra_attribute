@@ -1,19 +1,19 @@
-Feature: define hydra attributes
+Feature: define model with hydra attributes
   When use_hydra_attributes was called in model class
   Then model's object should respond to attributes which are saved in hydra_attributes table
 
   Background: create hydra attributes
-    Given create "HydraAttribute::HydraAttribute" models with attributes:
-      | entity_type | name  | backend_type | default_value |
-      | Product     | code  | string       |               |
-      | Product     | price | float        |               |
+    Given create "HydraAttribute::HydraAttribute" models with attributes as "hashes":
+      | entity_type | name  | backend_type |
+      | Product     | code  | string       |
+      | Product     | price | float        |
     And create class "Product" as "ActiveRecord::Base"
     And call "use_hydra_attributes" inside class "Product"
 
   Scenario Outline: models should respond to hydra attributes
     Then model "<model>" should "<respond>" to "<attributes>"
 
-    Scenarios: model should respond to own hydra attributes
+    Scenarios: model should respond to its own hydra attributes
       | model   | respond | attributes             |
       | Product | should  | code                   |
       | Product | should  | code=                  |

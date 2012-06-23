@@ -89,6 +89,5 @@ ActiveRecord::Schema.define do
   create_table "products", :force => true do |t|
     t.integer "hydra_set_id"
     t.string  "name"
-    t.float   "price"
   end
 end

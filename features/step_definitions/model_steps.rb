@@ -10,17 +10,25 @@
 #  @model = Object.const_get(klass).create!(attrs)
 #end
 
-Given /^create "([^"]+)" models with attributes:$/ do |klass, table|
-  table.hashes.each do |hash|
-    klass.constantize.create!(hash)
+Given /^create "([^"]+)" model$/ do |klass|
+  klass.constantize.create!
+end
+
+Given /^create "([^"]+)" models? with attributes as "([^"]+)":$/ do |klass, format, table|
+  Array.wrap(table.send(format)).each do |hash|
+    klass.constantize.create!(type_cast_hash(hash))
   end
 end
 
 Then /^model "([^"]+)" should "(should|should_not)" to "([^"]+)"$/ do |klass, method, attributes|
-  model = Object.const_get(klass).new
+  model = klass.constantize.new
   attributes.split.each do |attribute|
     model.send(method, respond_to(attribute))
   end
+end
+
+Then /^(last|first) created "([^"]+)" (should|should not) have the following attributes:$/ do |method, klass, match, table|
+
 end
 
 #Then /^it should have typecast attributes "([^"]+)"$/ do |attributes|
