@@ -75,6 +75,15 @@ module HydraAttribute
             EOS
           end
         end
+
+        def undefine_attribute_methods
+          generated_hydra_attribute_methods.module_eval do
+            instance_methods.each { |m| undef_method(m) }
+          end
+          @hydra_attributes = false
+          @hydra_attribute_methods_generated = false
+          super
+        end
       end
 
       def hydra_value_model(identifier)

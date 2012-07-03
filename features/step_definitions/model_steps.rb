@@ -20,8 +20,9 @@ Given /^create "([^"]+)" models? with attributes as "([^"]+)":$/ do |klass, form
   end
 end
 
-Then /^model "([^"]+)" should "(should|should_not)" to "([^"]+)"$/ do |klass, method, attributes|
-  model = klass.constantize.new
+Then /^model "([^"]+)" (should(?:\snot)?) respond to "([^"]+)"$/ do |klass, method, attributes|
+  model  = klass.constantize.new
+  method = method.gsub(/\s+/, '_')
   attributes.split.each do |attribute|
     model.send(method, respond_to(attribute))
   end

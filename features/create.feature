@@ -10,8 +10,6 @@ Feature: create models with hydra attributes
       | Product     | active  | boolean      | [string:0]          |
       | Product     | info    | text         | [string:]           |
       | Product     | started | datetime     | [string:2012-01-01] |
-    And create class "Product" as "ActiveRecord::Base"
-    And call "use_hydra_attributes" inside class "Product"
 
   Scenario: create model without hydra attributes
     Given create "Product" model

@@ -1,35 +1,43 @@
-Feature: define model with hydra attributes
+Feature: define entity with hydra attributes
   When use_hydra_attributes was called in model class
-  Then model's object should respond to attributes which are saved in hydra_attributes table
+  Then entity should respond to attributes which are saved in hydra_attributes table
+
+  When new hydra attribute is created
+  Then entity should respond to it
 
   Background: create hydra attributes
     Given create "HydraAttribute::HydraAttribute" models with attributes as "hashes":
       | entity_type | name  | backend_type |
       | Product     | code  | string       |
       | Product     | price | float        |
-    And create class "Product" as "ActiveRecord::Base"
-    And call "use_hydra_attributes" inside class "Product"
 
   Scenario Outline: models should respond to hydra attributes
-    Then model "<model>" should "<respond>" to "<attributes>"
+    Then model "<model>" <action> respond to "<attributes>"
 
     Scenarios: model should respond to its own hydra attributes
-      | model   | respond | attributes             |
-      | Product | should  | code                   |
-      | Product | should  | code=                  |
-      | Product | should  | code?                  |
-      | Product | should  | code_before_type_cast  |
-      | Product | should  | code_changed?          |
-      | Product | should  | code_change            |
-      | Product | should  | code_will_change!      |
-      | Product | should  | code_was               |
-      | Product | should  | reset_code!            |
-      | Product | should  | price                  |
-      | Product | should  | price=                 |
-      | Product | should  | price?                 |
-      | Product | should  | price_before_type_cast |
-      | Product | should  | price_changed?         |
-      | Product | should  | price_change           |
-      | Product | should  | price_will_change!     |
-      | Product | should  | price_was              |
-      | Product | should  | reset_price!           |
+      | model   | action | attributes             |
+      | Product | should | code                   |
+      | Product | should | code=                  |
+      | Product | should | code?                  |
+      | Product | should | code_before_type_cast  |
+      | Product | should | code_changed?          |
+      | Product | should | code_change            |
+      | Product | should | code_will_change!      |
+      | Product | should | code_was               |
+      | Product | should | reset_code!            |
+      | Product | should | price                  |
+      | Product | should | price=                 |
+      | Product | should | price?                 |
+      | Product | should | price_before_type_cast |
+      | Product | should | price_changed?         |
+      | Product | should | price_change           |
+      | Product | should | price_will_change!     |
+      | Product | should | price_was              |
+      | Product | should | reset_price!           |
+
+  Scenario: dynamically create new hydra attributes
+    Then model "Product" should not respond to "title"
+    When create "HydraAttribute::HydraAttribute" model with attributes as "hashes":
+      | entity_type | name  | backend_type |
+      | Product     | title | string       |
+    Then model "Product" should respond to "title"
