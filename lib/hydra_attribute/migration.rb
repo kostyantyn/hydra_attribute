@@ -7,6 +7,39 @@ module HydraAttribute
       @migration = migration
     end
 
+    def create_entity(name, options = {})
+      create_table name, options do |t|
+        t.integer :hydra_set_id
+
+        if block_given?
+          yield t
+        else
+          t.timestamps
+        end
+      end
+      add_index name, :hydra_set_id
+
+      SUPPORT_TYPES.each do |type|
+        table_name = "hydra_#{name.to_s.singularize}_#{type}_values"
+        create_table table_name do |t|
+          t.integer :entity_id,          null: false
+          t.integer :hydra_attribute_id, null: false
+          t.send type, :value
+          t.timestamps
+        end
+        add_index table_name, [:entity_id, :hydra_attribute_id], unique: true, name: "#{table_name}_index"
+      end
+    end
+
+    def drop_entity(name)
+      SUPPORT_TYPES.each do |type|
+        table_name = "hydra_#{name.to_s.singularize}_#{type}_values"
+        drop_table table_name
+      end
+
+      drop_table name
+    end
+
     def create_attributes
       create_table :hydra_attributes do |t|
         t.string :entity_type,  limit: 32, null: false
@@ -35,29 +68,6 @@ module HydraAttribute
       drop_table :hydra_attribute_sets
       drop_table :hydra_sets
       drop_table :hydra_attributes
-    end
-
-    def create_entity(name, options = {}, &block)
-      create_table name, options do |t|
-        t.integer :hydra_set_id
-        block.call(t)
-      end
-
-      SUPPORT_TYPES.each do |type|
-        table_name = "hydra_#{name.to_s.singularize}_#{type}_values"
-        create_table table_name do |t|
-          t.integer :entity_id,          null: false
-          t.integer :hydra_attribute_id, null: false
-          t.send type, :value
-          t.timestamps
-        end
-        add_index table_name, [:entity_id, :hydra_attribute_id], unique: true, name: "hydra_#{type}_values_composite_index"
-      end
-    end
-
-    def drop_entity(name)
-      drop_table name
-      drop_table "#{name.to_s.singularize}_#{type}_values"
     end
   end
 end
