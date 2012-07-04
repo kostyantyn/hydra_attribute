@@ -25,9 +25,9 @@ module HydraAttribute
             opts.inject(self) do |relation, (name, value)|
               if klass.hydra_attribute_names.include?(name.to_s)
                 relation, name = relation.clone, name.to_s
-                relation.hydra_joins_aliases << hydra_ref_alias(name, value)
-                relation.joins_values += build_hydra_joins_values(name, value)
-                relation.where_values += build_where(build_hydra_where_options(name, value))
+                relation.hydra_joins_aliases << hydra_helper.ref_alias(name, value)
+                relation.joins_values += hydra_helper.build_joins(name, value)
+                relation.where_values += build_where(hydra_helper.where_options(name, value))
                 relation
               else
                 relation.where_without_hydra_attribute(name => value)
@@ -48,11 +48,11 @@ module HydraAttribute
 
           @hydra_select_values, @select_values = @select_values.partition { |value| klass.hydra_attribute_names.include?(value.to_s) }
           @hydra_select_values.map!(&:to_s)
-          @select_values.map!{ |value| hydra_attr_helper.prepend_table_name(value) }
+          @select_values.map!{ |value| hydra_helper.prepend_table_name(value) }
 
           # force add ID for preloading hydra attributes
-          if @hydra_select_values.any? && @select_values.none? { |v| hydra_attr_helper.attr_eq_column?(v, klass.primary_key) }
-            @select_values << hydra_attr_helper.prepend_table_name(klass.primary_key)
+          if @hydra_select_values.any? && @select_values.none? { |v| hydra_helper.attr_eq_column?(v, klass.primary_key) }
+            @select_values << hydra_helper.prepend_table_name(klass.primary_key)
             @id_for_hydra_attributes = true
           end
 
@@ -87,73 +87,72 @@ module HydraAttribute
               column
             end
           end
+
+          def build_joins(name, value)
+            conn         = klass.connection
+            quoted_alias = conn.quote_table_name(ref_alias(name, value))
+
+            [[
+              "#{join_type(value)} JOIN",
+              conn.quote_table_name(ref_table(name)),
+              'AS',
+              quoted_alias,
+              'ON',
+              "#{klass.quoted_table_name}.#{klass.quoted_primary_key}",
+              '=',
+              "#{quoted_alias}.#{conn.quote_column_name(:entity_id)}",
+              'AND',
+              "#{quoted_alias}.#{conn.quote_column_name(:hydra_attribute_id)}",
+              '=',
+              hydra_attribute_id(name)
+            ].join(' ')]
+          end
+
+          def where_options(name, value)
+            {ref_alias(name, value) => {value: value}}
+          end
+
+          def ref_class(name)
+            type = klass.hydra_attribute_data(name)['backend_type']
+            AssociationBuilder.new(klass, type).class_name.constantize
+          end
+
+          def ref_table(name)
+            ref_class(name).table_name
+          end
+
+          def ref_alias(name, value)
+            ref_table(name) + '_' + join_type(value).downcase + '_' + name
+          end
+
+          def join_type(value)
+            value.nil? ? 'LEFT' : 'INNER'
+          end
+
+          def hydra_attribute_id(name)
+            klass.hydra_attribute_data(name)['id']
+          end
         end
 
         private
 
-        def hydra_attr_helper
-          @hydra_attr_helper ||= Helper.new(self)
+        def hydra_helper
+          @hydra_helper ||= Helper.new(self)
         end
 
         def build_hydra_values_for_arel(collection)
           collection.map do |attribute|
             attribute = attribute.respond_to?(:to_sql) ? attribute.to_sql : attribute.to_s
             if klass.hydra_attribute_names.include?(attribute)
-              join_alias = hydra_ref_alias(attribute, 'inner') # alias for inner join
-              join_alias = hydra_ref_alias(attribute, nil) unless hydra_joins_aliases.include?(join_alias) # alias for left join
+              join_alias = hydra_helper.ref_alias(attribute, 'inner') # alias for inner join
+              join_alias = hydra_helper.ref_alias(attribute, nil) unless hydra_joins_aliases.include?(join_alias) # alias for left join
 
-              @joins_values += build_hydra_joins_values(attribute, nil) unless hydra_joins_aliases.include?(join_alias)
+              @joins_values += hydra_helper.build_joins(attribute, nil) unless hydra_joins_aliases.include?(join_alias)
               klass.connection.quote_table_name(join_alias) + '.' + klass.connection.quote_column_name('value')
             else
-              hydra_attr_helper.prepend_table_name(attribute)
+              hydra_helper.prepend_table_name(attribute)
             end
           end
-        end
-
-        def build_hydra_joins_values(name, value)
-          ref_alias        = hydra_ref_alias(name, value)
-          conn             = klass.connection
-          quoted_ref_alias = conn.quote_table_name(ref_alias)
-
-          [[
-            "#{hydra_join_type(value)} JOIN",
-            conn.quote_table_name(hydra_ref_table(name)),
-            'AS',
-            quoted_ref_alias,
-            'ON',
-            "#{klass.quoted_table_name}.#{klass.quoted_primary_key}",
-            '=',
-            "#{quoted_ref_alias}.#{conn.quote_column_name(:entity_id)}",
-            'AND',
-            "#{quoted_ref_alias}.#{conn.quote_column_name(:entity_type)}",
-            '=',
-            conn.quote(klass.base_class.name),
-            'AND',
-            "#{quoted_ref_alias}.#{conn.quote_column_name(:name)}",
-            '=',
-            conn.quote(name)
-          ].join(' ')]
-        end
-
-        def build_hydra_where_options(name, value)
-          {hydra_ref_alias(name, value) => {value: value}}
-        end
-
-        def hydra_ref_class(name)
-          type = klass.hydra_attributes[name]
-          HydraAttribute.config.associated_model_name(type).constantize
-        end
-
-        def hydra_ref_table(name)
-          hydra_ref_class(name).table_name
-        end
-
-        def hydra_ref_alias(name, value)
-          hydra_ref_table(name) + '_' + hydra_join_type(value).downcase + '_' + name
-        end
-
-        def hydra_join_type(value)
-          value.nil? ? 'LEFT' : 'INNER'
         end
       end
     end

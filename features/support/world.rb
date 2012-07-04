@@ -29,7 +29,7 @@ module HydraAttribute
       end
 
       def type_cast_hash(hash)
-        hash.each do |key, value|
+        hash.delete_if{ |_, v| v.blank? }.each do |key, value|
           hash[key] = type_cast_value(value)
         end
       end

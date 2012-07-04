@@ -1,29 +1,28 @@
 Feature: hydra attribute where conditions
   When filter by hydra attribute and this value is not nil
-  Then the correct hydra attribute table should be joined and filter by this value should be added
+  Then records with this attribute should be selected
 
   When filter by hydra attribute and this value is nil
-  Then records with nil value should be selected  or records which don't have this hydra attribute
+  Then records with nil and blank value should be selected
 
   Background: create models and describe hydra attributes
-    Given create model class "Product"
-    And create model class "SimpleProduct" as "Product" with hydra attributes:
-      | type    | name    |
-      | string  | code    |
-      | string  | summary |
-      | string  | title   |
-      | float   | price   |
-      | boolean | active  |
-      | integer | state   |
+    Given create "HydraAttribute::HydraAttribute" models with attributes as "hashes":
+      | entity_type | name    | backend_type |
+      | Product     | code    | string       |
+      | Product     | summary | string       |
+      | Product     | title   | string       |
+      | Product     | price   | float        |
+      | Product     | active  | boolean      |
+      | Product     | state   | integer      |
 
-  Scenario: add filter by one hydra attribute
-    Given create models:
-      | model         | attributes                         |
-      | SimpleProduct | code=[string:1] price=[float:2.75] |
-      | SimpleProduct | code=[string:2] price=[float:2.75] |
-      | SimpleProduct | code=[string:3] price=[float:2.76] |
-      | SimpleProduct | code=[string:4] price=[nil:]       |
-    When filter "SimpleProduct" by:
+  Scenario: filter by one hydra attribute
+    Given create "Product" model with attributes as "hashes":
+      | code       | price        |
+      | [string:1] | [float:2.75] |
+      | [string:2] | [float:2.75] |
+      | [string:3] | [float:2.76] |
+      | [string:4] | [nil:]       |
+    When filter "Product" by:
       | field | value         |
       | price | [string:2.75] |
     Then total records should be "2"
@@ -32,13 +31,13 @@ Feature: hydra attribute where conditions
       | code  | [string:1] |
       | code  | [string:2] |
 
-  Scenario: add nil filter by one hydra attribute
-    Given create models:
-      | model         | attributes                      |
-      | SimpleProduct | code=[string:1] price=[nil:]    |
-      | SimpleProduct | code=[string:2] price=[float:0] |
-      | SimpleProduct | code=[string:3]                 |
-    When filter "SimpleProduct" by:
+  Scenario: filter by one hydra attribute with nil value
+    Given create "Product" model with attributes as "hashes":
+      | code       | price     |
+      | [string:1] | [nil:]    |
+      | [string:2] | [float:0] |
+      | [string:3] |           |
+    When filter "Product" by:
       | field | value  |
       | price | [nil:] |
     Then total records should be "2"
@@ -47,23 +46,22 @@ Feature: hydra attribute where conditions
       | code  | [string:1] |
       | code  | [string:3] |
 
-  Scenario: add filter by several fields including both the hydra and general attributes
-    Given create models:
-      | model         | attributes                                                                                                                                   |
-      | SimpleProduct | name=[string:toy] code=[string:1] title=[string:story] price=[float:2.45] active=[boolean:true]               info=[string:]                 |
-      | SimpleProduct | name=[string:toy] code=[string:2] title=[string:story] price=[float:2.45] active=[boolean:true]               info=[string:a] summary=[nil:] |
-      | SimpleProduct | name=[string:toy] code=[string:3] title=[string:story] price=[float:2.45] active=[boolean:true]  state=[nil:] info=[string:a] summary=[nil:] |
-      | SimpleProduct | name=[string:toy] code=[string:4]                      price=[float:2.45] active=[boolean:false] state=[nil:] info=[string:a] summary=[nil:] |
-      | SimpleProduct |                   code=[string:5]                      price=[float:2.45] active=[boolean:true]  state=[nil:] info=[string:a] summary=[nil:] |
-      | SimpleProduct | name=[string:toy] code=[string:6]                      price=[float:2.46] active=[boolean:true]  state=[nil:] info=[string:a] summary=[nil:] |
-    When filter "SimpleProduct" by:
+  Scenario: filter by several fields including both the hydra and general attributes
+    Given create "Product" model with attributes as "hashes":
+      | name         | code       | title          | price        | active          | state  | summary |
+      | [string:toy] | [string:1] | [string:story] | [float:2.40] | [boolean:true]  |        |         |
+      | [string:toy] | [string:2] | [string:story] | [float:2.45] | [boolean:true]  |        | [nil:]  |
+      | [string:toy] | [string:3] | [string:story] | [float:2.45] | [boolean:true]  | [nil:] | [nil:]  |
+      | [string:toy] | [string:4] |                | [float:2.45] | [boolean:false] | [nil:] | [nil:]  |
+      |              | [string:5] |                | [float:2.45] | [boolean:true]  | [nil:] | [nil:]  |
+      | [string:toy] | [string:6] |                | [float:2.46] | [boolean:true]  | [nil:] | [nil:]  |
+    When filter "Product" by:
       | field   | value          |
       | name    | [string:toy]   |
       | title   | [string:story] |
       | summary | [nil:]         |
       | price   | [string:2.45]  |
       | active  | [boolean:true] |
-      | info    | [string:a]     |
       | state   | [nil:]         |
     Then total records should be "2"
     And records should have the following attributes:

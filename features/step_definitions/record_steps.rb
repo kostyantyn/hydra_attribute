@@ -8,7 +8,7 @@ end
 
 Then /^record (read attribute(?: before type cast)?) "([^"]+)" and value should be "([^"]+)"$/ do |method, attribute, value|
   method = method.gsub(/\s+/, '_')
-  @record.send(method, attribute).should == typecast_value(value)
+  @record.send(method, attribute).should == type_cast_value(value)
 end
 
 Then /^"(first|last)" record should have "([^"]+)"$/ do |method, attribute|
@@ -19,7 +19,7 @@ end
 
 Then /^records should have the following attributes:$/ do |table|
   table.hashes.each do |hash|
-    record = @records.detect { |r| r.send(hash[:field]) == typecast_value(hash[:value]) }
+    record = @records.detect { |r| r.send(hash[:field]) == type_cast_value(hash[:value]) }
     record.should_not be_nil
   end
 end

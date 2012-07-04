@@ -1,5 +1,5 @@
 When /^filter "([^"]+)" by:$/ do |klass, table|
-  condition = table.hashes.each_with_object({}) { |item, hash| hash[item[:field].to_sym] = typecast_value(item[:value]) }
+  condition = table.hashes.each_with_object({}) { |item, hash| hash[item[:field].to_sym] = type_cast_value(item[:value]) }
   @records  = Object.const_get(klass).where(condition)
 end
 
@@ -9,7 +9,7 @@ When /^filter "([^"]+)" records by "([^"]+)"$/ do |klass, attribute|
 end
 
 When /^filter records by "([^"]+)"$/ do |attribute|
-  name, value = typecast_attribute(attribute)
+  name, value = type_cast_attribute(attribute)
   @records = @records.where(name => value)
 end
 
