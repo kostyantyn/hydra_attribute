@@ -1,13 +1,3 @@
-Given /^create class "([^"]+)" as "([^"]+)"$/ do |klass, superclass|
-  Object.const_set(klass, Class.new(superclass.constantize))
-end
-
-Given /^call "([^"]+)" inside class "([^"]+)"$/ do |method, klass|
-  klass.constantize.class_eval <<-EOS, __FILE__, __LINE__ + 1
-    #{method}
-  EOS
-end
-
 #Then /^class "([^"]+)"::"([^"]+)" "(should|should_not)" have (string|symbol) "([^"]+)" in array$/ do |klass, method, behavior, type, params|
 #  klass  = Object.const_get(klass)
 #  params = params.split

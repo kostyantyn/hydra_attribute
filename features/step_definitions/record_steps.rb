@@ -6,13 +6,6 @@ When /^select "(first|last)" "([^"]+)" record$/ do |method, klass|
   @record = Object.const_get(klass).send(method)
 end
 
-Then /^record should have the following ((?:hydra )?attributes(?: before type cast)?) "([^"]+)" in attribute hash$/ do |method, attributes|
-  method = method.gsub(/\s+/, '_')
-  typecast_attributes(attributes).each do |(name, value)|
-    @record.send(method)[name.to_s].should == value
-  end
-end
-
 Then /^record (read attribute(?: before type cast)?) "([^"]+)" and value should be "([^"]+)"$/ do |method, attribute, value|
   method = method.gsub(/\s+/, '_')
   @record.send(method, attribute).should == typecast_value(value)
@@ -47,7 +40,12 @@ Then /^records should raise "([^"]+)" when call the following "([^"]+)"$/ do |er
 end
 
 Then /^total records should be "([^"]+)"$/ do |count|
-  @records.to_a.should have(count.to_i).items
+  @records.to_a.should have(count.to_i).records
+end
+
+Then /^total "([^"]+)" records should be "([^"]+)"$/ do |klass, count|
+  @records = klass.constantize.scoped
+  step %Q(total records should be "#{count}")
 end
 
 Then /^records "(should|should_not)" have loaded associations:$/ do |should, table|

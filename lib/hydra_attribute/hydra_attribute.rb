@@ -16,9 +16,15 @@ module HydraAttribute
       klass.validates :backend_type, inclusion: SUPPORT_TYPES + SUPPORT_TYPES.map(&:to_s)
     end
 
+    before_destroy :delete_dependent_values
     after_commit :reload_entity_attributes
 
     private
+
+    def delete_dependent_values
+      value_class = AssociationBuilder.new(entity_type.constantize, backend_type).class_name.constantize
+      value_class.delete_all(hydra_attribute_id: id)
+    end
 
     def reload_entity_attributes
       entity_type.constantize.undefine_attribute_methods

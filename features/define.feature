@@ -35,9 +35,17 @@ Feature: define entity with hydra attributes
       | Product | should | price_was              |
       | Product | should | reset_price!           |
 
-  Scenario: dynamically create new hydra attributes
-    Then model "Product" should not respond to "title"
+  Scenario: create hydra attribute in runtime
     When create "HydraAttribute::HydraAttribute" model with attributes as "hashes":
       | entity_type | name  | backend_type |
       | Product     | title | string       |
     Then model "Product" should respond to "title"
+
+  Scenario: destroy hydra attribute in runtime
+    Given create "Product" model with attributes as "rows_hash":
+      | price | 10 |
+    When destroy all "HydraAttribute::HydraAttribute" model with attributes as "hashes":
+      | entity_type | name  |
+      | Product     | price |
+    Then model "Product" should not respond to "price"
+    And total "HydraAttribute::HydraProductFloatValue" records should be "0"
