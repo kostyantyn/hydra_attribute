@@ -116,7 +116,7 @@ module HydraAttribute
           end
 
           def ref_class(name)
-            type = klass.hydra_attribute_data(name)['backend_type']
+            type = klass.hydra_attribute(name).backend_type
             AssociationBuilder.new(klass, type).class_name.constantize
           end
 
@@ -133,7 +133,7 @@ module HydraAttribute
           end
 
           def hydra_attribute_id(name)
-            klass.hydra_attribute_data(name)['id']
+            klass.hydra_attribute(name).id
           end
         end
 
