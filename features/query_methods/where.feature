@@ -5,7 +5,7 @@ Feature: hydra attribute where conditions
   When filter by hydra attribute and this value is nil
   Then records with nil and blank value should be selected
 
-  Background: create models and describe hydra attributes
+  Background: create hydra attributes
     Given create "HydraAttribute::HydraAttribute" models with attributes as "hashes":
       | entity_type | name    | backend_type |
       | Product     | code    | string       |

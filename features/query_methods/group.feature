@@ -3,21 +3,20 @@ Feature: group conditions by hydra attributes
   Then correct table should be joined and group condition should be added
 
   Background: create models and describe hydra attributes
-    Given create model class "Product"
-    And create model class "SimpleProduct" as "Product" with hydra attributes:
-      | type    | name  |
-      | integer | code  |
-      | string  | title |
-      | integer | total |
-    And create models:
-      | model         | attributes                                                          |
-      | SimpleProduct | name=[string:a] code=[integer:1] title=[string:q] total=[integer:5] |
-      | SimpleProduct | name=[string:b] code=[integer:2] title=[string:w] total=[integer:5] |
-      | SimpleProduct | name=[string:b] code=[integer:3] title=[string:w] total=[nil:]      |
-      | SimpleProduct | name=[string:c] code=[integer:4] title=[string:e]                   |
+    Given create "HydraAttribute::HydraAttribute" models with attributes as "hashes":
+      | entity_type | name  | backend_type |
+      | Product     | code  | integer      |
+      | Product     | title | string       |
+      | Product     | total | integer      |
+    Given create "Product" model with attributes as "hashes":
+      | name       | code        | title      | total       |
+      | [string:a] | [integer:1] | [string:q] | [integer:5] |
+      | [string:b] | [integer:2] | [string:w] | [integer:5] |
+      | [string:b] | [integer:3] | [string:w] | [nil:]      |
+      | [string:c] | [integer:4] | [string:e] |             |
 
   Scenario Outline: group by attributes
-    When group "SimpleProduct" by "<group by>"
+    When group "Product" by "<group by>"
     Then total records should be "<total>"
     And "first" record should have "<first attribute>"
     And "last" record should have "<last attribute>"
@@ -29,7 +28,7 @@ Feature: group conditions by hydra attributes
       | name title | 3     | name=[string:a] code=[integer:1] | name=[string:c] code=[integer:4] |
 
   Scenario Outline: group by attributes with filter
-    When group "SimpleProduct" by "<group by>"
+    When group "Product" by "<group by>"
     And filter records by "<filter>"
     Then total records should be "<total>"
     And "first" record should have "<first attribute>"
