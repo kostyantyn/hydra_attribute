@@ -11,7 +11,7 @@ Feature: order conditions by hydra attributes
   When reorder by attributes
   Then old hydra attributes should be removed and new should be added
 
-  Background: create models and describe hydra attributes
+  Background: create hydra attributes
     Given create "HydraAttribute::HydraAttribute" models with attributes as "hashes":
       | entity_type | name  | backend_type |
       | Product     | code  | integer      |
@@ -35,7 +35,7 @@ Feature: order conditions by hydra attributes
       | name=asc   | code=[integer:3] | code=[integer:1] |
       | name=desc  | code=[integer:1] | code=[integer:3] |
 
-  Scenario Outline: order by several fields
+  Scenario Outline: order by several attributes
     Given create "Product" model with attributes as "hashes":
       | name       | code        | state       | title      |
       | [string:c] | [integer:1] | [integer:1] | [string:b] |
@@ -51,7 +51,7 @@ Feature: order conditions by hydra attributes
       | state title | code=[integer:1] | code=[integer:3] |
       | title state | code=[integer:2] | code=[integer:3] |
 
-  Scenario Outline: order by already joined field
+  Scenario Outline: order by filtered attribute
     Given create "Product" model with attributes as "hashes":
       | code        | state       | title      |
       | [integer:1] | [integer:1] |            |
@@ -63,13 +63,13 @@ Feature: order conditions by hydra attributes
     And "first" record should have "<first identifier>"
     And "last" record should have "<last identifier>"
 
-    Scenarios:
+    Scenarios: order conditions
       | filter attribute  | order attributes | count | first identifier | last identifier  |
       | state=[integer:1] | state code       | 2     | code=[integer:1] | code=[integer:3] |
       | state=[nil:]      | state code       | 1     | code=[integer:2] | code=[integer:2] |
       | title=[nil:]      | title code       | 2     | code=[integer:1] | code=[integer:2] |
 
-  Scenario Outline: reorder by hydra attributes
+  Scenario Outline: reorder
     Given create "Product" model with attributes as "hashes":
       | code        | name       | title      |
       | [integer:1] | [string:a] | [string:c] |
@@ -81,9 +81,19 @@ Feature: order conditions by hydra attributes
     And "first" record should have "<first identifier>"
     And "last" record should have "<last identifier>"
 
-    Scenarios:
+    Scenarios: order conditions
       | order | reorder    | count | first identifier | last identifier  |
       | title | name title | 3     | code=[integer:1] | code=[integer:3] |
       | name  | title name | 3     | code=[integer:3] | code=[integer:1] |
 
-
+  Scenario: reverse order
+    Given create "Product" model with attributes as "hashes":
+      | code        | title      |
+      | [integer:1] | [string:a] |
+      | [integer:2] | [string:b] |
+      | [integer:3] | [string:c] |
+    When order "Product" records by "title"
+    And reverse order records
+    Then total records should be "3"
+    And "first" record should have "code=[integer:3]"
+    And "last" record should have "code=[integer:1]"

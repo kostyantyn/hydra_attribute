@@ -39,6 +39,10 @@ When /^(order|reorder) records by "([^"]+)"$/ do |sort_method, attributes|
   @records = @records.reverse_order if reverse
 end
 
+When /^reverse order records$/ do
+  @records = @records.reverse_order
+end
+
 When /^"([^"]+)" select only the following columns "([^"]+)"$/ do |klass, columns|
   @records = Object.const_get(klass).select(columns.split(/\s+/).map(&:to_sym))
 end
