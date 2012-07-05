@@ -78,11 +78,14 @@ module HydraAttribute
           end
 
           def prepend_table_name(column)
-            return column unless column.is_a?(Symbol) or column.is_a?(String)
-
-            copy = column.to_s.strip
-            if copy =~ /^\w+$/
-              klass.quoted_table_name + '.' + connection.quote_column_name(copy)
+            case column
+            when String, Symbol
+              copy = column.to_s.strip
+              if copy =~ /^\w+$/
+                klass.quoted_table_name + '.' + connection.quote_column_name(copy)
+              else
+                column
+              end
             else
               column
             end

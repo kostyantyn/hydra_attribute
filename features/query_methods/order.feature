@@ -12,77 +12,78 @@ Feature: order conditions by hydra attributes
   Then old hydra attributes should be removed and new should be added
 
   Background: create models and describe hydra attributes
-    Given create model class "Product"
-    And create model class "SimpleProduct" as "Product" with hydra attributes:
-      | type    | name  |
-      | integer | code  |
-      | integer | state |
-      | string  | title |
+    Given create "HydraAttribute::HydraAttribute" models with attributes as "hashes":
+      | entity_type | name  | backend_type |
+      | Product     | code  | integer      |
+      | Product     | state | integer      |
+      | Product     | title | string       |
 
   Scenario Outline: order by one field
-    Given create models:
-      | model         | attributes                                         |
-      | SimpleProduct | name=[string:c] code=[integer:1] state=[integer:1] |
-      | SimpleProduct | name=[string:b] code=[integer:2] state=[integer:2] |
-      | SimpleProduct | name=[string:a] code=[integer:3] state=[integer:3] |
-    When order "SimpleProduct" records by "<attributes>"
-    Then "first" record should have "<first>"
-    And "last" record should have "<last>"
+    Given create "Product" model with attributes as "hashes":
+      | name       | code        | state       |
+      | [string:c] | [integer:1] | [integer:1] |
+      | [string:b] | [integer:2] | [integer:2] |
+      | [string:a] | [integer:3] | [integer:3] |
+    When order "Product" records by "<attributes>"
+    Then "first" record should have "<first identifier>"
+    And "last" record should have "<last identifier>"
 
     Scenarios: order conditions
-      | attributes | first            | last             |
+      | attributes | first identifier | last identifier  |
       | state=asc  | code=[integer:1] | code=[integer:3] |
       | state=desc | code=[integer:3] | code=[integer:1] |
       | name=asc   | code=[integer:3] | code=[integer:1] |
       | name=desc  | code=[integer:1] | code=[integer:3] |
 
   Scenario Outline: order by several fields
-    Given create models:
-      | model         | attributes                                                          |
-      | SimpleProduct | name=[string:c] code=[integer:1] state=[integer:1] title=[string:b] |
-      | SimpleProduct | name=[string:b] code=[integer:2] state=[integer:2] title=[string:a] |
-      | SimpleProduct | name=[string:a] code=[integer:3] state=[integer:3] title=[string:c] |
-    When order "SimpleProduct" records by "<attributes>"
-    Then "first" record should have "<first>"
-    And "last" record should have "<last>"
+    Given create "Product" model with attributes as "hashes":
+      | name       | code        | state       | title      |
+      | [string:c] | [integer:1] | [integer:1] | [string:b] |
+      | [string:b] | [integer:2] | [integer:2] | [string:a] |
+      | [string:a] | [integer:3] | [integer:3] | [string:c] |
+    When order "Product" records by "<attributes>"
+    Then "first" record should have "<first identifier>"
+    And "last" record should have "<last identifier>"
 
     Scenarios: order conditions
-      | attributes  | first            | last             |
+      | attributes  | first identifier | last identifier  |
       | name state  | code=[integer:3] | code=[integer:1] |
       | state title | code=[integer:1] | code=[integer:3] |
       | title state | code=[integer:2] | code=[integer:3] |
 
   Scenario Outline: order by already joined field
-    Given create models:
-      | model         | attributes                                          |
-      | SimpleProduct | code=[integer:1] state=[integer:1]                  |
-      | SimpleProduct | code=[integer:2]                   title=[nil:]     |
-      | SimpleProduct | code=[integer:3] state=[integer:1] title=[string:a] |
-    When filter "SimpleProduct" records by "<filter>"
-    And order records by "<order>"
+    Given create "Product" model with attributes as "hashes":
+      | code        | state       | title      |
+      | [integer:1] | [integer:1] |            |
+      | [integer:2] |             | [nil:]     |
+      | [integer:3] | [integer:1] | [string:a] |
+    When filter "Product" records by "<filter attribute>"
+    And order records by "<order attributes>"
     Then total records should be "<count>"
-    And "first" record should have "<first>"
-    And "last" record should have "<last>"
+    And "first" record should have "<first identifier>"
+    And "last" record should have "<last identifier>"
 
     Scenarios:
-      | filter            | order      | count | first            | last             |
-      | state=[integer:1] | state code | 2     | code=[integer:1] | code=[integer:3] |
-      | state=[nil:]      | state code | 1     | code=[integer:2] | code=[integer:2] |
-      | title=[nil:]      | title code | 2     | code=[integer:1] | code=[integer:2] |
+      | filter attribute  | order attributes | count | first identifier | last identifier  |
+      | state=[integer:1] | state code       | 2     | code=[integer:1] | code=[integer:3] |
+      | state=[nil:]      | state code       | 1     | code=[integer:2] | code=[integer:2] |
+      | title=[nil:]      | title code       | 2     | code=[integer:1] | code=[integer:2] |
 
   Scenario Outline: reorder by hydra attributes
-    Given create models:
-      | model         | attributes                                        |
-      | SimpleProduct | code=[integer:1] name=[string:a] title=[string:c] |
-      | SimpleProduct | code=[integer:2] name=[string:b] title=[string:b] |
-      | SimpleProduct | code=[integer:3] name=[string:c] title=[string:a] |
-    When order "SimpleProduct" records by "<order>"
+    Given create "Product" model with attributes as "hashes":
+      | code        | name       | title      |
+      | [integer:1] | [string:a] | [string:c] |
+      | [integer:2] | [string:b] | [string:b] |
+      | [integer:3] | [string:c] | [string:a] |
+    When order "Product" records by "<order>"
     And reorder records by "<reorder>"
     Then total records should be "<count>"
-    And "first" record should have "<first>"
-    And "last" record should have "<last>"
+    And "first" record should have "<first identifier>"
+    And "last" record should have "<last identifier>"
 
     Scenarios:
-      | order | reorder    | count | first            | last             |
+      | order | reorder    | count | first identifier | last identifier  |
       | title | name title | 3     | code=[integer:1] | code=[integer:3] |
       | name  | title name | 3     | code=[integer:3] | code=[integer:1] |
+
+

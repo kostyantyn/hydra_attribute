@@ -12,7 +12,7 @@ Then /^record (read attribute(?: before type cast)?) "([^"]+)" and value should 
 end
 
 Then /^"(first|last)" record should have "([^"]+)"$/ do |method, attribute|
-  typecast_attributes(attribute).each do |(name, value)|
+  type_cast_attributes(attribute).each do |(name, value)|
     @records.send(method).send(name).should == value
   end
 end
