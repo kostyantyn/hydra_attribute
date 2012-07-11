@@ -39,13 +39,14 @@ module HydraAttribute
         end
 
         def build_arel
-          @group_values = build_hydra_values_for_arel(@group_values.uniq.reject(&:blank?))
-          @order_values = build_hydra_values_for_arel(@order_values.uniq.reject(&:blank?))
+          @group_values = hydra_helper.quote_columns(@group_values.uniq.reject(&:blank?))
+          @order_values = hydra_helper.quote_columns(@order_values.uniq.reject(&:blank?))
 
           if instance_variable_defined?(:@reorder_value) and instance_variable_get(:@reorder_value).present? # for compatibility with 3.1.x
-            @reorder_value = build_hydra_values_for_arel(@reorder_value.uniq.reject(&:blank?))
+            @reorder_value = hydra_helper.quote_columns(@reorder_value.uniq.reject(&:blank?))
           end
 
+          # detect hydra attributes from select list
           @hydra_select_values, @select_values = @select_values.partition { |value| klass.hydra_attribute_names.include?(value.to_s) }
           @hydra_select_values.map!(&:to_s)
           @select_values.map!{ |value| hydra_helper.prepend_table_name(value) }
@@ -53,7 +54,6 @@ module HydraAttribute
           # force add ID for preloading hydra attributes
           if @hydra_select_values.any? && @select_values.none? { |v| hydra_helper.attr_eq_column?(v, klass.primary_key) }
             @select_values << hydra_helper.prepend_table_name(klass.primary_key)
-            @id_for_hydra_attributes = true
           end
 
           super
@@ -77,12 +77,12 @@ module HydraAttribute
             ].include?(attr)
           end
 
-          def prepend_table_name(column)
+          def prepend_table_name(column, table = klass.table_name)
             case column
             when String, Symbol
               copy = column.to_s.strip
               if copy =~ /^\w+$/
-                klass.quoted_table_name + '.' + connection.quote_column_name(copy)
+                connection.quote_table_name(table) + '.' + connection.quote_column_name(copy)
               else
                 column
               end
@@ -135,27 +135,27 @@ module HydraAttribute
           def hydra_attribute_id(name)
             klass.hydra_attribute(name).id
           end
+
+          def quote_columns(columns)
+            columns.map do |column|
+              column = column.respond_to?(:to_sql) ? column.to_sql : column.to_s
+              if klass.hydra_attribute_names.include?(column)
+                join_alias = ref_alias(column, 'inner') # alias for inner join
+                join_alias = ref_alias(column, nil) unless relation.hydra_joins_aliases.include?(join_alias) # alias for left join
+
+                relation.joins_values += build_joins(column, nil) unless relation.hydra_joins_aliases.include?(join_alias)
+                prepend_table_name('value', join_alias)
+              else
+                prepend_table_name(column)
+              end
+            end
+          end
         end
 
         private
 
         def hydra_helper
           @hydra_helper ||= Helper.new(self)
-        end
-
-        def build_hydra_values_for_arel(collection)
-          collection.map do |attribute|
-            attribute = attribute.respond_to?(:to_sql) ? attribute.to_sql : attribute.to_s
-            if klass.hydra_attribute_names.include?(attribute)
-              join_alias = hydra_helper.ref_alias(attribute, 'inner') # alias for inner join
-              join_alias = hydra_helper.ref_alias(attribute, nil) unless hydra_joins_aliases.include?(join_alias) # alias for left join
-
-              @joins_values += hydra_helper.build_joins(attribute, nil) unless hydra_joins_aliases.include?(join_alias)
-              klass.connection.quote_table_name(join_alias) + '.' + klass.connection.quote_column_name('value')
-            else
-              hydra_helper.prepend_table_name(attribute)
-            end
-          end
         end
       end
     end

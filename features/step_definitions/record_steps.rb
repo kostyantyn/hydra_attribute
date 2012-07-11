@@ -26,7 +26,7 @@ end
 
 Then /^records should have only the following "([^"]+)" names$/ do |attributes|
   @records.each do |record|
-    record.attributes.keys.should == attributes.split(/\s+/)
+    record.attributes.keys.should =~ attributes.split(/\s+/)
   end
 end
 

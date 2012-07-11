@@ -16,33 +16,42 @@ module HydraAttribute
         records = __old_exec_queries__
         return records if records.empty?
 
-        #limit_values = select_values.any? || hydra_select_values.any?
-        #
-        #if records.many?
-        #  if limit_values
-        #    hydra_attribute_types = hydra_select_values.map { |value| records.first.class.hydra_attributes[value] }.uniq
-        #  else
-        #    hydra_attribute_types = records.first.class.hydra_attribute_types
-        #  end
-        #
-        #  hydra_attribute_types.each do |type|
-        #    association = HydraAttribute.config.association(type)
-        #    unless records.first.association(association).loaded?
-        #      ::ActiveRecord::Associations::Preloader.new(records, association).run
-        #    end
-        #  end
-        #end
+        # TODO should be a separate preloader class
+        hydra_attributes = if select_values.any? or hydra_select_values.any?
+          hydra_select_values.map { |attribute| klass.hydra_attribute(attribute) }
+        else
+          klass.hydra_attributes
+        end
 
-        #if limit_values
-        #  records.each do |record| # force limit getter methods for hydra attributes
-        #    record.instance_variable_set(:@hydra_attribute_names, hydra_select_values)
-        #    record.instance_variable_get(:@attributes).delete('id') if @id_for_hydra_attributes
-        #  end
-        #end
+        preload_options = hydra_attributes.each_with_object({}) do |hydra_attribute, hash|
+          hash[hydra_attribute.backend_type] ||= {conditions: {hydra_attribute_id: []}}
+          hash[hydra_attribute.backend_type][:conditions][:hydra_attribute_id] << hydra_attribute.id
+        end
+
+        klass.hydra_attribute_backend_types.each do |type|
+          association = AssociationBuilder.new(klass, type).association_name
+          unless records.first.association(association).loaded?
+            if preload_options.has_key?(type)
+              ::ActiveRecord::Associations::Preloader.new(records, association, preload_options[type]).run
+
+              records.each do |record| # preloader class should create blank attributes
+                hydra_ids = record.association(association).target.map(&:id)
+                preload_options[type][:conditions][:hydra_attribute_id].each do |hydra_id|
+                  unless hydra_ids.include?(hydra_id)
+                    record.association(association).build(hydra_attribute_id: hydra_id)
+                  end
+                end
+              end
+            else
+              records.each do |record|
+                record.association(association).loaded!
+              end
+            end
+          end
+        end
 
         records
       end
-
     end
   end
 end

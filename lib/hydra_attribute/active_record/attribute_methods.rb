@@ -68,6 +68,10 @@ module HydraAttribute
 
             body = "hydra_value_model(#{hydra_attribute.id}).#{send}"
 
+            unless current == "#{hydra_attribute.name}="
+              body.insert(0, "missing_attribute('#{hydra_attribute.name}', caller) unless hydra_value_model(#{hydra_attribute.id}, false); ")
+            end
+
             generated_hydra_attribute_methods.module_eval <<-EOS, __FILE__, __LINE__ + 1
               #{defn}
                 #{body}
@@ -86,30 +90,6 @@ module HydraAttribute
         end
       end
 
-      def hydra_value_model(identifier)
-        hydra_attribute = self.class.hydra_attribute(identifier)
-        collection = send(::HydraAttribute::AssociationBuilder.new(self.class, hydra_attribute.backend_type).table_name)
-        collection.detect { |model| model.hydra_attribute_id == hydra_attribute.id } || collection.build(hydra_attribute_id: hydra_attribute.id)
-      end
-
-      def method_missing(method, *args, &block)
-        if self.class.hydra_attribute_methods_generated?
-          super
-        else
-          self.class.define_hydra_attribute_methods
-          if respond_to_without_attributes?(method)
-            send(method, *args, &block)
-          else
-            super
-          end
-        end
-      end
-
-      def respond_to?(name, include_private = false)
-        self.class.define_hydra_attribute_methods unless self.class.hydra_attribute_methods_generated?
-        super
-      end
-
       def initialize(attributes = nil, options = {}, &block)
         if attributes
           hydra_attributes = attributes.select { |key| self.class.hydra_attribute_names.include?(key.to_s) }
@@ -119,18 +99,17 @@ module HydraAttribute
         end
 
         super(attributes, options) do
-          initialize_hydra_attributes
+          self.class.hydra_attributes.each do |a|
+            send("#{a.name}=", a.default_value)
+          end
           assign_attributes(hydra_attributes)
           block.call(self) if block_given?
         end
       end
 
-      def initialize_hydra_attributes
-        self.class.hydra_attributes.each do |attribute|
-          unless send("#{attribute['name']}_changed?")
-            send("#{attribute['name']}=", attribute['default_value'])
-          end
-        end
+      def respond_to?(name, include_private = false)
+        self.class.define_hydra_attribute_methods unless self.class.hydra_attribute_methods_generated?
+        super
       end
 
       %w(attributes attributes_before_type_cast).each do |method|
@@ -160,6 +139,33 @@ module HydraAttribute
         EOS
       end
 
+      private
+
+      def hydra_value_model(identifier, force_build = true)
+        hydra_attribute = self.class.hydra_attribute(identifier)
+        collection = hydra_collection(hydra_attribute.backend_type)
+
+        value_model = collection.detect { |model| model.hydra_attribute_id == hydra_attribute.id }
+        value_model = collection.build(hydra_attribute_id: hydra_attribute.id) if !value_model && force_build
+        value_model
+      end
+
+      def hydra_collection(backend_type)
+        send(::HydraAttribute::AssociationBuilder.new(self.class, backend_type).table_name)
+      end
+
+      def method_missing(method, *args, &block)
+        if self.class.hydra_attribute_methods_generated?
+          super
+        else
+          self.class.define_hydra_attribute_methods
+          if respond_to_without_attributes?(method)
+            send(method, *args, &block)
+          else
+            super
+          end
+        end
+      end
     end
   end
 end
