@@ -1,10 +1,13 @@
 module HydraAttribute
   class AssociationBuilder
-
     attr_reader :klass, :type
 
     def initialize(klass, type)
       @klass, @type = klass, type
+    end
+
+    def self.build(klass, type)
+      new(klass, type).build
     end
 
     def build

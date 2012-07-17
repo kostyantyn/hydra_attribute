@@ -4,15 +4,17 @@ module HydraAttribute
 
     def initialize(klass)
       @klass = klass
-      @klass.class_eval do
-        include ActiveRecord::Scoping
-        include ActiveRecord::AttributeMethods
-      end
+      @klass.send :include, ActiveRecord::Scoping
+      @klass.send :include, ActiveRecord::AttributeMethods
+    end
+
+    def self.build(klass)
+      new(klass).build
     end
 
     def build
       SUPPORT_TYPES.each do |type|
-        AssociationBuilder.new(klass, type).build
+        AssociationBuilder.build(klass, type)
       end
     end
 

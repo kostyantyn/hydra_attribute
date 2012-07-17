@@ -1,7 +1,7 @@
 module HydraAttribute
   class Migration
     extend Forwardable
-    def_delegators :@migration, :create_table, :drop_table, :add_index
+    def_delegators :@migration, :create_table, :drop_table, :add_index, :table_exists?, :tables
 
     def initialize(migration)
       @migration = migration
@@ -9,15 +9,14 @@ module HydraAttribute
 
     def create_entity(name, options = {})
       create_table name, options do |t|
-        t.integer :hydra_set_id
-
         if block_given?
           yield t
         else
           t.timestamps
         end
       end
-      add_index name, :hydra_set_id
+
+      create_attributes unless table_exists?(:hydra_attributes)
 
       SUPPORT_TYPES.each do |type|
         table_name = "hydra_#{name.to_s.singularize}_#{type}_values"
@@ -37,8 +36,11 @@ module HydraAttribute
         drop_table table_name
       end
 
+      drop_table :hydra_attributes if tables.one? { |table| table.start_with?('hydra_') }
       drop_table name
     end
+
+    private
 
     def create_attributes
       create_table :hydra_attributes do |t|
@@ -49,25 +51,6 @@ module HydraAttribute
         t.timestamps
       end
       add_index :hydra_attributes, [:entity_type, :name], unique: true, name: 'hydra_attributes_composite_index'
-
-      create_table :hydra_sets do |t|
-        t.string :entity_type, limit: 32, null: false
-        t.string :name,        limit: 32, null: false
-        t.timestamps
-      end
-      add_index :hydra_sets, [:entity_type, :name], unique: true, name: 'hydra_sets_composite_index'
-
-      create_table :hydra_attribute_sets do |t|
-        t.integer :hydra_attribute_id, null: false
-        t.integer :hydra_set_id,       null: false
-      end
-      add_index :hydra_attribute_sets, [:hydra_attribute_id, :hydra_set_id], unique: true, name: 'hydra_attribute_sets_composite_index'
-    end
-
-    def drop_attributes
-      drop_table :hydra_attribute_sets
-      drop_table :hydra_sets
-      drop_table :hydra_attributes
     end
   end
 end
