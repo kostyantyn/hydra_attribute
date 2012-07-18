@@ -1,4 +1,4 @@
-Feature: define entity with hydra attributes
+Feature: create hydra attributes
   When use_hydra_attributes was called in model class
   Then entity should respond to attributes which are saved in hydra_attributes table
 
