@@ -14,6 +14,12 @@ Given /^(load and )?(save|create|update(?: all| attributes)?|destroy(?: all)?|de
   end
 end
 
+Given /^create "([^"]+)" association for "([^"]+)" with attributes as "([^"]+)":$/ do |association, klass, format, table|
+  Array.wrap(table.send(format)).each do |hash|
+    klass.constantize.send(association).create(hash)
+  end
+end
+
 Then /^model "([^"]+)" (should(?:\snot)?) respond to "([^"]+)"$/ do |klass, method, attributes|
   model  = klass.constantize.new
   method = method.gsub(/\s+/, '_')

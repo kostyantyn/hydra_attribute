@@ -14,3 +14,9 @@ Feature: create hydra attributes
       | entity_type | name  | backend_type |
       | Product     | title | string       |
     Then model "Product" should respond to "title"
+
+  Scenario: create hydra attribute from entity class
+    Given create "hydra_attributes" association for "Product" with attributes as "hashes":
+      | name | backend_type |
+      | code | integer      |
+    Then model "Product" should respond to "code"
