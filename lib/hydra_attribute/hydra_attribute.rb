@@ -11,7 +11,7 @@ module HydraAttribute
     end
 
     before_destroy :delete_dependent_values
-    after_commit :reload_entity_attributes
+    after_commit   :reload_entity_attributes
 
     private
 

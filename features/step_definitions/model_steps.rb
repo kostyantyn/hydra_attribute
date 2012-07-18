@@ -2,10 +2,15 @@ Given /^create "([^"]+)" model$/ do |klass|
   klass.constantize.create!
 end
 
-Given /^(create|destroy all) "([^"]+)" models? with attributes as "([^"]+)":$/ do |action, klass, format, table|
+Given /^(load and )?(save|create|update(?: all| attributes)?|destroy(?: all)?|delete(?: all)?)(?: for)? "([^"]+)" models? with attributes as "([^"]+)":$/ do |load, action, klass, format, table|
   action = action.gsub(' ', '_')
+  klass  = klass.constantize
+  models = load.present? ? klass.all : [klass]
+
   Array.wrap(table.send(format)).each do |hash|
-    klass.constantize.send(action, type_cast_hash(hash))
+    models.each do |model|
+      model.send(action, type_cast_hash(hash))
+    end
   end
 end
 
