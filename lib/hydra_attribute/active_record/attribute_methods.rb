@@ -154,16 +154,10 @@ module HydraAttribute
         # TODO the following code should be in custom association class
         value_model = association.proxy.detect { |model| model.hydra_attribute_id == hydra_attribute.id }
         if !value_model && force_build
-          if association.any?
-            association.target << value_model = association.last.dup
-            value_model.hydra_attribute_id = hydra_attribute.id
-            value_model.value = nil
-            value_model
-          else
-            association.build.tap do |model|
-              model.hydra_attribute_id = hydra_attribute.id # much faster then pass attributes to build method
-            end
-          end
+          association.target << value_model = association.reflection.klass.new
+          value_model.hydra_attribute_id = hydra_attribute.id
+          value_model.value = nil
+          value_model
         else
           value_model
         end
