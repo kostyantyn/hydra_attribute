@@ -21,7 +21,7 @@ module HydraAttribute
     end
 
     def reload_entity_attributes
-      entity_type.constantize.undefine_attribute_methods
+      entity_type.constantize.reset_hydra_attribute_methods
     end
   end
 end

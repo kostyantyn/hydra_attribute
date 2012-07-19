@@ -36,7 +36,8 @@ module HydraAttribute
         end
 
         def hydra_attribute(identifier)
-          hydra_attributes.find do |hydra_attribute|
+          @hydra_attribute_cache ||= {}
+          @hydra_attribute_cache[identifier] ||= hydra_attributes.find do |hydra_attribute|
             hydra_attribute.id == identifier || hydra_attribute.name == identifier
           end
         end
@@ -80,12 +81,18 @@ module HydraAttribute
           end
         end
 
-        def undefine_attribute_methods
+        def reset_hydra_attribute_methods
           generated_hydra_attribute_methods.module_eval do
             instance_methods.each { |m| undef_method(m) }
           end
-          @hydra_attributes = false
+
+          @hydra_attributes                  = false
           @hydra_attribute_methods_generated = false
+          @hydra_attribute_cache             = {}
+        end
+
+        def undefine_attribute_methods
+          reset_hydra_attribute_methods
           super
         end
       end
