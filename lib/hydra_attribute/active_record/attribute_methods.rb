@@ -101,8 +101,8 @@ module HydraAttribute
 
       def initialize(attributes = nil, options = {}, &block)
         if attributes
-          hydra_attributes = attributes.select { |name| self.class.hydra_attribute_names?(name.to_s) }
-          attributes.delete_if { |name| self.class.hydra_attribute_names?(name.to_s) }
+          hydra_attributes = attributes.select { |name| self.class.hydra_attribute_names.include?(name.to_s) }
+          attributes.delete_if { |name| self.class.hydra_attribute_names.include?(name.to_s) }
         else
           hydra_attributes = nil
         end
