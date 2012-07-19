@@ -15,4 +15,4 @@ Feature: destroy hydra attributes
       | entity_type | name  |
       | Product     | price |
     Then model "Product" should not respond to "price"
-    And total "HydraAttribute::HydraProductFloatValue" records should be "0"
+    And total "HydraAttribute::HydraFloatProduct" records should be "0"

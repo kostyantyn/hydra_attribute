@@ -14,9 +14,9 @@ ActiveRecord::Schema.define do
     t.datetime "updated_at",                  :null => false
   end
 
-  add_index "hydra_attributes", ["entity_type", "name"], :name => "hydra_attributes_composite_index", :unique => true
+  add_index "hydra_attributes", ["entity_type", "name"], :name => "hydra_attributes_index", :unique => true
 
-  create_table "hydra_product_boolean_values", :force => true do |t|
+  create_table "hydra_boolean_products", :force => true do |t|
     t.integer  "entity_id",          :null => false
     t.integer  "hydra_attribute_id", :null => false
     t.boolean  "value"
@@ -24,9 +24,9 @@ ActiveRecord::Schema.define do
     t.datetime "updated_at",         :null => false
   end
 
-  add_index "hydra_product_boolean_values", ["entity_id", "hydra_attribute_id"], :name => "hydra_boolean_values_composite_index", :unique => true
+  add_index "hydra_boolean_products", ["entity_id", "hydra_attribute_id"], :name => "hydra_boolean_products_index", :unique => true
 
-  create_table "hydra_product_datetime_values", :force => true do |t|
+  create_table "hydra_datetime_products", :force => true do |t|
     t.integer  "entity_id",          :null => false
     t.integer  "hydra_attribute_id", :null => false
     t.datetime "value"
@@ -34,9 +34,9 @@ ActiveRecord::Schema.define do
     t.datetime "updated_at",         :null => false
   end
 
-  add_index "hydra_product_datetime_values", ["entity_id", "hydra_attribute_id"], :name => "hydra_datetime_values_composite_index", :unique => true
+  add_index "hydra_datetime_products", ["entity_id", "hydra_attribute_id"], :name => "hydra_datetime_products_index", :unique => true
 
-  create_table "hydra_product_float_values", :force => true do |t|
+  create_table "hydra_float_products", :force => true do |t|
     t.integer  "entity_id",          :null => false
     t.integer  "hydra_attribute_id", :null => false
     t.float    "value"
@@ -44,9 +44,9 @@ ActiveRecord::Schema.define do
     t.datetime "updated_at",         :null => false
   end
 
-  add_index "hydra_product_float_values", ["entity_id", "hydra_attribute_id"], :name => "hydra_float_values_composite_index", :unique => true
+  add_index "hydra_float_products", ["entity_id", "hydra_attribute_id"], :name => "hydra_float_products_index", :unique => true
 
-  create_table "hydra_product_integer_values", :force => true do |t|
+  create_table "hydra_integer_products", :force => true do |t|
     t.integer  "entity_id",          :null => false
     t.integer  "hydra_attribute_id", :null => false
     t.integer  "value"
@@ -54,9 +54,9 @@ ActiveRecord::Schema.define do
     t.datetime "updated_at",         :null => false
   end
 
-  add_index "hydra_product_integer_values", ["entity_id", "hydra_attribute_id"], :name => "hydra_integer_values_composite_index", :unique => true
+  add_index "hydra_integer_products", ["entity_id", "hydra_attribute_id"], :name => "hydra_integer_products_index", :unique => true
 
-  create_table "hydra_product_string_values", :force => true do |t|
+  create_table "hydra_string_products", :force => true do |t|
     t.integer  "entity_id",          :null => false
     t.integer  "hydra_attribute_id", :null => false
     t.string   "value"
@@ -64,9 +64,9 @@ ActiveRecord::Schema.define do
     t.datetime "updated_at",         :null => false
   end
 
-  add_index "hydra_product_string_values", ["entity_id", "hydra_attribute_id"], :name => "hydra_string_values_composite_index", :unique => true
+  add_index "hydra_string_products", ["entity_id", "hydra_attribute_id"], :name => "hydra_string_products_index", :unique => true
 
-  create_table "hydra_product_text_values", :force => true do |t|
+  create_table "hydra_text_products", :force => true do |t|
     t.integer  "entity_id",          :null => false
     t.integer  "hydra_attribute_id", :null => false
     t.text     "value"
@@ -74,5 +74,5 @@ ActiveRecord::Schema.define do
     t.datetime "updated_at",         :null => false
   end
 
-  add_index "hydra_product_text_values", ["entity_id", "hydra_attribute_id"], :name => "hydra_text_values_composite_index", :unique => true
+  add_index "hydra_text_products", ["entity_id", "hydra_attribute_id"], :name => "hydra_text_products_index", :unique => true
 end

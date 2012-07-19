@@ -28,7 +28,7 @@ module HydraAttribute
     end
 
     def model_name
-      "Hydra#{klass.model_name}#{type.to_s.titleize}Value"
+      "Hydra#{type.to_s.capitalize}#{klass.model_name}"
     end
 
     def class_name
@@ -36,7 +36,7 @@ module HydraAttribute
     end
 
     def table_name
-      "hydra_#{klass.table_name.singularize}_#{type}_values"
+      "hydra_#{type}_#{klass.table_name}"
     end
 
     def association_name

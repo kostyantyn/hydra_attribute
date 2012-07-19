@@ -19,7 +19,7 @@ module HydraAttribute
       create_attributes unless table_exists?(:hydra_attributes)
 
       SUPPORT_TYPES.each do |type|
-        table_name = "hydra_#{name.to_s.singularize}_#{type}_values"
+        table_name = "hydra_#{type}_#{name}"
         create_table table_name do |t|
           t.integer :entity_id,          null: false
           t.integer :hydra_attribute_id, null: false
@@ -32,8 +32,7 @@ module HydraAttribute
 
     def drop_entity(name)
       SUPPORT_TYPES.each do |type|
-        table_name = "hydra_#{name.to_s.singularize}_#{type}_values"
-        drop_table table_name
+        drop_table "hydra_#{type}_#{name}"
       end
 
       drop_table :hydra_attributes if tables.one? { |table| table.start_with?('hydra_') }
@@ -50,7 +49,7 @@ module HydraAttribute
         t.string :default_value
         t.timestamps
       end
-      add_index :hydra_attributes, [:entity_type, :name], unique: true, name: 'hydra_attributes_composite_index'
+      add_index :hydra_attributes, [:entity_type, :name], unique: true, name: 'hydra_attributes_index'
     end
   end
 end
