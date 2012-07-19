@@ -37,9 +37,7 @@ module HydraAttribute
 
         def hydra_attribute(identifier)
           @hydra_attribute_cache ||= {}
-          return @hydra_attribute_cache[identifier] if @hydra_attribute_cache.has_key?(identifier)
-
-          @hydra_attribute_cache[identifier] = hydra_attributes.find do |hydra_attribute|
+          @hydra_attribute_cache[identifier] ||= hydra_attributes.find do |hydra_attribute|
             hydra_attribute.id == identifier || hydra_attribute.name == identifier
           end
         end
@@ -153,9 +151,22 @@ module HydraAttribute
         hydra_attribute = self.class.hydra_attribute(identifier)
         association = hydra_value_association(hydra_attribute.backend_type)
 
+        # TODO the following code should be in custom association class
         value_model = association.proxy.detect { |model| model.hydra_attribute_id == hydra_attribute.id }
-        value_model = association.build(hydra_attribute_id: hydra_attribute.id) if !value_model && force_build
-        value_model
+        if !value_model && force_build
+          if association.any?
+            association.target << value_model = association.last.dup
+            value_model.hydra_attribute_id = hydra_attribute.id
+            value_model.value = nil
+            value_model
+          else
+            association.build.tap do |model|
+              model.hydra_attribute_id = hydra_attribute.id # much faster then pass attributes to build method
+            end
+          end
+        else
+          value_model
+        end
       end
 
       def hydra_value_association(backend_type)
