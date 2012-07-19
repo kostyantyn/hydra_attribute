@@ -37,7 +37,9 @@ module HydraAttribute
 
         def hydra_attribute(identifier)
           @hydra_attribute_cache ||= {}
-          @hydra_attribute_cache[identifier] ||= hydra_attributes.find do |hydra_attribute|
+          return @hydra_attribute_cache[identifier] if @hydra_attribute_cache.has_key?(identifier)
+
+          @hydra_attribute_cache[identifier] = hydra_attributes.find do |hydra_attribute|
             hydra_attribute.id == identifier || hydra_attribute.name == identifier
           end
         end
@@ -99,8 +101,8 @@ module HydraAttribute
 
       def initialize(attributes = nil, options = {}, &block)
         if attributes
-          hydra_attributes = attributes.select { |key| self.class.hydra_attribute_names.include?(key.to_s) }
-          attributes.delete_if { |key| self.class.hydra_attribute_names.include?(key.to_s) }
+          hydra_attributes = attributes.select { |name| self.class.hydra_attribute_names?(name.to_s) }
+          attributes.delete_if { |name| self.class.hydra_attribute_names?(name.to_s) }
         else
           hydra_attributes = nil
         end
@@ -122,11 +124,10 @@ module HydraAttribute
       %w(attributes attributes_before_type_cast).each do |method|
         class_eval <<-EOS, __FILE__, __LINE__ + 1
           def #{method}
-            SUPPORT_TYPES.each_with_object(super) do |type, attrs|
-              association = AssociationBuilder.new(self.class, type).association_name
-              send(association).each do |model|
+            SUPPORT_TYPES.each_with_object(super) do |type, attributes|
+              hydra_value_association(type).proxy.each do |model|
                 hydra_attribute = self.class.hydra_attribute(model.hydra_attribute_id)
-                attrs[hydra_attribute.name] = model.#{method}['value']
+                attributes[hydra_attribute.name] = model.#{method}['value']
               end
             end
           end
@@ -150,15 +151,15 @@ module HydraAttribute
 
       def hydra_value_model(identifier, force_build = true)
         hydra_attribute = self.class.hydra_attribute(identifier)
-        collection = hydra_collection(hydra_attribute.backend_type)
+        association = hydra_value_association(hydra_attribute.backend_type)
 
-        value_model = collection.detect { |model| model.hydra_attribute_id == hydra_attribute.id }
-        value_model = collection.build(hydra_attribute_id: hydra_attribute.id) if !value_model && force_build
+        value_model = association.proxy.detect { |model| model.hydra_attribute_id == hydra_attribute.id }
+        value_model = association.build(hydra_attribute_id: hydra_attribute.id) if !value_model && force_build
         value_model
       end
 
-      def hydra_collection(backend_type)
-        send(::HydraAttribute::AssociationBuilder.new(self.class, backend_type).table_name)
+      def hydra_value_association(backend_type)
+        association(::HydraAttribute::AssociationBuilder.new(self.class, backend_type).association_name)
       end
 
       def method_missing(method, *args, &block)
