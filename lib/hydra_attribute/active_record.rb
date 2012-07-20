@@ -9,7 +9,7 @@ module HydraAttribute
       Builder.build(self)
     end
 
-    # Create hydra reflection class which assign custom association for value models.
+    # Create reflection for hydra association
     def create_reflection(macro, name, options, active_record)
       if name.to_s.start_with?('hydra_')
         reflections[name] = Reflection.new(macro, name, options, active_record)
