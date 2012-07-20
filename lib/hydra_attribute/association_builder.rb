@@ -40,7 +40,7 @@ module HydraAttribute
     end
 
     def association_name
-      table_name.to_sym
+      "hydra_#{type}_values".to_sym
     end
   end
 end
