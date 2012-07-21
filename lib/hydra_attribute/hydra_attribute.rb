@@ -16,7 +16,7 @@ module HydraAttribute
     private
 
     def delete_dependent_values
-      value_class = AssociationBuilder.new(entity_type.constantize, backend_type).class_name.constantize
+      value_class = AssociationBuilder.class_name(entity_type.constantize, backend_type).constantize
       value_class.delete_all(hydra_attribute_id: id)
     end
 

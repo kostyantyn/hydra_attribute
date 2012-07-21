@@ -67,15 +67,13 @@ module HydraAttribute
               send = "send(:'#{target}', *args)"
             end
 
-            body = "hydra_value_model(#{hydra_attribute.id}).#{send}"
-
-            unless current == "#{hydra_attribute.name}="
-              body.insert(0, "missing_attribute('#{hydra_attribute.name}', caller) unless hydra_value_model(#{hydra_attribute.id}, false); ")
-            end
-
             generated_hydra_attribute_methods.module_eval <<-EOS, __FILE__, __LINE__ + 1
               #{defn}
-                #{body}
+                if value_model = hydra_value_model(#{hydra_attribute.id})
+                  value_model.#{send}
+                else
+                  missing_attribute('#{hydra_attribute.name}', caller)
+                end
               end
             EOS
           end
@@ -97,22 +95,23 @@ module HydraAttribute
         end
       end
 
-      def initialize(attributes = nil, options = {}, &block)
-        if attributes
-          hydra_attributes = attributes.select { |name| self.class.hydra_attribute_names.include?(name.to_s) }
-          attributes.delete_if { |name| self.class.hydra_attribute_names.include?(name.to_s) }
-        else
-          hydra_attributes = nil
-        end
-
-        super(attributes, options) do
-          self.class.hydra_attributes.each do |a|
-            send("#{a.name}=", a.default_value)
-          end
-          assign_attributes(hydra_attributes)
-          block.call(self) if block_given?
-        end
-      end
+      #def initialize(attributes = nil, options = {}, &block)
+      #  super
+      #  if attributes
+      #    hydra_attributes = attributes.select { |name| self.class.hydra_attribute_names.include?(name.to_s) }
+      #    attributes.delete_if { |name| self.class.hydra_attribute_names.include?(name.to_s) }
+      #  else
+      #    hydra_attributes = nil
+      #  end
+      #
+      #  super(attributes, options) do
+      #    self.class.hydra_attributes.each do |a|
+      #      send("#{a.name}=", a.default_value)
+      #    end
+      #    assign_attributes(hydra_attributes)
+      #    block.call(self) if block_given?
+      #  end
+      #end
 
       def respond_to?(name, include_private = false)
         self.class.define_hydra_attribute_methods unless self.class.hydra_attribute_methods_generated?
@@ -122,8 +121,8 @@ module HydraAttribute
       %w(attributes attributes_before_type_cast).each do |method|
         class_eval <<-EOS, __FILE__, __LINE__ + 1
           def #{method}
-            SUPPORT_TYPES.each_with_object(super) do |type, attributes|
-              hydra_value_association(type).proxy.each do |model|
+            self.class.hydra_attribute_backend_types.each_with_object(super) do |type, attributes|
+              hydra_value_association(type).all_models.each do |model|
                 hydra_attribute = self.class.hydra_attribute(model.hydra_attribute_id)
                 attributes[hydra_attribute.name] = model.#{method}['value']
               end
@@ -137,7 +136,11 @@ module HydraAttribute
           def #{method}(attr_name)
             identifier = attr_name.to_s
             if self.class.hydra_attribute_names.include?(identifier)
-              hydra_value_model(identifier).#{method}('value')
+              if value_model = hydra_value_model(identifier)
+                value_model.#{method}('value')
+              else
+                missing_attribute(identifier, caller)
+              end
             else
               super
             end
@@ -147,19 +150,17 @@ module HydraAttribute
 
       private
 
-      def hydra_value_model(identifier, force_build = true)
-        hydra_attribute = self.class.hydra_attribute(identifier)
-        association = hydra_value_association(hydra_attribute.backend_type)
-
-        if force_build
-          association.detect_or_build(hydra_attribute_id: hydra_attribute.id, value: nil)
-        else
-          association.detect(hydra_attribute_id: hydra_attribute.id)
+      def hydra_value_model(identifier)
+        @hydra_value_model_cache ||= {}
+        @hydra_value_model_cache[identifier] ||= begin
+          hydra_attribute = self.class.hydra_attribute(identifier)
+          association = hydra_value_association(hydra_attribute.backend_type)
+          association.find_model_or_build(hydra_attribute_id: hydra_attribute.id)
         end
       end
 
       def hydra_value_association(backend_type)
-        association(::HydraAttribute::AssociationBuilder.new(self.class, backend_type).association_name)
+        association(::HydraAttribute::AssociationBuilder.association_name(backend_type))
       end
 
       def method_missing(method, *args, &block)
