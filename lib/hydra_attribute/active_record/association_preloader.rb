@@ -14,7 +14,7 @@ module HydraAttribute
       end
 
       def run
-        grouped_values do |association, values|
+        grouped_values do |association, values, white_list_attribute_ids|
           association.target.concat(values)
           association.lock_for_build!(white_list_attribute_ids)
         end
@@ -26,7 +26,7 @@ module HydraAttribute
         grouped_attribute_ids do |type, attribute_ids|
           association_name = AssociationBuilder.association_name(type)
           load_values(type, attribute_ids) do |record, values|
-            yield(record.association(association_name), values)
+            yield(record.association(association_name), values, attribute_ids)
           end
         end
       end
@@ -64,10 +64,6 @@ module HydraAttribute
         else
           klass.hydra_attributes
         end
-      end
-
-      def white_list_attribute_ids
-        @white_list_attribute_ids ||= hydra_attributes.map(&:id)
       end
 
       def attribute_limit?

@@ -1,5 +1,5 @@
 module HydraAttribute
-  SUPPORT_TYPES = [:string, :text, :integer, :float, :boolean, :datetime]
+  SUPPORT_TYPES = %w(string text integer float boolean datetime).freeze
 
   class << self
     def config

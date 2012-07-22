@@ -44,7 +44,9 @@ module HydraAttribute
       end
 
       def all_attribute_ids
-        locked_for_build ? white_list_for_build : owner.class.hydra_attribute_ids
+        hydra_attribute_ids  = owner.class.grouped_hydra_attribute_ids(reflection.backend_type)
+        hydra_attribute_ids &= white_list_for_build if locked_for_build?
+        hydra_attribute_ids
       end
 
       private

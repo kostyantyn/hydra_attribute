@@ -27,10 +27,19 @@ module HydraAttribute
           @hydra_attributes ||= HydraAttribute.where(entity_type: base_class.model_name)
         end
 
+        def grouped_hydra_attributes
+          @grouped_hydra_attributes ||= hydra_attributes.group_by(&:backend_type)
+        end
+
         %w(id name backend_type).each do |prefix|
           class_eval <<-EOS, __FILE__, __LINE__ + 1
             def hydra_attribute_#{prefix}s
               @hydra_attribute_#{prefix}s ||= hydra_attributes.map(&:#{prefix}).uniq
+            end
+
+            def grouped_hydra_attribute_#{prefix}s(type)
+              instance = "@grouped_hydra_attribute_\#{type}_#{prefix}s"
+              instance_variable_get(instance) || instance_variable_set(instance, grouped_hydra_attributes[type].map(&:#{prefix}).uniq)
             end
           EOS
         end
@@ -84,9 +93,18 @@ module HydraAttribute
             instance_methods.each { |m| undef_method(m) }
           end
 
-          @hydra_attributes                  = false
+          @hydra_attributes                  = nil
           @hydra_attribute_methods_generated = false
           @hydra_attribute_cache             = {}
+          @grouped_hydra_attributes          = nil
+
+          %w(id name backend_type).each do |prefix|
+            instance_variable_set("@hydra_attribute_#{prefix}s", nil)
+
+            SUPPORT_TYPES.each do |type|
+              instance_variable_set("@grouped_hydra_attribute_#{type}_#{prefix}s", nil)
+            end
+          end
         end
 
         def undefine_attribute_methods
@@ -94,24 +112,6 @@ module HydraAttribute
           super
         end
       end
-
-      #def initialize(attributes = nil, options = {}, &block)
-      #  super
-      #  if attributes
-      #    hydra_attributes = attributes.select { |name| self.class.hydra_attribute_names.include?(name.to_s) }
-      #    attributes.delete_if { |name| self.class.hydra_attribute_names.include?(name.to_s) }
-      #  else
-      #    hydra_attributes = nil
-      #  end
-      #
-      #  super(attributes, options) do
-      #    self.class.hydra_attributes.each do |a|
-      #      send("#{a.name}=", a.default_value)
-      #    end
-      #    assign_attributes(hydra_attributes)
-      #    block.call(self) if block_given?
-      #  end
-      #end
 
       def respond_to?(name, include_private = false)
         self.class.define_hydra_attribute_methods unless self.class.hydra_attribute_methods_generated?
