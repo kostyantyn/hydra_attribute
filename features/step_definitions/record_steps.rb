@@ -2,8 +2,28 @@ When /^load all "([^"]+)" records$/ do |klass|
   @records = Object.const_get(klass).all
 end
 
-When /^select "(first|last)" "([^"]+)" record$/ do |method, klass|
+When /^select (first|last) "([^"]+)" record$/ do |method, klass|
   @record = Object.const_get(klass).send(method)
+end
+
+When /^assign attributes as "([^"]+)":$/ do |format, table|
+  Array.wrap(table.send(format)).each do |hash|
+    @record.assign_attributes(type_cast_hash(hash))
+  end
+end
+
+When /^(save|destroy) record$/ do |action|
+  @record.send(action)
+end
+
+When /^keep "([^"]+)" attribute$/ do |attribute|
+  @keep ||= {}
+  @keep[attribute] = @record.send(attribute)
+end
+
+Then /^attribute "([^"]+)" (should(?:\snot)?) be the same$/ do |attribute, behavior|
+  method = behavior.sub(/\s/, '_')
+  @keep[attribute].send(method) == @record.send(attribute)
 end
 
 Then /^record (read attribute(?: before type cast)?) "([^"]+)" and value should be "([^"]+)"$/ do |method, attribute, value|
