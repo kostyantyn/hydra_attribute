@@ -16,109 +16,115 @@ gem 'hydra_attribute'
 ```
 and run `bundle install` from your shell.
     
-After successful installation run rails generator:
+Then we should generate our migration:
 ```shell
-rails generate hydra_attribute:install
-```
-
-This command generates hydra_attribute initializer:
-```ruby    
-HydraAttribute.setup do |config|
-  # Add prefix for all attribute tables
-  # config.table_prefix = 'hydra_'
-      
-  # Add prefix for has_many associations
-  # config.association_prefix = 'hydra_'
-      
-  # Wrap all associated models in HydraAttribute module
-  # config.use_module_for_associated_models = true
-end
-```
-
-And the last step is to generate db:migration:
-```shell
-rails generate migration create_hydra_attrubute_tables
+rails generate migration create_hydra_attributes
 ```    
-Migration should look like this:
+The content should be:
 ```ruby    
 class CreateHydraAttributeTables < ActiveRecord::Migration
   def up
-    HydraAttribute::Migration.new(self).migrate
+    create_hydra_entity :products do |t|
+      # add here all other columns that should be in the entity table
+      t.timestamps
+    end
   end
       
   def down
-    HydraAttribute::Migration.new(self).rollback
+    drop_hydra_entity :products
   end
 end
 ```
+
+##### or if we have already the entity table
+```ruby    
+class CreateHydraAttributeTables < ActiveRecord::Migration
+  def up
+    migrate_to_hydra_entity :products
+  end
+      
+  def down
+    rollback_from_hydra_entity :products
+  end
+end
+```
+
 ## Usage
 
-##### Generate model
+##### Create model
 ```shell
-rails generate model Product type:string name:string
-rails generate model SimpleProduct --migration=false --parent=Product
+rails generate model Product type:string name:string --migration=false
 rake db:migrate
 ```
 
-##### Describe EAV attributes
+##### Create some hydra attributes from `rails console`
 ```ruby
-class SimpleProduct < Product
-  attr_accessible :name, :title, :code, :quantity, :price, :active, :description
-  
-  define_hydra_attributes do
-    string  :title, :code
-    integer :quantity
-    float   :price
-    boolean :active
-    text    :description
-  end
-end
+Product.hydra_attributes.create(name: 'color', backend_type: 'string', default_value: 'green')
+Product.hydra_attributes.create(name: 'title', backend_type: 'string')
+Product.hydra_attributes.create(name: 'total', backend_type: 'integer', default_value: 1)
 ```
 
-##### Create some products
-```shell
-SimpleProduct.create(name: 'Book', title: 'book', code: '100', quantity: 5, price: 2.75, active: true,  description: '...')
-SimpleProduct.create(name: 'Book', title: 'book', code: '101', quantity: 5, price: 3.75, active: true,  description: '...')
-SimpleProduct.create(name: 'Book', title: 'book', code: '102', quantity: 4, price: 4.50, active: false, description: '...')
-SimpleProduct.create(name: 'Book', title: nil,    code: '103', quantity: 3, price: 4.50, active: true,  description: '...')
-SimpleProduct.create(name: 'Book',                code: '104', quantity: 2, price: 5.00, active: true,  description: '...')
+So we created three hydra attributes: **color**, **title** and **total**.
+* `name` is **required** and it is the name of attribute.  
+* `backend_type` is **required** and tells us in what table the value for this attribute will be stored.
+The whole list of allowed backend types are: `string`, `text`, `integer`, `float`, `boolean` and `datetime`  
+* `default_value` is **optional** and it sets the default value for attribute.
+
+##### Create several objects
+
+```ruby
+Product.create.attributes
+# {"id"=>1, created_at"=>..., "updated_at"=>..., "color"=>"green", "title"=>nil, "total"=>1}
+Product.create(color: 'red', title: 'toy').attributes
+# {"id"=>1, "created_at"=>..., "updated_at"=>..., "color"=>"red", "title"=>"toy", "total"=>1}
+Product.create(title: 'book', total: 2).attributes
+# {"id"=>1, "created_at"=>..., "updated_at"=>..., "color"=>"green", "title"=>"book", "total"=>2} 
 ```
 
-##### "where"
-```shell
-SimpleProduct.where(name: 'Book', quantity: 5, price: 2.75).first.attributes
-=> {"id"=>1, "type"=>"SimpleProduct", "name"=>"Book", "created_at"=>Tue, 05 Jun 2012 23:13:21 UTC +00:00, "updated_at"=>Tue, 05 Jun 2012 23:13:21 UTC +00:00, "title"=>"book", "code"=>"100", "quantity"=>5, "price"=>2.75, "active"=>true, "description"=>"..."} 
-
-SimpleProduct.where(title: 'book', active: false).first.attributes
-=> {"id"=>3, "type"=>"SimpleProduct", "name"=>"Book", "created_at"=>Tue, 05 Jun 2012 23:13:50 UTC +00:00, "updated_at"=>Tue, 05 Jun 2012 23:13:50 UTC +00:00, "title"=>"book", "code"=>"102", "quantity"=>4, "price"=>4.5, "active"=>false, "description"=>"..."}
-
-SimpleProduct.where(title: nil).first.attributes
-=> {"id"=>4, "type"=>"SimpleProduct", "name"=>"Book", "created_at"=>Tue, 05 Jun 2012 23:13:50 UTC +00:00, "updated_at"=>Tue, 05 Jun 2012 23:13:50 UTC +00:00, "title"=>nil, "code"=>"103", "quantity"=>3, "price"=>4.5, "active"=>true, "description"=>"..."} 
-
-SimpleProduct.where(title: nil).last.attributes
-=> {"id"=>5, "type"=>"SimpleProduct", "name"=>"Book", "created_at"=>Tue, 05 Jun 2012 23:13:51 UTC +00:00, "updated_at"=>Tue, 05 Jun 2012 23:13:51 UTC +00:00, "title"=>nil, "code"=>"104", "quantity"=>2, "price"=>5.0, "active"=>true, "description"=>"..."}
+##### Add the new attribute in runtime
+```ruby
+Product.hydra_attributes.create(name: 'price', backend_type: 'float', default_value: 0.0)
+Product.create(title: 'car', price: 2.50).attributes
+# {"id"=>4, "created_at"=>..., "updated_at"=>..., "color"=>"green", "title"=>"car", "price"=>2.5, "total"=>1} 
 ```
 
-##### "order" and "reverse_order"
-```shell
-SimpleProduct.order(:code).first.attributes
-=> {"id"=>1, "type"=>"SimpleProduct", "name"=>"Book", "created_at"=>Tue, 05 Jun 2012 23:30:48 UTC +00:00, "updated_at"=>Tue, 05 Jun 2012 23:30:49 UTC +00:00, "title"=>"book", "code"=>"100", "quantity"=>5, "price"=>2.75, "active"=>true, "description"=>"..."} 
+##### Obtain data
+```ruby
+Product.where(color: 'red').map(&:attributes)
+# [{"id"=>2, "created_at"=>..., "updated_at"=>..., "color"=>"red", "title"=>"toy", "price"=>0.0, "total"=>1}] 
+Product.where(color: 'green', price: nil).map(&:attributes)
+# [{"id"=>1, "created_at"=>..., "updated_at"=>..., "color"=>"green", "title"=>nil, "price"=>0.0, "total"=>1},  
+#  {"id"=>3, "created_at"=>..., "updated_at"=>..., "color"=>"green", "title"=>"book", "price"=>0.0, "total"=>2}] 
+```
+**Notice**: the attribute `price` was added in runtime and records that were created before have not this attribute
+so they matched this condition `where(price: nil)`
 
-SimpleProduct.order(:code).reverse_order.first.attributes
-=> {"id"=>5, "type"=>"SimpleProduct", "name"=>"Book", "created_at"=>Tue, 05 Jun 2012 23:30:51 UTC +00:00, "updated_at"=>Tue, 05 Jun 2012 23:30:51 UTC +00:00, "title"=>nil, "code"=>"104", "quantity"=>2, "price"=>5.0, "active"=>true, "description"=>"..."} 
+##### Order data
+```ruby
+Product.order(:color).first.attributes
+# {"id"=>1, "created_at"=>..., "updated_at"=>..., "color"=>"green", "title"=>nil, "price"=>0.0, "total"=>1} 
+Product.order(:color).reverse_order.first.attributes
+# {"id"=>2, "created_at"=>..., "updated_at"=>..., "color"=>"red", "title"=>"toy", "price"=>0.0, "total"=>1}
 ```
 
-##### "select"
-```shell
-SimpleProduct.select([:code, :price]).map(&:attributes)
-=> [{"code"=>"100", "price"=>2.75}, {"code"=>"101", "price"=>3.75}, {"code"=>"102", "price"=>4.5}, {"code"=>"103", "price"=>4.5}, {"code"=>"104", "price"=>5.0}]
+##### Select concrete attributes
+```ruby
+Product.select([:color, :title]).map(&:attributes)
+# [{"id"=>1, "color"=>"green", "title"=>nil}, {"id"=>2, "color"=>"red", "title"=>"toy"},  
+     {"id"=>3, "color"=>"green", "title"=>"book"}, {"id"=>4, "color"=>"green", "title"=>"car"}]
+```
+**Notice**: `id` attribute will be added if we want to select hydra attribute
+
+##### Group by attribute
+```ruby
+Product.group(:color).count
+=> {"green"=>3, "red"=>1}
 ```
 
-##### "group"
-```shell
-SimpleProduct.group(:name, :price).count
-=> {["Book", 2.75]=>1, ["Book", 3.75]=>1, ["Book", 4.5]=>2, ["Book", 5.0]=>1}
-```
+## Notice
+
+The each new minor version doesn't guarantee back compatibility with previous one 
+until the first major version will be released. 
 
 ## Contributing
 
