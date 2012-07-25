@@ -36,7 +36,7 @@ module HydraAttribute
 
         attribute_ids.each_slice(in_clause_length || attribute_ids.length) do |sliced_attribute_ids|
           records.each_slice(in_clause_length || records.length) do |sliced_records|
-            values = AssociationBuilder.class_name(klass, type).constantize.where(entity_id: sliced_records, hydra_attribute_id: sliced_attribute_ids)
+            values = AssociationBuilder.class_name(klass, type).constantize.select([:id, :entity_id, :hydra_attribute_id, :value]).where(entity_id: sliced_records, hydra_attribute_id: sliced_attribute_ids)
             group_records_with_values(sliced_records, values).each do |record_id, grouped_values|
               yield(hashed_records[record_id], grouped_values)
             end

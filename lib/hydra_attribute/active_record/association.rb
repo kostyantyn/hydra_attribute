@@ -58,14 +58,18 @@ module HydraAttribute
         record
       end
 
-      # Optimized record
+      # Optimized method
       # Attributes are written via low level function without additional checks
       def build_record(attributes, _)
         reflection.klass.new do |record|
-          default_value = owner.class.hydra_attribute(attributes[:hydra_attribute_id]).default_value
-          attributes.reverse_merge(value: default_value).each do |name, value|
-            record.send(:write_attribute, name, value)
+          unless attributes.has_key?(:value)
+            attributes[:value] = owner.class.hydra_attribute(attributes[:hydra_attribute_id]).default_value
           end
+
+          record.send :write_attribute, 'id', attributes[:id]
+          record.send :write_attribute, 'entity_id', owner.id
+          record.send :write_attribute, 'hydra_attribute_id', attributes[:hydra_attribute_id]
+          record.send :write_attribute, 'value', attributes[:value]
         end
       end
     end
