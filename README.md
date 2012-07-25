@@ -111,14 +111,14 @@ Product.order(:color).reverse_order.first.attributes
 ```ruby
 Product.select([:color, :title]).map(&:attributes)
 # [{"id"=>1, "color"=>"green", "title"=>nil}, {"id"=>2, "color"=>"red", "title"=>"toy"},  
-     {"id"=>3, "color"=>"green", "title"=>"book"}, {"id"=>4, "color"=>"green", "title"=>"car"}]
+#  {"id"=>3, "color"=>"green", "title"=>"book"}, {"id"=>4, "color"=>"green", "title"=>"car"}]
 ```
 **Notice**: `id` attribute will be added if we want to select hydra attribute
 
 ##### Group by attribute
 ```ruby
 Product.group(:color).count
-=> {"green"=>3, "red"=>1}
+# {"green"=>3, "red"=>1}
 ```
 
 ## Notice
