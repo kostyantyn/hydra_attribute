@@ -42,7 +42,7 @@ module HydraAttribute
     end
 
     def add_association
-      klass.has_many association_name, class_name: class_name, foreign_key: :entity_id, dependent: :delete_all, autosave: false
+      klass.has_many association_name, class_name: class_name, foreign_key: :entity_id, autosave: false
     end
 
     def model_name

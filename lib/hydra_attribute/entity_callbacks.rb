@@ -32,8 +32,8 @@ module HydraAttribute
     end
 
     def destroy_hydra_values
-      self.class.grouped_hydra_attribute_backend_types.each do |type|
-        AssociationBuilder.class_name(self.class, type).constantize
+      self.class.hydra_attribute_backend_types.each do |type|
+        AssociationBuilder.class_name(self.class, type).constantize.where(entity_id: id).delete_all
       end
     end
 
