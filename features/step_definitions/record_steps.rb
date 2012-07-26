@@ -1,9 +1,9 @@
 When /^load all "([^"]+)" records$/ do |klass|
-  @records = Object.const_get(klass).all
+  @records = klass.constantize.all
 end
 
 When /^select (first|last) "([^"]+)" record$/ do |method, klass|
-  @record = Object.const_get(klass).send(method)
+  @record = klass.constantize.send(method)
 end
 
 When /^assign attributes as "([^"]+)":$/ do |format, table|
@@ -19,6 +19,10 @@ end
 When /^keep "([^"]+)" attribute$/ do |attribute|
   @keep ||= {}
   @keep[attribute] = @record.send(attribute)
+end
+
+Then /^record should be nil$/ do
+  @record.should be_nil
 end
 
 Then /^attribute "([^"]+)" (should(?:\snot)?) be the same$/ do |attribute, behavior|
