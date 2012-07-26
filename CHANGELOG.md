@@ -1,3 +1,8 @@
+**0.3.0 (July 27, 2012)**
+* All attribibutes are now stored in database
+* Support default value for attributes
+* `#inspect` method displays hydra attributes too
+
 **0.2.0 (June 13, 2012)**
 * Implement `group` method for `ActiveRecord::Relation` object 
 
