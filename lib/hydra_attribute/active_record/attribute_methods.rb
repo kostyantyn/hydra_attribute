@@ -111,6 +111,12 @@ module HydraAttribute
           reset_hydra_attribute_methods
           super
         end
+
+        def inspect
+          attr_list  = columns.map { |c| "#{c.name}: #{c.type}" }
+          attr_list += hydra_attributes.map { |a| "#{a.name}: #{a.backend_type}" }
+          "#{name}(#{attr_list.join(', ')})"
+        end
       end
 
       def respond_to?(name, include_private = false)
@@ -118,17 +124,16 @@ module HydraAttribute
         super
       end
 
-      %w(attributes attributes_before_type_cast).each do |method|
-        class_eval <<-EOS, __FILE__, __LINE__ + 1
-          def #{method}
-            self.class.hydra_attribute_backend_types.each_with_object(super) do |type, attributes|
-              hydra_value_association(type).all_models.each do |model|
-                hydra_attribute = self.class.hydra_attribute(model.hydra_attribute_id)
-                attributes[hydra_attribute.name] = model.#{method}['value']
-              end
-            end
-          end
-        EOS
+      def attributes
+        hydra_value_models.each_with_object(super) do |model, attributes|
+          attributes[model.attribute_name] = model.read_attribute('value')
+        end
+      end
+
+      def attributes_before_type_cast
+        hydra_value_models.each_with_object(super) do |model, attributes|
+          attributes[model.attribute_name] = model.read_attribute_before_type_cast('value')
+        end
       end
 
       %w(read_attribute read_attribute_before_type_cast).each do |method|
@@ -148,6 +153,22 @@ module HydraAttribute
         EOS
       end
 
+      def hydra_attribute_names
+        @hydra_attribute_names ||= hydra_value_models.map(&:attribute_name)
+      end
+
+      def hydra_attribute_backend_types
+        @hydra_attribute_backend_types ||= self.class.hydra_attribute_backend_types.select do |backend_type|
+          hydra_value_association(backend_type).all_models.any?
+        end
+      end
+
+      def inspect
+        attrs  = self.class.column_names.map { |name| "#{name}: #{attribute_for_inspect(name)}" }
+        attrs += hydra_value_models.map { |model| "#{model.attribute_name}: #{model.attribute_for_inspect('value')}" }
+        "#<#{self.class} #{attrs.join(', ')}>"
+      end
+
       private
 
       def hydra_value_model(identifier)
@@ -156,6 +177,12 @@ module HydraAttribute
           hydra_attribute = self.class.hydra_attribute(identifier)
           association = hydra_value_association(hydra_attribute.backend_type)
           association.find_model_or_build(hydra_attribute_id: hydra_attribute.id)
+        end
+      end
+
+      def hydra_value_models
+        @hydra_value_models ||= self.class.hydra_attribute_backend_types.inject([]) do |models, backend_type|
+          models + hydra_value_association(backend_type).all_models
         end
       end
 

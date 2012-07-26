@@ -39,6 +39,12 @@ module HydraAttribute
       value_model.belongs_to :entity, class_name: klass.model_name, autosave: false
       value_model.belongs_to :hydra_attribute, class_name: 'HydraAttribute::HydraAttribute'
       value_model.attr_accessible :hydra_attribute_id, :value
+
+      value_model.class_eval <<-EOS, __FILE__, __LINE__ + 1
+        def attribute_name
+          #{klass.model_name}.hydra_attribute(hydra_attribute_id).name
+        end
+      EOS
     end
 
     def add_association
