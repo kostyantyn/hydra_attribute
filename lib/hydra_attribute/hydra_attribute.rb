@@ -4,6 +4,8 @@ module HydraAttribute
   class HydraAttribute < ActiveRecord::Base
     self.table_name = 'hydra_attributes'
 
+    attr_accessible :name, :backend_type, :default_value
+
     with_options presence: true do |klass|
       klass.validates :entity_type,  inclusion: { in: lambda { |attr| [(attr.entity_type.constantize.name rescue nil)] } }
       klass.validates :name,         uniqueness: { scope: :entity_type }
