@@ -57,6 +57,13 @@ rails generate model Product type:string name:string --migration=false
 rake db:migrate
 ```
 
+and add `use_hydra_attributes` to Product class
+```ruby
+class Product < ActiveRecord::Base
+  use_hydra_attributes
+end
+```
+
 ##### Create some hydra attributes from `rails console`
 ```ruby
 Product.hydra_attributes.create(name: 'color', backend_type: 'string', default_value: 'green')
