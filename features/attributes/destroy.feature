@@ -4,9 +4,9 @@ Feature: destroy hydra attributes
   And all values for this attribute should be removed
 
   Background: create hydra attributes
-    Given create hydra attributes for "Product" as "hashes":
-      | name  | backend_type |
-      | price | float        |
+    Given create hydra attributes for "Product" with role "admin" as "hashes":
+      | name           | backend_type   | white_list     |
+      | [string:price] | [string:float] | [boolean:true] |
 
   Scenario: destroy hydra attribute in runtime
     Given create "Product" model with attributes as "rows_hash":

@@ -3,9 +3,9 @@ Feature: update hydra attribute
   Then model should be notified about this
 
   Background: create hydra attributes
-    Given create hydra attributes for "Product" as "hashes":
-      | name | backend_type | default_value |
-      | code | integer      | 1             |
+    Given create hydra attributes for "Product" with role "admin" as "hashes":
+      | name          | backend_type     | default_value | white_list     |
+      | [string:code] | [string:integer] | [integer:1]   | [boolean:true] |
 
   Scenario: update default value in runtime
     Given create "Product" model

@@ -19,8 +19,21 @@ module HydraAttribute
     end
 
     def build
+      build_associations
+      build_white_list
+    end
+
+    private
+
+    def build_associations
       SUPPORT_TYPES.each do |type|
         AssociationBuilder.build(klass, type)
+      end
+    end
+
+    def build_white_list
+      klass.hydra_attributes.each do |hydra_attribute|
+        klass.accessible_attributes.add(hydra_attribute.name) if hydra_attribute.white_list?
       end
     end
   end

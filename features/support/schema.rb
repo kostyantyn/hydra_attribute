@@ -10,6 +10,7 @@ ActiveRecord::Schema.define do
     t.string   "name",          :limit => 32, :null => false
     t.string   "backend_type",  :limit => 16, :null => false
     t.string   "default_value"
+    t.boolean  "white_list",                  :null => false, :default => false
     t.datetime "created_at",                  :null => false
     t.datetime "updated_at",                  :null => false
   end

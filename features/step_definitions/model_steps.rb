@@ -8,9 +8,9 @@ Given /^create "([^"]+)" model with attributes as "([^"]+):"$/ do |klass, format
   end
 end
 
-Given /^create hydra attributes for "([^"]+)" as "([^"]+)":$/ do |klass, format, table|
+Given /^create hydra attributes for "([^"]+)" with role "([^"]+)" as "([^"]+)":$/ do |klass, role, format, table|
   Array.wrap(table.send(format)).each do |hash|
-    klass.constantize.hydra_attributes.create!(type_cast_hash(hash))
+    klass.constantize.hydra_attributes.create!(type_cast_hash(hash), as: role.to_sym)
   end
 end
 

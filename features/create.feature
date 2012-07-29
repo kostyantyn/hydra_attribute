@@ -3,13 +3,13 @@ Feature: create models with hydra attributes
   Then hydra attributes should be saved with default values
 
   Background: create hydra attributes
-    Given create hydra attributes for "Product" as "hashes":
-      | name    | backend_type | default_value       |
-      | code    | string       | [nil:]              |
-      | price   | float        | [string:0]          |
-      | active  | boolean      | [string:0]          |
-      | info    | text         | [string:]           |
-      | started | datetime     | [string:2012-01-01] |
+    Given create hydra attributes for "Product" with role "admin" as "hashes":
+      | name             | backend_type      | default_value       | white_list     |
+      | [string:code]    | [string:string]   | [nil:]              | [boolean:true] |
+      | [string:price]   | [string:float]    | [string:0]          | [boolean:true] |
+      | [string:active]  | [string:boolean]  | [string:0]          | [boolean:true] |
+      | [string:info]    | [string:text]     | [string:]           | [boolean:true] |
+      | [string:started] | [string:datetime] | [string:2012-01-01] | [boolean:true] |
 
   Scenario: create model without hydra attributes
     Given create "Product" model

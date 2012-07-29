@@ -4,10 +4,10 @@ require 'database_cleaner'
 require 'database_cleaner/cucumber'
 
 ActiveSupport.on_load(:active_record) do
-  # self.attr_accessible nil
+  self.attr_accessible :name # we create entity model with one column "name" for testing
   self.default_timezone = :utc
   unless ActiveRecord::VERSION::STRING.start_with?('3.1.')
-    # self.mass_assignment_sanitizer = :strict
+    self.mass_assignment_sanitizer = :strict
   end
   extend HydraAttribute::ActiveRecord
 end

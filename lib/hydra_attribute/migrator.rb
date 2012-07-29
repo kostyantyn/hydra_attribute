@@ -47,10 +47,11 @@ module HydraAttribute
 
     def create_attribute
       create_table :hydra_attributes do |t|
-        t.string :entity_type,  limit: 32, null: false
-        t.string :name,         limit: 32, null: false
-        t.string :backend_type, limit: 16, null: false
-        t.string :default_value
+        t.string  :entity_type,  limit: 32, null: false
+        t.string  :name,         limit: 32, null: false
+        t.string  :backend_type, limit: 16, null: false
+        t.string  :default_value
+        t.boolean :white_list,              null: false, default: false
         t.timestamps
       end
       add_index :hydra_attributes, [:entity_type, :name], unique: true, name: 'hydra_attributes_index'
