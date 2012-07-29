@@ -71,11 +71,15 @@ Product.hydra_attributes.create(name: 'title', backend_type: 'string')
 Product.hydra_attributes.create(name: 'total', backend_type: 'integer', default_value: 1)
 ```
 
-So we created three hydra attributes: **color**, **title** and **total**.
-* `name` is **required** and it is the name of attribute.  
-* `backend_type` is **required** and tells us in what table the value for this attribute will be stored.
-The whole list of allowed backend types are: `string`, `text`, `integer`, `float`, `boolean` and `datetime`  
-* `default_value` is **optional** and it sets the default value for attribute.
+Creating method accepts the following options:
+* **name**. The **required** parameter. Allowed any string.   
+* **backend_type**. The **required** parameter. Allowed one of the following strings: `string`, `text`, `integer`, `float`, `boolean` and `datetime`.
+* **default_value**. The **optional** parameter. Allowed any value. By default is `nil`.
+* **white_list**. The **optional** parameter. Should be `true` or `flase`. By defauls is `false`. if pass `white_list: true` this attribute will be added to white list and will be allowed for mass-assignment. This parameter is in black list for creation by default so if you want to pass it, you have to pass the role `as: :admin` too.
+
+  ```ruby
+    Product.hydra_attributes.create({name: 'title', backend_type: 'string', white_list: true}, as: :admin)
+  ```
 
 ##### Create several objects
 
