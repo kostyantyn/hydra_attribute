@@ -3,9 +3,9 @@ Feature: update hydra attribute
   Then model should be notified about this
 
   Background: create hydra attributes
-    Given create "HydraAttribute::HydraAttribute" model with attributes as "hashes":
-      | entity_type | name | backend_type | default_value |
-      | Product     | code | integer      | 1             |
+    Given create hydra attributes for "Product" as "hashes":
+      | name | backend_type | default_value |
+      | code | integer      | 1             |
 
   Scenario: update default value in runtime
     Given create "Product" model

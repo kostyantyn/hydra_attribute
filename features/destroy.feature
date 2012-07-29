@@ -3,13 +3,13 @@ Feature: destroy model
   Then all associated values should be deleted too
 
   Background: create hydra attributes
-    Given create "HydraAttribute::HydraAttribute" models with attributes as "hashes":
-      | entity_type | name    | backend_type | default_value       |
-      | Product     | code    | string       | [nil:]              |
-      | Product     | price   | float        | [string:0]          |
-      | Product     | active  | boolean      | [string:0]          |
-      | Product     | info    | text         | [string:]           |
-      | Product     | started | datetime     | [string:2012-01-01] |
+    Given create hydra attributes for "Product" as "hashes":
+      | name    | backend_type | default_value       |
+      | code    | string       | [nil:]              |
+      | price   | float        | [string:0]          |
+      | active  | boolean      | [string:0]          |
+      | info    | text         | [string:]           |
+      | started | datetime     | [string:2012-01-01] |
 
   Scenario: destroy model
     Given create "Product" model with attributes as "hashes":

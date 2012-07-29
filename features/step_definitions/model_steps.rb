@@ -8,6 +8,12 @@ Given /^create "([^"]+)" model with attributes as "([^"]+):"$/ do |klass, format
   end
 end
 
+Given /^create hydra attributes for "([^"]+)" as "([^"]+)":$/ do |klass, format, table|
+  Array.wrap(table.send(format)).each do |hash|
+    klass.constantize.hydra_attributes.create!(type_cast_hash(hash))
+  end
+end
+
 Given /^(load and )?(save|create|update(?: all| attributes)?|destroy(?: all)?|delete(?: all)?)(?: for)? "([^"]+)" models? with attributes as "([^"]+)":$/ do |load, action, klass, format, table|
   action = action.gsub(' ', '_')
   klass  = klass.constantize
@@ -17,12 +23,6 @@ Given /^(load and )?(save|create|update(?: all| attributes)?|destroy(?: all)?|de
     models.each do |model|
       model.send(action, type_cast_hash(hash))
     end
-  end
-end
-
-Given /^create "([^"]+)" association for "([^"]+)" with attributes as "([^"]+)":$/ do |association, klass, format, table|
-  Array.wrap(table.send(format)).each do |hash|
-    klass.constantize.send(association).create(hash)
   end
 end
 

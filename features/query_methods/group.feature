@@ -3,11 +3,11 @@ Feature: group conditions by hydra attributes
   Then correct table should be joined and group condition should be added
 
   Background: create models and describe hydra attributes
-    Given create "HydraAttribute::HydraAttribute" models with attributes as "hashes":
-      | entity_type | name  | backend_type |
-      | Product     | code  | integer      |
-      | Product     | title | string       |
-      | Product     | total | integer      |
+    Given create hydra attributes for "Product" as "hashes":
+      | name  | backend_type |
+      | code  | integer      |
+      | title | string       |
+      | total | integer      |
     Given create "Product" model with attributes as "hashes":
       | name       | code        | title      | total       |
       | [string:a] | [integer:1] | [string:q] | [integer:5] |

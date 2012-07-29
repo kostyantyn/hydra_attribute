@@ -3,14 +3,14 @@ Feature: select concrete attributes
   Then model should response only to these attributes
 
   Background: create hydra attributes
-    Given create "HydraAttribute::HydraAttribute" models with attributes as "hashes":
-      | entity_type | name     | backend_type |
-      | Product     | code     | integer      |
-      | Product     | price    | float        |
-      | Product     | title    | string       |
-      | Product     | note     | text         |
-      | Product     | active   | boolean      |
-      | Product     | schedule | datetime     |
+    Given create hydra attributes for "Product" as "hashes":
+      | name     | backend_type |
+      | code     | integer      |
+      | price    | float        |
+      | title    | string       |
+      | note     | text         |
+      | active   | boolean      |
+      | schedule | datetime     |
     And create "Product" model with attributes as "hashes":
       | name       | code        | price     | title      | note       | active          | schedule              |
       | [string:a] | [integer:1] | [float:4] | [string:q] | [string:z] | [boolean:true]  | [datetime:2012-06-01] |

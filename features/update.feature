@@ -3,11 +3,11 @@ Feature: update hydra attributes
   Then entity should be touched
 
   Background: create hydra attributes
-    Given create "HydraAttribute::HydraAttribute" models with attributes as "hashes":
-      | entity_type | name  | backend_type | default_value |
-      | Product     | code  | string       | [string:###]  |
-      | Product     | title | string       |               |
-      | Product     | total | integer      | [integer:1]   |
+    Given create hydra attributes for "Product" as "hashes":
+      | name  | backend_type | default_value |
+      | code  | string       | [string:###]  |
+      | title | string       |               |
+      | total | integer      | [integer:1]   |
     And create "Product" model
 
   Scenario Outline: update attributes

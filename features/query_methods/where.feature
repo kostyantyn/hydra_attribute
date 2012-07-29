@@ -6,14 +6,14 @@ Feature: hydra attribute where conditions
   Then records with nil and blank value should be selected
 
   Background: create hydra attributes
-    Given create "HydraAttribute::HydraAttribute" models with attributes as "hashes":
-      | entity_type | name    | backend_type |
-      | Product     | code    | string       |
-      | Product     | summary | string       |
-      | Product     | title   | string       |
-      | Product     | price   | float        |
-      | Product     | active  | boolean      |
-      | Product     | state   | integer      |
+    Given create hydra attributes for "Product" as "hashes":
+      | name    | backend_type |
+      | code    | string       |
+      | summary | string       |
+      | title   | string       |
+      | price   | float        |
+      | active  | boolean      |
+      | state   | integer      |
 
   Scenario: filter by one hydra attribute
     Given create "Product" model with attributes as "hashes":

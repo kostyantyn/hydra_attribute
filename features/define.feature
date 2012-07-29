@@ -3,10 +3,10 @@ Feature: define hydra attributes
   Then entity should respond to attributes which are saved in hydra_attributes table
 
   Background: create hydra attributes
-    Given create "HydraAttribute::HydraAttribute" models with attributes as "hashes":
-      | entity_type | name  | backend_type |
-      | Product     | code  | string       |
-      | Product     | price | float        |
+    Given create hydra attributes for "Product" as "hashes":
+      | name  | backend_type |
+      | code  | string       |
+      | price | float        |
 
   Scenario Outline: models should respond to hydra attributes
       Then model "<model>" <action> respond to "<attributes>"

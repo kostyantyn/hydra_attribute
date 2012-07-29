@@ -3,20 +3,20 @@ Feature: create hydra attributes
   Then entity should respond to it
 
   Background: create hydra attributes
-    Given create "HydraAttribute::HydraAttribute" model with attributes as "hashes":
-      | entity_type | name  | backend_type |
-      | Product     | price | float        |
+    Given create hydra attributes for "Product" as "hashes":
+      | name  | backend_type |
+      | price | float        |
 
   Scenario: create hydra attribute in runtime
     # Important: when respond_to? is called the hydra attributes are being loaded for entity class
     Then model "Product" should respond to "price"
-    Given create "HydraAttribute::HydraAttribute" model with attributes as "hashes":
-      | entity_type | name  | backend_type |
-      | Product     | title | string       |
+    Given create hydra attributes for "Product" as "hashes":
+      | name  | backend_type |
+      | title | string       |
     Then model "Product" should respond to "title"
 
   Scenario: create hydra attribute from entity class
-    Given create "hydra_attributes" association for "Product" with attributes as "hashes":
+    Given create hydra attributes for "Product" as "hashes":
       | name | backend_type |
       | code | integer      |
     Then model "Product" should respond to "code"

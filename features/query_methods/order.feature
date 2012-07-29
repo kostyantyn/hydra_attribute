@@ -12,11 +12,11 @@ Feature: order conditions by hydra attributes
   Then old hydra attributes should be removed and new should be added
 
   Background: create hydra attributes
-    Given create "HydraAttribute::HydraAttribute" models with attributes as "hashes":
-      | entity_type | name  | backend_type |
-      | Product     | code  | integer      |
-      | Product     | state | integer      |
-      | Product     | title | string       |
+    Given create hydra attributes for "Product" as "hashes":
+      | name  | backend_type |
+      | code  | integer      |
+      | state | integer      |
+      | title | string       |
 
   Scenario Outline: order by one field
     Given create "Product" model with attributes as "hashes":

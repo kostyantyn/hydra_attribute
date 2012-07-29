@@ -3,11 +3,16 @@ require 'hydra_attribute'
 require 'database_cleaner'
 require 'database_cleaner/cucumber'
 
+ActiveSupport.on_load(:active_record) do
+  # self.attr_accessible nil
+  self.default_timezone = :utc
+  unless ActiveRecord::VERSION::STRING.start_with?('3.1.')
+    # self.mass_assignment_sanitizer = :strict
+  end
+  extend HydraAttribute::ActiveRecord
+end
 
-ActiveRecord::Base.default_timezone = :utc
 ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')
-ActiveRecord::Base.extend(HydraAttribute::ActiveRecord)
-
 DatabaseCleaner.strategy = :truncation
 
 Before do
