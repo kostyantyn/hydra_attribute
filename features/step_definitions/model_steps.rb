@@ -1,3 +1,7 @@
+Given /^redefine "([^"]+)" class to use hydra attributes$/ do |klass|
+  redefine_hydra_entity(klass)
+end
+
 Given /^create "([^"]+)" model$/ do |klass|
   klass.constantize.create!
 end
@@ -38,4 +42,9 @@ Then /^(last|first) created "([^"]+)" (should|should not) have the following att
   table.rows_hash.each_with_object(klass.constantize.send(method)) do |(attribute, value), model|
     model.send(attribute).send(match) == type_cast_value(value)
   end
+end
+
+Then /^class "([^"]+)" (should(?:\snot)?) have "([^"]+)" in white list$/ do |klass, accept, attribute|
+  method = accept.sub(' ', '_')
+  klass.constantize.accessible_attributes.send(method, include(attribute))
 end

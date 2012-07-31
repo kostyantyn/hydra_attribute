@@ -1,8 +1,11 @@
+**0.3.2 (July 31, 2012)**
+* Add `white_list` option which allow to add attribute to white list for entity during creation it
+
 **0.3.1 (July 28, 2012)**
 * Fix bug "ActiveModel::MassAssignmentSecurity::Error: Can't mass-assign protected attributes: name, backend_type, default_value" during creation hydra attributes 
 
 **0.3.0 (July 27, 2012)**
-* All attribibutes are now stored in database
+* All attributes are now stored in database
 * Support default value for attributes
 * `#inspect` method displays hydra attributes too
 

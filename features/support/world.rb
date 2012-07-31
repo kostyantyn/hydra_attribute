@@ -33,6 +33,22 @@ module HydraAttribute
           hash[key] = type_cast_value(value)
         end
       end
+
+      def redefine_hydra_entity(klass)
+        ::ActiveSupport::Dependencies.clear
+
+        Object.send(:remove_const, klass.to_sym) if Object.const_defined?(klass.to_sym)
+
+        ::HydraAttribute::SUPPORT_TYPES.each do |type|
+          class_name = "Hydra#{type.capitalize}#{klass}".to_sym
+          ::HydraAttribute.send(:remove_const, class_name) if ::HydraAttribute.const_defined?(class_name)
+        end
+
+        Object.const_set(klass.to_sym, Class.new(::ActiveRecord::Base))
+        klass.to_s.constantize.send(:accessible_attributes_configs).values.each(&:clear)
+        klass.to_s.constantize.attr_accessible :name
+        klass.to_s.constantize.use_hydra_attributes
+      end
     end
   end
 end

@@ -16,7 +16,16 @@ module HydraAttribute
     end
 
     before_destroy :delete_dependent_values
-    after_commit   :reload_entity_attributes
+    after_commit   :reload_attribute_methods
+    after_commit   :toggle_white_list!
+
+    def toggle_white_list!
+      if destroyed? or !white_list?
+        remove_from_white_list
+      else
+        add_to_white_list
+      end
+    end
 
     private
 
@@ -25,20 +34,16 @@ module HydraAttribute
       value_class.delete_all(hydra_attribute_id: id)
     end
 
-    def reload_entity_attributes
+    def reload_attribute_methods
       entity_type.constantize.reset_hydra_attribute_methods # TODO should not remove all generated methods just for this attribute
-      destroyed? ? remove_from_white_list : add_to_white_list
     end
 
-    # Add attribute to white list for entity if it has a white list mark
     def add_to_white_list
-      entity_type.constantize.accessible_attributes.add(name) if white_list?
+      entity_type.constantize.accessible_attributes.add(name)
     end
 
-    # Don't check if this attribute is in white list or has a white list mark.
-    # Just remove it from white list for entity
     def remove_from_white_list
-      entity_type.constantize.accessible_attributes.remove(name)
+      entity_type.constantize.accessible_attributes.delete(name)
     end
   end
 end

@@ -8,10 +8,21 @@ Feature: destroy hydra attributes
       | name           | backend_type   | white_list     |
       | [string:price] | [string:float] | [boolean:true] |
 
-  Scenario: destroy hydra attribute in runtime
+
+  Scenario: entity should not respond to removed attribute
+    When destroy all "HydraAttribute::HydraAttribute" models with attributes as "rows_hash":
+      |name | price |
+    Then model "Product" should not respond to "price"
+
+
+  Scenario: remove all values from appropriate table
     Given create "Product" model with attributes as "rows_hash":
       | price | 10 |
     When destroy all "HydraAttribute::HydraAttribute" models with attributes as "rows_hash":
       |name | price |
-    Then model "Product" should not respond to "price"
-    And total "HydraAttribute::HydraFloatProduct" records should be "0"
+    Then total "HydraAttribute::HydraFloatProduct" records should be "0"
+
+  Scenario: remove attribute from white list
+    When destroy all "HydraAttribute::HydraAttribute" models with attributes as "rows_hash":
+      |name | price |
+    Then class "Product" should not have "price" in white list

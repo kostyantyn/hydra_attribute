@@ -4,9 +4,9 @@ Feature: define hydra attributes
 
   Background: create hydra attributes
     Given create hydra attributes for "Product" with role "admin" as "hashes":
-      | name           | backend_type    |
-      | [string:code]  | [string:string] |
-      | [string:price] | [string:float]  |
+      | name           | backend_type    | white_list      |
+      | [string:code]  | [string:string] | [boolean:true]  |
+      | [string:price] | [string:float]  | [boolean:false] |
 
   Scenario Outline: models should respond to hydra attributes
       Then model "<model>" <action> respond to "<attributes>"
@@ -31,3 +31,8 @@ Feature: define hydra attributes
       | Product | should | price_will_change!     |
       | Product | should | price_was              |
       | Product | should | reset_price!           |
+
+  Scenario: model should have appropriate attributes in white list
+    When redefine "Product" class to use hydra attributes
+    Then class "Product" should have "code" in white list
+    And class "Product" should not have "price" in white list

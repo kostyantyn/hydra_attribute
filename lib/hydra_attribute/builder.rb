@@ -32,9 +32,7 @@ module HydraAttribute
     end
 
     def build_white_list
-      klass.hydra_attributes.each do |hydra_attribute|
-        klass.accessible_attributes.add(hydra_attribute.name) if hydra_attribute.white_list?
-      end
+      klass.hydra_attributes.each(&:toggle_white_list!)
     end
   end
 end

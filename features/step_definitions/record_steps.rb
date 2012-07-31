@@ -21,6 +21,10 @@ When /^keep "([^"]+)" attribute$/ do |attribute|
   @keep[attribute] = @record.send(attribute)
 end
 
+Then /^update attributes as "([^"]+)":$/ do |role, table|
+  @record.update_attributes(type_cast_hash(table.rows_hash), as: role.to_sym)
+end
+
 Then /^record should be nil$/ do
   @record.should be_nil
 end
