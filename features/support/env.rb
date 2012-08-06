@@ -8,7 +8,6 @@ ActiveSupport.on_load(:active_record) do
   unless ActiveRecord::VERSION::STRING.start_with?('3.1.')
     self.mass_assignment_sanitizer = :strict
   end
-  extend HydraAttribute::ActiveRecord
 end
 
 ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')

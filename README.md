@@ -64,6 +64,14 @@ class Product < ActiveRecord::Base
 end
 ```
 
+**From version 0.4.0 `use_hydra_attributes` helper will be removed.**
+**Instead`HydraAttribute::ActiveRecord` should be included.**
+```ruby
+class Product < ActiveRecord::Base
+  include HydraAttribute::ActiveRecord
+end
+```
+
 ##### Create some hydra attributes from `rails console`
 ```ruby
 Product.hydra_attributes.create(name: 'color', backend_type: 'string', default_value: 'green')

@@ -47,7 +47,7 @@ module HydraAttribute
         Object.const_set(klass.to_sym, Class.new(::ActiveRecord::Base))
         klass.to_s.constantize.send(:accessible_attributes_configs).values.each(&:clear)
         klass.to_s.constantize.attr_accessible :name
-        klass.to_s.constantize.use_hydra_attributes
+        klass.to_s.constantize.send(:include, ::HydraAttribute::ActiveRecord)
       end
     end
   end

@@ -1,5 +1,5 @@
 Feature: define hydra attributes
-  When use_hydra_attributes was called in model class
+  When include HydraAttribute::ActiveRecord
   Then entity should respond to attributes which are saved in hydra_attributes table
 
   Background: create hydra attributes
