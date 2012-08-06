@@ -47,12 +47,13 @@ module HydraAttribute
 
     def create_attribute
       create_table :hydra_attributes do |t|
-        t.string  :entity_type,  limit: 32, null: false
-        t.string  :name,         limit: 32, null: false
-        t.string  :backend_type, limit: 16, null: false
-        t.string  :default_value
-        t.boolean :white_list,              null: false, default: false
-        t.timestamps
+        t.string   :entity_type,  limit: 32, null: false
+        t.string   :name,         limit: 32, null: false
+        t.string   :backend_type, limit: 16, null: false
+        t.string   :default_value
+        t.boolean  :white_list,              null: false, default: false
+        t.datetime :created_at # should not use t.timestamps because Rails 3.1.x and 3.2.x have a different "null" value
+        t.datetime :updated_at
       end
       add_index :hydra_attributes, [:entity_type, :name], unique: true, name: 'hydra_attributes_index'
     end

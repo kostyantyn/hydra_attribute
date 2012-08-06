@@ -12,6 +12,7 @@ module HydraAttribute
         when 'boolean'  then value == 'true' ? true : false
         when 'nil'      then nil
         when 'datetime' then ActiveSupport::TimeZone.new('UTC').parse(value)
+        when 'symbol'   then value.to_sym
         else value
         end
       end
