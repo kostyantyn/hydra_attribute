@@ -6,7 +6,7 @@ module HydraAttribute
     end
 
     class << self
-      %w(create remove migrate rollback).each do |method|
+      %w(create drop migrate rollback).each do |method|
         class_eval <<-EOS, __FILE__, __LINE__ + 1
           def #{method}(migration, *args, &block)
             new(migration).#{method}(*args, &block)
@@ -23,7 +23,7 @@ module HydraAttribute
 
     def drop(name)
       drop_values(name)
-      drop_attributes unless values_exists?
+      drop_attribute unless values_exists?
       drop_entity(name)
     end
 
@@ -45,6 +45,8 @@ module HydraAttribute
       end
     end
 
+    # Should use custom t.datetime method instead of t.timestamps
+    # because Rails 3.1.x and 3.2.x have a different "null" value
     def create_attribute
       create_table :hydra_attributes do |t|
         t.string   :entity_type,  limit: 32, null: false
@@ -52,7 +54,7 @@ module HydraAttribute
         t.string   :backend_type, limit: 16, null: false
         t.string   :default_value
         t.boolean  :white_list,              null: false, default: false
-        t.datetime :created_at # should not use t.timestamps because Rails 3.1.x and 3.2.x have a different "null" value
+        t.datetime :created_at
         t.datetime :updated_at
       end
       add_index :hydra_attributes, [:entity_type, :name], unique: true, name: 'hydra_attributes_index'
@@ -65,7 +67,8 @@ module HydraAttribute
           t.integer :entity_id,          null: false
           t.integer :hydra_attribute_id, null: false
           t.send type, :value
-          t.timestamps
+          t.datetime :created_at
+          t.datetime :updated_at
         end
         add_index table_name, [:entity_id, :hydra_attribute_id], unique: true, name: "#{table_name}_index"
       end

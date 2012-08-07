@@ -13,6 +13,7 @@ module HydraAttribute
         when 'nil'      then nil
         when 'datetime' then ActiveSupport::TimeZone.new('UTC').parse(value)
         when 'symbol'   then value.to_sym
+        when 'array'    then value.split(',')
         else value
         end
       end
