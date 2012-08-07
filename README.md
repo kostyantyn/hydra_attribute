@@ -64,8 +64,7 @@ class Product < ActiveRecord::Base
 end
 ```
 
-**From version 0.4.0 `use_hydra_attributes` helper will be removed.**
-**Instead`HydraAttribute::ActiveRecord` should be included.**
+**Starting from version 0.4.0 `use_hydra_attributes` method will be removed.**
 ```ruby
 class Product < ActiveRecord::Base
   include HydraAttribute::ActiveRecord
