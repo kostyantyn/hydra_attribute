@@ -3,17 +3,19 @@ module HydraAttribute
     module World
       def type_cast_value(schema)
         return schema unless schema.is_a?(String)
-        type, value = schema.gsub(/\[|\]/, '').split(':', 2)
+        type, value = schema.gsub(/(^\[)|(\]$)/, '').split(':', 2)
         return schema if schema == type && value.nil?
 
         case type
-        when 'integer'  then value.to_i
-        when 'float'    then value.to_f
-        when 'boolean'  then value == 'true' ? true : false
+        when 'integer'  then type_cast_value(value).to_i
+        when 'float'    then type_cast_value(value).to_f
+        when 'boolean'  then type_cast_value(value) == 'true' ? true : false
         when 'nil'      then nil
-        when 'datetime' then ActiveSupport::TimeZone.new('UTC').parse(value)
-        when 'symbol'   then value.to_sym
-        when 'array'    then value.split(',')
+        when 'datetime' then ActiveSupport::TimeZone.new('UTC').parse(type_cast_value(value))
+        when 'symbol'   then type_cast_value(value).to_sym
+        when 'array'    then type_cast_value(value).split(',')
+        when 'eval'     then eval(type_cast_value(value))
+        when 'string'   then type_cast_value(value).to_s
         else value
         end
       end
@@ -48,7 +50,7 @@ module HydraAttribute
 
         Object.const_set(klass.to_sym, Class.new(::ActiveRecord::Base))
         klass.to_s.constantize.send(:accessible_attributes_configs).values.each(&:clear)
-        klass.to_s.constantize.attr_accessible :name
+        klass.to_s.constantize.attr_accessible :name, :hydra_set_id
         klass.to_s.constantize.send(:include, ::HydraAttribute::ActiveRecord)
       end
     end
