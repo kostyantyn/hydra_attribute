@@ -22,6 +22,11 @@ end
 Then /^table "([^"]+)" should have the following (columns|indexes):$/ do |table_name, method, table|
   @connection.send(method, table_name).each do |field|
     column_params = table.hashes.find { |hash| field.name == type_cast_value(hash['name']) }
+
+    if column_params.nil?
+      raise %Q(Table "#{table_name}" has #{method.singularize} "#{field.name}" but it doesn't exist in "[#{table.hashes.map { |h| type_cast_value(h['name']) }.join(', ')}]")
+    end
+
     column_params.each do |param, value|
       field.send(param).should == type_cast_value(value)
     end
