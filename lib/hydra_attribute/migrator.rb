@@ -49,8 +49,10 @@ module HydraAttribute
 
     def create_entity(name, options = {})
       create_table name, options do |t|
+        t.integer :hydra_set_id
         yield t if block_given?
       end
+      add_index name, :hydra_set_id, unique: false, name: "#{name}_hydra_set_id_index"
     end
 
     # Should use custom t.datetime method instead of t.timestamps

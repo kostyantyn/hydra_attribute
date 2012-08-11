@@ -27,8 +27,8 @@ Scenario: create and drop hydra entity
     | [string:id]           | [symbol:integer] | [nil:] | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
     | [string:hydra_set_id] | [symbol:integer] | [nil:] | [nil:]  | [boolean:true]  | [nil:]    | [nil:] |
   And table "wheels" should have the following indexes:
-    | name               | columns              | unique          |
-    | hydra_set_id_index | [array:hydra_set_id] | [boolean:false] |
+    | name                      | columns              | unique          |
+    | wheels_hydra_set_id_index | [array:hydra_set_id] | [boolean:false] |
   And table "hydra_attributes" should have the following columns:
     | name                   | type              | limit         | default         | null            | precision | scale  |
     | [string:id]            | [symbol:integer]  | [nil:]        | [nil:]          | [boolean:false] | [nil:]    | [nil:] |

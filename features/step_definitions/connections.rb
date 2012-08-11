@@ -20,15 +20,16 @@ Then /^should not have any tables$/ do
 end
 
 Then /^table "([^"]+)" should have the following (columns|indexes):$/ do |table_name, method, table|
-  @connection.send(method, table_name).each do |field|
-    column_params = table.hashes.find { |hash| field.name == type_cast_value(hash['name']) }
+  connection_params = @connection.send(method, table_name).sort_by(&:name)
+  checked_params    = table.hashes.map { |hash| type_cast_hash(hash) }.sort_by { |param| param['name'] }
 
-    if column_params.nil?
-      raise %Q(Table "#{table_name}" has #{method.singularize} "#{field.name}" but it doesn't exist in "[#{table.hashes.map { |h| type_cast_value(h['name']) }.join(', ')}]")
-    end
+  unless connection_params.length == checked_params.length
+    raise %Q(Table "#{table_name}" has "#{connection_params.length}" #{method} but in our test "#{checked_params.length}". Diff: is "#{connection_params.map(&:name)}" but should be "#{checked_params.map { |h| h['name'] }}")
+  end
 
-    column_params.each do |param, value|
-      field.send(param).should == type_cast_value(value)
+  connection_params.zip(checked_params).each do |(real_params, params)|
+    params.keys.each do |name|
+      params[name].should == real_params.send(name)
     end
   end
 end
