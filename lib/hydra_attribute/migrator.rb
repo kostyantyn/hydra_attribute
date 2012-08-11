@@ -18,23 +18,31 @@ module HydraAttribute
     def create(name, options = {}, &block)
       create_entity(name, options, &block)
       create_attribute unless attribute_exists?
+      create_set       unless set_exists?
       create_values(name)
     end
 
     def drop(name)
       drop_values(name)
-      drop_attribute unless values_exists?
+      unless values_exists?
+        drop_set
+        drop_attribute
+      end
       drop_entity(name)
     end
 
     def migrate(name)
       create_attribute unless attribute_exists?
+      create_set       unless set_exists?
       create_values(name)
     end
 
     def rollback(name)
       drop_values(name)
-      drop_attribute unless values_exists?
+      unless values_exists?
+        drop_attribute
+        drop_set
+      end
     end
 
     private
@@ -60,6 +68,22 @@ module HydraAttribute
       add_index :hydra_attributes, [:entity_type, :name], unique: true, name: 'hydra_attributes_index'
     end
 
+    def create_set
+      create_table :hydra_sets do |t|
+        t.string   :entity_type,  limit: 32, null: false
+        t.string   :name,         limit: 32, null: false
+        t.datetime :created_at
+        t.datetime :updated_at
+      end
+      add_index :hydra_sets, [:entity_type, :name], unique: true, name: 'hydra_sets_index'
+
+      create_table :hydra_attribute_sets, id: false do |t|
+        t.integer :hydra_attribute_id, null: false
+        t.integer :hydra_set_id,       null: false
+      end
+      add_index :hydra_attribute_sets, [:hydra_attribute_id, :hydra_set_id], unique: true, name: 'hydra_attribute_sets_index'
+    end
+
     def create_values(name)
       SUPPORT_TYPES.each do |type|
         table_name = value_table(name, type)
@@ -82,6 +106,11 @@ module HydraAttribute
       drop_table(:hydra_attributes)
     end
 
+    def drop_set
+      drop_table(:hydra_attribute_sets)
+      drop_table(:hydra_sets)
+    end
+
     def drop_values(name)
       SUPPORT_TYPES.each do |type|
         drop_table(value_table(name, type))
@@ -94,6 +123,10 @@ module HydraAttribute
 
     def attribute_exists?
       table_exists?(:hydra_attributes)
+    end
+
+    def set_exists?
+      table_exists?(:hydra_sets)
     end
 
     def values_exists?

@@ -9,6 +9,8 @@ module HydraAttribute
     end
     attr_accessible :white_list, as: :admin
 
+    has_and_belongs_to_many :hydra_sets, join_table: 'hydra_attribute_sets', class_name: 'HydraAttribute::HydraSet', conditions: proc { {hydra_sets: {entity_type: entity_type}} }
+
     with_options presence: true do |klass|
       klass.validates :entity_type,  inclusion: { in: lambda { |attr| [(attr.entity_type.constantize.name rescue nil)] } }
       klass.validates :name,         uniqueness: { scope: :entity_type }
