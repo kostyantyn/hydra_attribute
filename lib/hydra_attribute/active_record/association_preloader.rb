@@ -15,7 +15,6 @@ module HydraAttribute
 
       def run
         return if records.blank?
-        return if hydra_attribute_ids.blank?
 
         prepared_records.keys.each_slice(in_clause_length || prepared_records.keys.length) do |entity_ids|
           grouped_attribute_ids.each do |backend_type, hydra_attribute_ids|
@@ -34,37 +33,26 @@ module HydraAttribute
       private
 
       def prepared_records
+        limit = attribute_limit?
         @prepared_records ||= records.each_with_object({}) do |record, hash|
-          grouped_attribute_ids.each do |backend_type, ids|
-            record.association(association_builder.association_name(backend_type)).lock_for_build!(ids)
+          grouped_attribute_ids.each do |backend_type, hydra_attribute_ids|
+            association = record.association(association_builder.association_name(backend_type))
+            limit ? association.lock!(hydra_attribute_ids) : association.loaded!
           end
           hash[record.id] = record
         end
       end
 
       def grouped_attribute_ids
-        @grouped_attribute_ids ||= begin
-          map = klass.hydra_attribute_backend_types.each_with_object({}) { |type, object| object[type] = [] }
-          hydra_attributes.each_with_object(map) do |hydra_attribute, mapping|
-            mapping[hydra_attribute.backend_type] << hydra_attribute.id
+        @grouped_attribute_ids ||= if attribute_limit?
+          map = klass.hydra_attribute_backend_types.each_with_object({}) { |backend_type, hash| hash[backend_type] = [] }
+          relation.hydra_select_values.each_with_object(map) do |name, grouped_ids|
+            hydra_attribute = klass.hydra_attribute(name)
+            grouped_ids[hydra_attribute.backend_type] << hydra_attribute.id
           end
-        end
-      end
-
-      def hydra_attributes
-        @hydra_attributes ||= if attribute_limit?
-          relation.hydra_select_values.map { |name| klass.hydra_attribute(name) }
         else
-          klass.hydra_attributes
+          klass.hydra_attribute_ids_by_backend_type
         end
-      end
-
-      def hydra_attribute_ids
-        @hydra_attribute_ids ||= hydra_attributes.map(&:id)
-      end
-
-      def hydra_attribute_backend_types
-        @hydra_attribute_backend_types ||= hydra_attributes.map(&:backend_type).uniq
       end
 
       def attribute_limit?

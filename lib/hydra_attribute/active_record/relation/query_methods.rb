@@ -42,7 +42,8 @@ module HydraAttribute
           @group_values = hydra_helper.quote_columns(@group_values.uniq.reject(&:blank?))
           @order_values = hydra_helper.quote_columns(@order_values.uniq.reject(&:blank?))
 
-          if instance_variable_defined?(:@reorder_value) and instance_variable_get(:@reorder_value).present? # for compatibility with 3.1.x
+          # @COMPATIBILITY with 3.1.x active_record 3.1 uses the separate @reorder_value instance
+          if instance_variable_defined?(:@reorder_value) and instance_variable_get(:@reorder_value).present?
             @reorder_value = hydra_helper.quote_columns(@reorder_value.uniq.reject(&:blank?))
           end
 
@@ -51,9 +52,10 @@ module HydraAttribute
           @hydra_select_values.map!(&:to_s)
           @select_values.map!{ |value| hydra_helper.prepend_table_name(value) }
 
-          # force add ID for preloading hydra attributes
-          if @hydra_select_values.any? && @select_values.none? { |v| hydra_helper.attr_eq_column?(v, klass.primary_key) }
+          # attributes "id" and "hydra_set_id" are important for hydra_attribute gem
+          if @hydra_select_values.any? or @select_values.any?
             @select_values << hydra_helper.prepend_table_name(klass.primary_key)
+            @select_values << hydra_helper.prepend_table_name('hydra_set_id')
           end
 
           super

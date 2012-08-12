@@ -5,7 +5,7 @@ require 'database_cleaner/cucumber'
 
 ActiveSupport.on_load(:active_record) do
   self.default_timezone = :utc
-  unless ActiveRecord::VERSION::STRING.start_with?('3.1.')
+  unless ActiveRecord::VERSION::STRING.start_with?('3.1.') # @COMPATIBILITY with 3.1.x. active_record 3.1 doesn't have "mass_assignment_sanitizer" method
     self.mass_assignment_sanitizer = :strict
   end
 

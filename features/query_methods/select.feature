@@ -25,14 +25,14 @@ Feature: select concrete attributes
     And total records should be "4"
 
     Scenarios: select attributes
-      | selected columns  | expected columns     | methods                               |
-      | name              | name                 | code price title note active schedule |
-      | name code         | id name code         | price title note active schedule      |
-      | name code price   | id name code price   | title note active schedule            |
-      | code price title  | id code price title  | name note active schedule             |
-      | title note active | id title note active | name code price schedule              |
-      | schedule          | id schedule          | name code price title note active     |
-      | id schedule       | id schedule          | name code price title note active     |
+      | selected columns  | expected columns                  | methods                               |
+      | name              | id hydra_set_id name              | code price title note active schedule |
+      | name code         | id hydra_set_id name code         | price title note active schedule      |
+      | name code price   | id hydra_set_id name code price   | title note active schedule            |
+      | code price title  | id hydra_set_id code price title  | name note active schedule             |
+      | title note active | id hydra_set_id title note active | name code price schedule              |
+      | schedule          | id hydra_set_id schedule          | name code price title note active     |
+      | id schedule       | id hydra_set_id schedule          | name code price title note active     |
 
   Scenario Outline: filter collection and select concrete attributes
     When "Product" select only the following columns "<selected columns>"
@@ -43,8 +43,8 @@ Feature: select concrete attributes
 
     Scenarios: filter and select attributes
       | selected columns | expected columns | filter attributes | methods                               | total |
-      | name code        | id name code     | name=[string:a]   | price title note active schedule      | 1     |
-      | code             | id code          | code=[integer:1]  | name price title note active schedule | 1     |
-      | name code        | id name code     | code=[integer:1]  | price title note active schedule      | 1     |
-      | code title       | id code title    | title=[nil:]      | name price note active schedule       | 2     |
-      | code note        | id code note     | title=[nil:]      | name price title active schedule      | 2     |
+      | name code        | id hydra_set_id name code  | name=[string:a]   | price title note active schedule      | 1     |
+      | code             | id hydra_set_id code       | code=[integer:1]  | name price title note active schedule | 1     |
+      | name code        | id hydra_set_id name code  | code=[integer:1]  | price title note active schedule      | 1     |
+      | code title       | id hydra_set_id code title | title=[nil:]      | name price note active schedule       | 2     |
+      | code note        | id hydra_set_id code note  | title=[nil:]      | name price title active schedule      | 2     |

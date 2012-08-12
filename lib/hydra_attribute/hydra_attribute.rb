@@ -37,7 +37,7 @@ module HydraAttribute
     end
 
     def reload_attribute_methods
-      entity_type.constantize.reset_hydra_attribute_methods # TODO should not remove all generated methods just for this attribute
+      entity_type.constantize.reset_hydra_attribute_methods! # TODO should not remove all generated methods just for this attribute
     end
 
     def add_to_white_list

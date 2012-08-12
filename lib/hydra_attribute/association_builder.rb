@@ -40,7 +40,7 @@ module HydraAttribute
       value_model.belongs_to :hydra_attribute, class_name: 'HydraAttribute::HydraAttribute'
 
       value_model.class_eval <<-EOS, __FILE__, __LINE__ + 1
-        def attribute_name
+        def hydra_attribute_name
           #{klass.model_name}.hydra_attribute(hydra_attribute_id).name
         end
       EOS

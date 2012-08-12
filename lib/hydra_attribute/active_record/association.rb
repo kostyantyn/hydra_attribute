@@ -2,25 +2,26 @@ module HydraAttribute
   module ActiveRecord
     class Association < ::ActiveRecord::Associations::HasManyAssociation
 
-      def find_model(attributes = {})
+      def find_model(options = {})
         load_target unless loaded?
+
         target.detect do |model|
-          model.hydra_attribute_id == attributes[:hydra_attribute_id]
+          model.hydra_attribute_id == options[:hydra_attribute_id]
         end
       end
 
-      def find_model_or_build(attributes = {})
-        find_model(attributes) || build(attributes)
+      def find_model_or_build(options = {})
+        find_model(options) || build(options)
       end
 
       def build(attributes = {}, options = {}, &block)
-        return if locked_for_build? and white_list_for_build.exclude?(attributes[:hydra_attribute_id])
+        return unless hydra_attribute_ids.include?(attributes[:hydra_attribute_id])
         super
       end
 
       def all_models
         unless @full_loaded
-          (all_attribute_ids - target.map(&:hydra_attribute_id)).each do |hydra_attribute_id|
+          (hydra_attribute_ids - target.map(&:hydra_attribute_id)).each do |hydra_attribute_id|
             build(hydra_attribute_id: hydra_attribute_id)
           end
           @full_loaded = true
@@ -28,25 +29,33 @@ module HydraAttribute
         target
       end
 
-      def locked_for_build
-        @locked_for_build ||= false
-      end
-      alias_method :locked_for_build?, :locked_for_build
-
-      def lock_for_build!(white_list_for_build = [])
-        @locked_for_build     = true
-        @white_list_for_build = Array(white_list_for_build)
+      def lock!(white_list = [])
+        @white_list = Array(white_list)
         loaded!
       end
 
-      def white_list_for_build
-        @white_list_for_build ||= []
+      def hydra_attributes
+        if @white_list
+          @hydra_attributes ||= owner.class.hydra_set_attributes_for_backend_type(owner.hydra_set_id, reflection.backend_type)
+        else
+          owner.class.hydra_set_attributes_for_backend_type(owner.hydra_set_id, reflection.backend_type)
+        end
       end
 
-      def all_attribute_ids
-        hydra_attribute_ids  = owner.class.grouped_hydra_attribute_ids(reflection.backend_type)
-        hydra_attribute_ids &= white_list_for_build if locked_for_build?
-        hydra_attribute_ids
+      def hydra_attribute_ids
+        if @white_list
+          @hydra_attribute_ids ||= owner.class.hydra_set_attribute_ids_for_backend_type(owner.hydra_set_id, reflection.backend_type) & @white_list
+        else
+          owner.class.hydra_set_attribute_ids_for_backend_type(owner.hydra_set_id, reflection.backend_type)
+        end
+      end
+
+      def hydra_attribute_names
+        if @white_list
+          hydra_attributes.map(&:name)
+        else
+          owner.class.hydra_set_attribute_names_for_backend_type(owner.hydra_set_id, reflection.backend_type)
+        end
       end
 
       private
@@ -60,16 +69,16 @@ module HydraAttribute
 
       # Optimized method
       # Attributes are written via low level function without additional checks
-      def build_record(attributes, _)
+      def build_record(options, _)
         reflection.klass.new do |record|
-          unless attributes.has_key?(:value)
-            attributes[:value] = owner.class.hydra_attribute(attributes[:hydra_attribute_id]).default_value
+          unless options.has_key?(:value)
+            options[:value] = owner.class.hydra_attribute(options[:hydra_attribute_id]).default_value
           end
 
-          record.send :write_attribute, 'id', attributes[:id]
+          record.send :write_attribute, 'id', options[:id]
           record.send :write_attribute, 'entity_id', owner.id
-          record.send :write_attribute, 'hydra_attribute_id', attributes[:hydra_attribute_id]
-          record.send :write_attribute, 'value', attributes[:value]
+          record.send :write_attribute, 'hydra_attribute_id', options[:hydra_attribute_id]
+          record.send :write_attribute, 'value', options[:value]
         end
       end
     end
