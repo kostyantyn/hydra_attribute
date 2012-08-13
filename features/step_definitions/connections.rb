@@ -3,11 +3,15 @@ Given /^create connection$/ do
   @connection = ActiveRecord::ConnectionAdapters::ConnectionPool.new(spec).connection
 end
 
-Given /^(create|drop|migrate|rollback) hydra entity "([^"]+)"$/ do |method, table|
+Given /^(create|drop|migrate|rollback)(?:\sto|\sfrom)? hydra entity "([^"]+)"$/ do |method, table|
   HydraAttribute::Migrator.send(method, @connection, table)
 end
 
-Then /^should have the following (\d+) tables:$/ do |count, table|
+Given /^create table "([^"]+)"$/ do |table|
+  @connection.create_table(table)
+end
+
+Then /^should have the following (\d+) tables?:$/ do |count, table|
   @connection.should have(count.to_i).tables
 
   table.rows.flatten.each do |name|

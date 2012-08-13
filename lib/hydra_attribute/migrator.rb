@@ -31,7 +31,8 @@ module HydraAttribute
       drop_entity(name)
     end
 
-    def migrate(name)
+    def migrate(name, options = {}, &block)
+      migrate_entity(name, options, &block)
       create_attribute unless attribute_exists?
       create_set       unless set_exists?
       create_values(name)
@@ -43,16 +44,24 @@ module HydraAttribute
         drop_attribute
         drop_set
       end
+      rollback_entity(name)
     end
 
     private
 
     def create_entity(name, options = {})
       create_table name, options do |t|
-        t.integer :hydra_set_id
+        t.integer :hydra_set_id, null: true
         yield t if block_given?
       end
       add_index name, :hydra_set_id, unique: false, name: "#{name}_hydra_set_id_index"
+    end
+
+    def migrate_entity(name, options = {})
+      change_table name, options do |t|
+        t.integer :hydra_set_id, null: true
+      end
+      add_index name, :hydra_set_id, uniqie: false, name: "#{name}_hydra_set_id_index"
     end
 
     def create_attribute
@@ -100,6 +109,10 @@ module HydraAttribute
 
     def drop_entity(name)
       drop_table(name)
+    end
+
+    def rollback_entity(name)
+      remove_column name, :hydra_set_id
     end
 
     def drop_attribute

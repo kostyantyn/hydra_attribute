@@ -9,8 +9,8 @@ module HydraAttribute
         Migrator.drop(self, name)
       end
 
-      def migrate_to_hydra_entity(name)
-        Migrator.migrate(self, name)
+      def migrate_to_hydra_entity(name, options = {}, &block)
+        Migrator.migrate(self, name, options, &block)
       end
 
       def rollback_from_hydra_entity(name)
