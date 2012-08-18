@@ -6,6 +6,7 @@ Feature: new entity
 
   When hydra_set_id was passed to new entity
   Then entity should respond only to hydra attributes which was added to this hydra set
+  And  entity attribute list should include only attributes from hydra set
 
   Scenario Outline: models should respond to hydra attributes
     Given create hydra attributes for "Product" with role "admin" as "hashes":
@@ -45,7 +46,7 @@ Feature: new entity
     Then class "Product" should have "code" in white list
     And class "Product" should not have "price" in white list
 
-  Scenario: model should respond to hydra attributes which are in hydra set if hydra_set_id is passed
+  Scenario: set hydra_set_id to the new entity
     Given create hydra sets for "Product" as "hashes":
       | name    |
       | Default |
@@ -64,20 +65,50 @@ Feature: new entity
 
     When build "Product" model:
       | hydra_set_id | [string:[eval:Product.hydra_sets.find_by_name('Default').id]] |
-    Then model should respond to "code"
-    And model should respond to "title"
-    And model should not respond to "price"
-    And model should not respond to "total"
+    Then model should respond to "code title"
+    And model should not respond to "price total"
 
     When build "Product" model:
       | hydra_set_id | [string:[eval:Product.hydra_sets.find_by_name('General').id]] |
-    Then model should not respond to "code"
-    And model should respond to "title"
-    And model should respond to "price"
-    And model should not respond to "total"
+    Then model should not respond to "code total"
+    And model should respond to "title price"
 
     When build "Product" model
-    Then model should respond to "code"
-    And model should respond to "title"
-    And model should respond to "price"
-    And model should respond to "total"
+    Then model should respond to "code title price total"
+
+  Scenario: attach and detach hydra set to the same entity
+    Given create hydra sets for "Product" as "hashes":
+      | name    |
+      | Default |
+      | General |
+    And create hydra attributes for "Product" with role "admin" as "hashes":
+      | name  | backend_type | white_list     |
+      | title | string       | [boolean:true] |
+      | code  | string       | [boolean:true] |
+      | total | integer      | [boolean:true] |
+      | price | float        | [boolean:true] |
+    And add "Product" hydra attributes to hydra set:
+      | hydra attribute name | hydra set name          |
+      | title                | [array:Default]         |
+      | code                 | [array:Default,General] |
+      | total                | [array:General]         |
+
+    When build "Product" model
+    Then model should respond to "title code total price"
+    And  model attributes should include "title code total price"
+
+    When set "hydra_set_id" to "[eval:Product.hydra_sets.find_by_name('Default').id]"
+    Then model should respond to "title code"
+    And  model should not respond to "total price"
+    And  model attributes should include "title code"
+    And  model attributes should not include "total price"
+
+    When set "hydra_set_id" to "[eval:Product.hydra_sets.find_by_name('General').id]"
+    Then model should respond to "code total"
+    And  model should not respond to "title price"
+    And  model attributes should include "code total"
+    And  model attributes should not include "title price"
+
+    When set "hydra_set_id" to "[nil:]"
+    Then model should respond to "title code total price"
+    And  model attributes should include "title code total price"

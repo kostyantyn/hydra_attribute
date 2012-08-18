@@ -14,6 +14,10 @@ Given /^build "([^"]+)" model:$/ do |klass, table|
   @model = klass.constantize.new(type_cast_hash(table.rows_hash))
 end
 
+When /^set "([^"]+)" to "([^"]+)"$/ do |attribute, value|
+  @model.send("#{attribute}=", type_cast_value(value))
+end
+
 Given /^create "([^"]+)" model with attributes as "([^"]+):"$/ do |klass, format, table|
   Array.wrap(table.send(format)).each do |hash|
     klass.constantize.create!(type_cast_hash(hash))
@@ -58,6 +62,13 @@ Then /^model (should(?:\snot)?) respond to "([^"]+)"$/ do |method, attributes|
   method = method.gsub(/\s+/, '_')
   attributes.split.each do |attribute|
     @model.send(method, respond_to(attribute))
+  end
+end
+
+Then /^model attributes (should(?:\snot)?) include "([^"]+)"$/ do |method, attributes|
+  method = method.gsub(/\s+/, '_')
+  attributes.split.each do |attribute|
+    @model.attributes.keys.send(method, include(attribute))
   end
 end
 

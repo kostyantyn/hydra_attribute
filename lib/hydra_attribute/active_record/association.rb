@@ -2,20 +2,22 @@ module HydraAttribute
   module ActiveRecord
     class Association < ::ActiveRecord::Associations::HasManyAssociation
 
-      def find_model(options = {})
+      def find_model(hydra_attribute_id)
         load_target unless loaded?
 
-        target.detect do |model|
-          model.hydra_attribute_id == options[:hydra_attribute_id]
+        hydra_set_target.detect do |model|
+          model.hydra_attribute_id == hydra_attribute_id
         end
       end
 
       def find_model_or_build(options = {})
-        find_model(options) || build(options)
+        find_model(options[:hydra_attribute_id]) || build(options)
       end
 
       def build(attributes = {}, options = {}, &block)
-        return unless hydra_attribute_ids.include?(attributes[:hydra_attribute_id])
+        return if hydra_attribute_ids.exclude?(attributes[:hydra_attribute_id])
+        return if target.any? { |model| model.hydra_attribute_id == attributes[:hydra_attribute_id] }
+
         super
       end
 
@@ -26,7 +28,22 @@ module HydraAttribute
           end
           @full_loaded = true
         end
-        target
+        hydra_set_target
+      end
+
+      def save
+        changed = false
+        all_models.each do |model|
+          model.entity_id = owner.id
+          model.save
+          changed = true unless model.previous_changes.blank?
+        end
+
+        if changed and block_given?
+          yield
+        else
+          changed
+        end
       end
 
       def lock!(white_list = [])
@@ -58,6 +75,19 @@ module HydraAttribute
         end
       end
 
+      def hydra_set_target
+        @hydra_set_target ||= target.select do |model|
+          hydra_attribute_ids.include?(model.hydra_attribute_id)
+        end
+      end
+
+      def clear_cache!
+        @hydra_attributes    = nil
+        @hydra_attribute_ids = nil
+        @full_loaded         = nil
+        @hydra_set_target    = nil
+      end
+
       private
 
       # Optimized method
@@ -79,6 +109,8 @@ module HydraAttribute
           record.send :write_attribute, 'entity_id', owner.id
           record.send :write_attribute, 'hydra_attribute_id', options[:hydra_attribute_id]
           record.send :write_attribute, 'value', options[:value]
+
+          hydra_set_target << record unless hydra_set_target.include?(record)
         end
       end
     end

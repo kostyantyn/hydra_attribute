@@ -5,6 +5,10 @@ module HydraAttribute
   module HydraSetMethods
     extend ActiveSupport::Concern
 
+    included do
+      alias_method_chain :write_attribute, :hydra_set_id
+    end
+
     module ClassMethods
       def hydra_sets
         @hydra_sets ||= HydraSet.where(entity_type: base_class.model_name)
@@ -31,6 +35,16 @@ module HydraAttribute
         @hydra_set_ids   = nil
         @hydra_set_names = nil
       end
+    end
+
+    def write_attribute_with_hydra_set_id(attr_name, value)
+      if attr_name.to_s == 'hydra_set_id'
+        self.class.hydra_attribute_backend_types.each do |backend_type|
+          hydra_value_association(backend_type).clear_cache!
+        end
+        @hydra_value_models = nil
+      end
+      write_attribute_without_hydra_set_id(attr_name, value)
     end
   end
 end
