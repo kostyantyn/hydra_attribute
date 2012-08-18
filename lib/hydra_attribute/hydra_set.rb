@@ -12,5 +12,13 @@ module HydraAttribute
       klass.validates :entity_type,  inclusion: { in: lambda { |attr| [(attr.entity_type.constantize.name rescue nil)] } }
       klass.validates :name,         uniqueness: { scope: :entity_type }
     end
+
+    after_destroy :detach_entities
+
+  private
+
+    def detach_entities
+      entity_type.constantize.where(hydra_set_id: id).update_all(hydra_set_id: nil)
+    end
   end
 end
