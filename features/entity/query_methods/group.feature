@@ -4,16 +4,16 @@ Feature: group conditions by hydra attributes
 
   Background: create models and describe hydra attributes
     Given create hydra attributes for "Product" with role "admin" as "hashes":
-      | name           | backend_type     | white_list     |
-      | [string:code]  | [string:integer] | [boolean:true] |
-      | [string:title] | [string:string]  | [boolean:true] |
-      | [string:total] | [string:integer] | [boolean:true] |
+      | name  | backend_type | white_list     |
+      | code  | integer      | [boolean:true] |
+      | title | string       | [boolean:true] |
+      | total | integer      | [boolean:true] |
     Given create "Product" model with attributes as "hashes":
-      | name       | code        | title      | total       |
-      | [string:a] | [integer:1] | [string:q] | [integer:5] |
-      | [string:b] | [integer:2] | [string:w] | [integer:5] |
-      | [string:b] | [integer:3] | [string:w] | [nil:]      |
-      | [string:c] | [integer:4] | [string:e] |             |
+      | name | code        | title | total       |
+      | a    | [integer:1] | q     | [integer:5] |
+      | b    | [integer:2] | w     | [integer:5] |
+      | b    | [integer:3] | w     | [nil:]      |
+      | c    | [integer:4] | e     |             |
 
   Scenario Outline: group by attributes
     When group "Product" by "<group by>"

@@ -13,17 +13,17 @@ Feature: order conditions by hydra attributes
 
   Background: create hydra attributes
     Given create hydra attributes for "Product" with role "admin" as "hashes":
-      | name           | backend_type     | white_list     |
-      | [string:code]  | [string:integer] | [boolean:true] |
-      | [string:state] | [string:integer] | [boolean:true] |
-      | [string:title] | [string:string]  | [boolean:true] |
+      | name  | backend_type | white_list     |
+      | code  | integer      | [boolean:true] |
+      | state | integer      | [boolean:true] |
+      | title | string       | [boolean:true] |
 
   Scenario Outline: order by one field
     Given create "Product" model with attributes as "hashes":
-      | name       | code        | state       |
-      | [string:c] | [integer:1] | [integer:1] |
-      | [string:b] | [integer:2] | [integer:2] |
-      | [string:a] | [integer:3] | [integer:3] |
+      | name | code        | state       |
+      | c    | [integer:1] | [integer:1] |
+      | b    | [integer:2] | [integer:2] |
+      | a    | [integer:3] | [integer:3] |
     When order "Product" records by "<attributes>"
     Then "first" record should have "<first identifier>"
     And "last" record should have "<last identifier>"
@@ -37,10 +37,10 @@ Feature: order conditions by hydra attributes
 
   Scenario Outline: order by several attributes
     Given create "Product" model with attributes as "hashes":
-      | name       | code        | state       | title      |
-      | [string:c] | [integer:1] | [integer:1] | [string:b] |
-      | [string:b] | [integer:2] | [integer:2] | [string:a] |
-      | [string:a] | [integer:3] | [integer:3] | [string:c] |
+      | name | code        | state       | title      |
+      | c    | [integer:1] | [integer:1] | [string:b] |
+      | b    | [integer:2] | [integer:2] | [string:a] |
+      | a    | [integer:3] | [integer:3] | [string:c] |
     When order "Product" records by "<attributes>"
     Then "first" record should have "<first identifier>"
     And "last" record should have "<last identifier>"

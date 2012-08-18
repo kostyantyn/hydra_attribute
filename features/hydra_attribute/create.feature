@@ -4,8 +4,8 @@ Feature: create hydra attributes
 
   Background: create hydra attributes
     Given create hydra attributes for "Product" with role "admin" as "hashes":
-      | name           | backend_type   | white_list     |
-      | [string:price] | [string:float] | [boolean:true] |
+      | name  | backend_type | white_list     |
+      | price | float        | [boolean:true] |
 
   Scenario: create hydra attribute
     # Important: when respond_to? is called the hydra attributes are being loaded for entity class
@@ -17,14 +17,14 @@ Feature: create hydra attributes
 
   Scenario: create attribute but don't add it to white list
     Given create hydra attributes for "Product" with role "admin" as "hashes":
-      | name           | backend_type     | white_list      |
-      | [string:code]  | [string:string]  |                 |
-      | [string:total] | [string:integer] | [boolean:false] |
+      | name  | backend_type | white_list      |
+      | code  | string       |                 |
+      | total | integer      | [boolean:false] |
     Then class "Product" should not have "code" in white list
     And class "Product" should not have "total" in white list
 
   Scenario: create attribute and add it to white list
     Given create hydra attributes for "Product" with role "admin" as "hashes":
-      | name           | backend_type     | white_list     |
-      | [string:code]  | [string:string]  | [boolean:true] |
+      | name | backend_type | white_list     |
+      | code | string       | [boolean:true] |
     Then class "Product" should have "code" in white list

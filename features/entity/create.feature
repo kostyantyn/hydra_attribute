@@ -4,12 +4,12 @@ Feature: create models with hydra attributes
 
   Background: create hydra attributes
     Given create hydra attributes for "Product" with role "admin" as "hashes":
-      | name             | backend_type      | default_value       | white_list     |
-      | [string:code]    | [string:string]   | [nil:]              | [boolean:true] |
-      | [string:price]   | [string:float]    | [string:0]          | [boolean:true] |
-      | [string:active]  | [string:boolean]  | [string:0]          | [boolean:true] |
-      | [string:info]    | [string:text]     | [string:]           | [boolean:true] |
-      | [string:started] | [string:datetime] | [string:2012-01-01] | [boolean:true] |
+      | name    | backend_type | default_value | white_list     |
+      | code    | string       | [nil:]        | [boolean:true] |
+      | price   | float        | 0             | [boolean:true] |
+      | active  | boolean      | 0             | [boolean:true] |
+      | info    | text         | [string:]     | [boolean:true] |
+      | started | datetime     | 2012-01-01    | [boolean:true] |
 
   Scenario: create model without hydra attributes
     Given create "Product" model
@@ -22,10 +22,10 @@ Feature: create models with hydra attributes
 
   Scenario: create model with several hydra attributes
     Given create "Product" model with attributes as "rows_hash":
-      | code  | [string:a] |
-      | price | [nil:]     |
+      | code  | a      |
+      | price | [nil:] |
     Then last created "Product" should have the following attributes:
-      | code    | [string:a]            |
+      | code    | a                     |
       | price   | [nil:]                |
       | active  | [boolean:false]       |
       | info    | [string:]             |
@@ -33,15 +33,15 @@ Feature: create models with hydra attributes
 
   Scenario: create model hydra attributes
     Given create "Product" model with attributes as "rows_hash":
-      | code    | [string:a]            |
-      | price   | [string:2]            |
+      | code    | a                     |
+      | price   | 2                     |
       | active  | [boolean:true]        |
-      | info    | [string:b]            |
+      | info    | b                     |
       | started | [datetime:2012-05-05] |
 
     Then last created "Product" should have the following attributes:
-      | code    | [string:a]            |
+      | code    | a                     |
       | price   | [float:2]             |
       | active  | [boolean:true]        |
-      | info    | [string:b]            |
+      | info    | b                     |
       | started | [datetime:2012-05-05] |

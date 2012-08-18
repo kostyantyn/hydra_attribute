@@ -23,44 +23,44 @@ Feature: update hydra attributes
       | total | <total> |
 
     Scenarios: attributes
-      | set code   | set title  | set total   | code         | title      | total       |
-      | [string:a] | [string:b] | [integer:2] | [string:a]   | [string:b] | [integer:2] |
-      | [string:]  | [string:]  | [nil:]      | [string:]    | [string:]  | [nil:]      |
-      |            |            | [string:3]  | [string:###] | [nil:]     | [integer:3] |
+      | set code  | set title | set total   | code      | title     | total       |
+      | a         | b         | [integer:2] | a         | b         | [integer:2] |
+      | [string:] | [string:] | [nil:]      | [string:] | [string:] | [nil:]      |
+      |           |           | 3           | ###       | [nil:]    | [integer:3] |
 
   # Is a better solution to call several scenarios but don't call hooks and backgrounds before?
   Scenario: update the same model several times
     Given select first "Product" record
     And save record
     Then last created "Product" should have the following attributes:
-      | code  | [string:###] |
-      | title | [nil:]       |
-      | total | [integer:1]  |
+      | code  | ###         |
+      | title | [nil:]      |
+      | total | [integer:1] |
 
     When assign attributes as "rows_hash":
       | title | [string:] |
       | total | [nil:]    |
     And save record
     Then last created "Product" should have the following attributes:
-      | code  | [string:###] |
-      | title | [string:]    |
-      | total | [nil:]       |
+      | code  | ###       |
+      | title | [string:] |
+      | total | [nil:]    |
 
     When assign attributes as "rows_hash":
-      | code  | [string:a] |
-      | total | [string:2] |
+      | code  | a |
+      | total | 2 |
     And save record
     Then last created "Product" should have the following attributes:
-      | code  | [string:a]  |
+      | code  | a           |
       | title | [string:]   |
       | total | [integer:2] |
 
     When assign attributes as "rows_hash":
-      | title | [string:b] |
+      | title | b |
     And save record
     Then last created "Product" should have the following attributes:
-      | code  | [string:a]  |
-      | title | [string:b]  |
+      | code  | a           |
+      | title | b           |
       | total | [integer:2] |
 
   Scenario: touch entity when attribute is updated
@@ -72,8 +72,8 @@ Feature: update hydra attributes
     Given select last "Product" record
     And keep "updated_at" attribute
     When assign attributes as "rows_hash":
-      | code  | [string:###] |
-      | total | [integer:1]  |
+      | code  | ###         |
+      | total | [integer:1] |
     And save record
     Then attribute "updated_at" should be the same
 

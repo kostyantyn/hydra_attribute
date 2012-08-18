@@ -9,9 +9,9 @@ Feature: new entity
 
   Scenario Outline: models should respond to hydra attributes
     Given create hydra attributes for "Product" with role "admin" as "hashes":
-      | name           | backend_type    | white_list      |
-      | [string:code]  | [string:string] | [boolean:true]  |
-      | [string:price] | [string:float]  | [boolean:false] |
+      | name  | backend_type | white_list      |
+      | code  | string       | [boolean:true]  |
+      | price | float        | [boolean:false] |
     Then model "<model>" <action> respond to "<attributes>"
 
     Scenarios: hydra attributes
@@ -37,9 +37,9 @@ Feature: new entity
 
   Scenario: model should have appropriate hydra attributes in white list
     Given create hydra attributes for "Product" with role "admin" as "hashes":
-      | name           | backend_type    | white_list      |
-      | [string:code]  | [string:string] | [boolean:true]  |
-      | [string:price] | [string:float]  | [boolean:false] |
+      | name  | backend_type | white_list      |
+      | code  | string       | [boolean:true]  |
+      | price | float        | [boolean:false] |
     # imitate initialization model class with already created hydra attributes
     When redefine "Product" class to use hydra attributes
     Then class "Product" should have "code" in white list
@@ -47,20 +47,20 @@ Feature: new entity
 
   Scenario: model should respond to hydra attributes which are in hydra set if hydra_set_id is passed
     Given create hydra sets for "Product" as "hashes":
-      | name             |
-      | [string:Default] |
-      | [string:General] |
+      | name    |
+      | Default |
+      | General |
     And create hydra attributes for "Product" with role "admin" as "hashes":
-      | name           | backend_type     | white_list     |
-      | [string:code]  | [string:string]  | [boolean:true] |
-      | [string:title] | [string:string]  | [boolean:true] |
-      | [string:price] | [string:float]   | [boolean:true] |
-      | [string:total] | [string:integer] | [boolean:true] |
+      | name  | backend_type | white_list     |
+      | code  | string       | [boolean:true] |
+      | title | string       | [boolean:true] |
+      | price | float        | [boolean:true] |
+      | total | integer      | [boolean:true] |
     And add "Product" hydra attributes to hydra set:
-      | attribute      | set                     |
-      | [string:code]  | [array:Default]         |
-      | [string:title] | [array:Default,General] |
-      | [string:price] | [array:General]         |
+      | hydra attribute name | hydra set name          |
+      | code                 | [array:Default]         |
+      | title                | [array:Default,General] |
+      | price                | [array:General]         |
 
     When build "Product" model:
       | hydra_set_id | [string:[eval:Product.hydra_sets.find_by_name('Default').id]] |

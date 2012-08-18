@@ -4,19 +4,19 @@ Feature: select concrete attributes
 
   Background: create hydra attributes
     Given create hydra attributes for "Product" with role "admin" as "hashes":
-      | name              | backend_type      | white_list     |
-      | [string:code]     | [string:integer]  | [boolean:true] |
-      | [string:price]    | [string:float]    | [boolean:true] |
-      | [string:title]    | [string:string]   | [boolean:true] |
-      | [string:note]     | [string:text]     | [boolean:true] |
-      | [string:active]   | [string:boolean]  | [boolean:true] |
-      | [string:schedule] | [string:datetime] | [boolean:true] |
+      | name     | backend_type | white_list     |
+      | code     | integer      | [boolean:true] |
+      | price    | float        | [boolean:true] |
+      | title    | string       | [boolean:true] |
+      | note     | text         | [boolean:true] |
+      | active   | boolean      | [boolean:true] |
+      | schedule | datetime     | [boolean:true] |
     And create "Product" model with attributes as "hashes":
-      | name       | code        | price     | title      | note       | active          | schedule              |
-      | [string:a] | [integer:1] | [float:4] | [string:q] | [string:z] | [boolean:true]  | [datetime:2012-06-01] |
-      | [string:b] | [integer:2] | [float:5] | [string:w] | [string:x] | [boolean:false] | [datetime:2012-06-02] |
-      | [string:c] | [integer:3] | [float:6] |            | [string:c] | [boolean:true]  | [datetime:2012-06-03] |
-      | [string:d] | [nil:]      | [float:7] |            | [string:v] | [boolean:false] | [datetime:2012-06-04] |
+      | name | code        | price     | title | note | active          | schedule              |
+      | a    | [integer:1] | [float:4] | q     | z    | [boolean:true]  | [datetime:2012-06-01] |
+      | b    | [integer:2] | [float:5] | w     | x    | [boolean:false] | [datetime:2012-06-02] |
+      | c    | [integer:3] | [float:6] |       | c    | [boolean:true]  | [datetime:2012-06-03] |
+      | d    | [nil:]      | [float:7] |       | v    | [boolean:false] | [datetime:2012-06-04] |
 
   Scenario Outline: select concrete attributes
     When "Product" select only the following columns "<selected columns>"
@@ -42,7 +42,7 @@ Feature: select concrete attributes
     And total records should be "<total>"
 
     Scenarios: filter and select attributes
-      | selected columns | expected columns | filter attributes | methods                               | total |
+      | selected columns | expected columns           | filter attributes | methods                               | total |
       | name code        | id hydra_set_id name code  | name=[string:a]   | price title note active schedule      | 1     |
       | code             | id hydra_set_id code       | code=[integer:1]  | name price title note active schedule | 1     |
       | name code        | id hydra_set_id name code  | code=[integer:1]  | price title note active schedule      | 1     |

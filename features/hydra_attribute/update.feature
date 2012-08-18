@@ -4,8 +4,8 @@ Feature: update hydra attribute
 
   Background: create hydra attributes
     Given create hydra attributes for "Product" with role "admin" as "hashes":
-      | name          | backend_type     | default_value | white_list     |
-      | [string:code] | [string:integer] | [integer:1]   | [boolean:true] |
+      | name | backend_type | default_value | white_list     |
+      | code | integer      | [integer:1]   | [boolean:true] |
 
   Scenario: update default value
     Given create "Product" model
@@ -19,8 +19,8 @@ Feature: update hydra attribute
 
   Scenario: update white list attribute to true
     Given create hydra attributes for "Product" with role "admin" as "hashes":
-      | name           | backend_type    | white_list      |
-      | [string:title] | [string:string] | [boolean:false] |
+      | name  | backend_type | white_list      |
+      | title | string       | [boolean:false] |
     And select last "HydraAttribute::HydraAttribute" record
     When update attributes as "admin":
       | white_list | [boolean:true] |
@@ -28,8 +28,8 @@ Feature: update hydra attribute
 
   Scenario: update white list attribute to false
     Given create hydra attributes for "Product" with role "admin" as "hashes":
-      | name          | backend_type    | white_list      |
-      | [string:info] | [string:string] | [boolean:true] |
+      | name | backend_type | white_list      |
+      | info | string       | [boolean:true] |
     And select last "HydraAttribute::HydraAttribute" record
     When update attributes as "admin":
       | white_list | [boolean:false] |

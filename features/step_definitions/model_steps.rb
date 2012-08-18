@@ -36,8 +36,8 @@ Given /^add "([^"]+)" hydra attributes to hydra set:$/ do |klass, table|
   klass = klass.constantize
 
   Array.wrap(table.hashes).each do |hash|
-    Array.wrap(type_cast_value(hash['set'])).each do |set|
-      klass.hydra_sets.find_by_name(set).hydra_attributes << klass.hydra_attributes.find_by_name(type_cast_value(hash['attribute']))
+    Array.wrap(type_cast_value(hash['hydra set name'])).each do |set|
+      klass.hydra_sets.find_by_name(set).hydra_attributes << klass.hydra_attributes.find_by_name(type_cast_value(hash['hydra attribute name']))
     end
   end
 end
