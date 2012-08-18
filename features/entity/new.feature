@@ -1,6 +1,11 @@
-Feature: define hydra attributes
-  When include HydraAttribute::ActiveRecord
-  Then entity should respond to attributes which are saved in hydra_attributes table
+Feature: new entity
+  Given new entity should respond to hydra attributes which are saved in hydra_attributes table
+
+  When hydra attribute was created with white_list flag
+  Then it should be allowed through mass-assignment for new entity
+
+  When hydra_set_id was passed to new entity
+  Then entity should respond only to hydra attributes which was added to this hydra set
 
   Scenario Outline: models should respond to hydra attributes
     Given create hydra attributes for "Product" with role "admin" as "hashes":
@@ -30,16 +35,17 @@ Feature: define hydra attributes
       | Product | should | price_was              |
       | Product | should | reset_price!           |
 
-  Scenario: model should have appropriate attributes in white list
+  Scenario: model should have appropriate hydra attributes in white list
     Given create hydra attributes for "Product" with role "admin" as "hashes":
       | name           | backend_type    | white_list      |
       | [string:code]  | [string:string] | [boolean:true]  |
       | [string:price] | [string:float]  | [boolean:false] |
+    # imitate initialization model class with already created hydra attributes
     When redefine "Product" class to use hydra attributes
     Then class "Product" should have "code" in white list
     And class "Product" should not have "price" in white list
 
-  Scenario: model should respond to attributes which are in hydra set if hydra_set_id is passed
+  Scenario: model should respond to hydra attributes which are in hydra set if hydra_set_id is passed
     Given create hydra sets for "Product" as "hashes":
       | name             |
       | [string:Default] |
