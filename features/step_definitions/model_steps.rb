@@ -77,6 +77,12 @@ Then /^model "([^"]+)" (should(?:\snot)?) respond to "([^"]+)"$/ do |klass, meth
   step %Q(model #{method} respond to "#{attributes}")
 end
 
+Then /^error "([^"]+)" (should(?:\snot)?) be risen when methods? "([^"]+)" (?:is|are) called$/ do |error_class, expect, methods|
+  Array.wrap(methods.split).each do |method|
+    lambda { @model.send(method) }.send(expect.gsub(/\s+/, '_'), raise_error(error_class.constantize))
+  end
+end
+
 Then /^(last|first) created "([^"]+)" (should|should not) have the following attributes:$/ do |method, klass, match, table|
   table.rows_hash.each_with_object(klass.constantize.send(method)) do |(attribute, value), model|
     model.send(attribute).send(match) == type_cast_value(value)

@@ -58,11 +58,10 @@ Then /^records should have only the following "([^"]+)" names$/ do |attributes|
   end
 end
 
-Then /^records should raise "([^"]+)" when call the following "([^"]+)"$/ do |error, methods|
-  error_class = error.constantize
+Then /^records should raise "([^"]+)" when call the following "([^"]+)"$/ do |error_class, methods|
   @records.each do |record|
     methods.split(/\s+/).each do |method|
-      lambda { record.send(method) }.should raise_error(error_class)
+      lambda { record.send(method) }.should raise_error(error_class.constantize)
     end
   end
 end
