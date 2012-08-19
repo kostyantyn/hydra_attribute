@@ -84,7 +84,11 @@ Feature: create models with hydra attributes
     And table "hydra_text_products" should have 1 records:
       | entity_id              | hydra_attribute_id                                      |
       | [eval:Product.last.id] | [eval:Product.hydra_attributes.find_by_name('info').id] |
-    And table "hydra_string_products" should have 1 record
-    And table "hydra_float_products" should have 1 record
+    And table "hydra_string_products" should have 1 record:
+      | entity_id               | hydra_attribute_id                                      |
+      | [eval:Product.first.id] | [eval:Product.hydra_attributes.find_by_name('code').id] |
+    And table "hydra_float_products" should have 1 record:
+      | entity_id               | hydra_attribute_id                                       |
+      | [eval:Product.first.id] | [eval:Product.hydra_attributes.find_by_name('price').id] |
     And table "hydra_integer_products" should have 0 records
     And table "hydra_datetime_products" should have 0 records
