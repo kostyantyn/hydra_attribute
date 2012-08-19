@@ -38,3 +38,18 @@ Then /^table "([^"]+)" should have the following (columns|indexes):$/ do |table_
   end
 end
 
+Then /^table "([^"]+)" should have (\d+) records?$/ do |table_name, count|
+  result = ActiveRecord::Base.connection.select_one("SELECT COUNT(*) AS count FROM #{table_name}")
+  result['count'].should == count.to_i
+end
+
+Then /^table "([^"]+)" should have (\d+) records?:$/ do |table_name, count, table|
+  step %(table "#{table_name}" should have #{count} records)
+
+  table.hashes.each do |hash|
+    where  = hash.map { |name, value| %(#{name} = "#{type_cast_value(value)}") }.join(' AND ')
+    result = ActiveRecord::Base.connection.select_one("SELECT COUNT(*) AS count FROM #{table_name} WHERE #{where}")
+    result['count'].should >= 1
+  end
+end
+
