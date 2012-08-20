@@ -4,99 +4,108 @@ Feature: destroy model
 
   Background: create hydra attributes
     Given create hydra attributes for "Product" with role "admin" as "hashes":
-      | name    | backend_type | default_value | white_list     |
-      | code    | string       | [nil:]        | [boolean:true] |
-      | price   | float        | 0             | [boolean:true] |
-      | active  | boolean      | 0             | [boolean:true] |
-      | info    | text         | [string:]     | [boolean:true] |
-      | started | datetime     | 2012-01-01    | [boolean:true] |
+      | name    | backend_type | default_value | white_list |
+      | code    | string       |               | [bool:t]   |
+      | info    | text         | [string:]     | [bool:t]   |
+      | total   | integer      | 0             | [bool:t]   |
+      | price   | float        | 0             | [bool:t]   |
+      | active  | boolean      | 0             | [bool:t]   |
+      | started | datetime     | 2012-01-01    | [bool:t]   |
 
   Scenario: destroy model
     Given create "Product" model with attributes as "hashes":
-      | code | price | active | info | started    |
-      | 1    | 1     | 1      | a    | 2012-01-01 |
-      | 2    | 2     | 1      | b    | 2012-01-02 |
-      | 3    | 3     | 1      | c    | 2012-01-03 |
-      | 4    | 4     | 1      | d    | 2012-01-04 |
-      | 5    | 5     | 1      | e    | 2012-01-05 |
+      | code | info | total | price | active | started    |
+      | 1    | a    | 1     | 1.10  | 1      | 2012-01-01 |
+      | 2    | b    | 2     | 1.20  | 1      | 2012-01-02 |
+      | 3    | c    | 3     | 1.30  | 0      | 2012-01-03 |
 
-    When select first "HydraAttribute::HydraStringProduct" record
-    Then record read attribute "value" and value should be "[string:1]"
-    When select first "HydraAttribute::HydraFloatProduct" record
-    Then record read attribute "value" and value should be "[float:1]"
-    When select first "HydraAttribute::HydraBooleanProduct" record
-    Then record read attribute "value" and value should be "[boolean:true]"
-    When select first "HydraAttribute::HydraTextProduct" record
-    Then record read attribute "value" and value should be "[string:a]"
-    When select first "HydraAttribute::HydraDatetimeProduct" record
-    Then record read attribute "value" and value should be "[string:2012-01-01]"
-
-    Given select first "Product" record
-    And destroy record
-
-    When select first "HydraAttribute::HydraStringProduct" record
-    Then record read attribute "value" and value should be "[string:2]"
-    When select first "HydraAttribute::HydraFloatProduct" record
-    Then record read attribute "value" and value should be "[float:2]"
-    When select first "HydraAttribute::HydraBooleanProduct" record
-    Then record read attribute "value" and value should be "[boolean:true]"
-    When select first "HydraAttribute::HydraTextProduct" record
-    Then record read attribute "value" and value should be "[string:b]"
-    When select first "HydraAttribute::HydraDatetimeProduct" record
-    Then record read attribute "value" and value should be "[string:2012-01-02]"
-
-    Given select first "Product" record
-    And destroy record
-
-    When select first "HydraAttribute::HydraStringProduct" record
-    Then record read attribute "value" and value should be "[string:3]"
-    When select first "HydraAttribute::HydraFloatProduct" record
-    Then record read attribute "value" and value should be "[float:3]"
-    When select first "HydraAttribute::HydraBooleanProduct" record
-    Then record read attribute "value" and value should be "[boolean:true]"
-    When select first "HydraAttribute::HydraTextProduct" record
-    Then record read attribute "value" and value should be "[string:c]"
-    When select first "HydraAttribute::HydraDatetimeProduct" record
-    Then record read attribute "value" and value should be "[string:2012-01-03]"
+    Then table "hydra_string_products" should have 3 records:
+      | entity_id | hydra_attribute_id                        | value |
+      | 1         | [eval:Product.hydra_attribute('code').id] | 1     |
+      | 2         | [eval:Product.hydra_attribute('code').id] | 2     |
+      | 3         | [eval:Product.hydra_attribute('code').id] | 3     |
+    And table "hydra_text_products" should have 3 records:
+      | entity_id | hydra_attribute_id                        | value |
+      | 1         | [eval:Product.hydra_attribute('info').id] | a     |
+      | 2         | [eval:Product.hydra_attribute('info').id] | b     |
+      | 3         | [eval:Product.hydra_attribute('info').id] | c     |
+    And table "hydra_integer_products" should have 3 records:
+      | entity_id | hydra_attribute_id                         | value |
+      | 1         | [eval:Product.hydra_attribute('total').id] | 1     |
+      | 2         | [eval:Product.hydra_attribute('total').id] | 2     |
+      | 3         | [eval:Product.hydra_attribute('total').id] | 3     |
+    And table "hydra_float_products" should have 3 records:
+      | entity_id | hydra_attribute_id                         | value |
+      | 1         | [eval:Product.hydra_attribute('price').id] | 1.10  |
+      | 2         | [eval:Product.hydra_attribute('price').id] | 1.20  |
+      | 3         | [eval:Product.hydra_attribute('price').id] | 1.30  |
+    And table "hydra_boolean_products" should have 3 records:
+      | entity_id | hydra_attribute_id                          | value    |
+      | 1         | [eval:Product.hydra_attribute('active').id] | [bool:t] |
+      | 2         | [eval:Product.hydra_attribute('active').id] | [bool:t] |
+      | 3         | [eval:Product.hydra_attribute('active').id] | [bool:f] |
+    And table "hydra_datetime_products" should have 3 records:
+      | entity_id | hydra_attribute_id                           | value             |
+      | 1         | [eval:Product.hydra_attribute('started').id] | [date:2012-01-01] |
+      | 2         | [eval:Product.hydra_attribute('started').id] | [date:2012-01-02] |
+      | 3         | [eval:Product.hydra_attribute('started').id] | [date:2012-01-03] |
 
     Given select first "Product" record
     And destroy record
 
-    When select first "HydraAttribute::HydraStringProduct" record
-    Then record read attribute "value" and value should be "[string:4]"
-    When select first "HydraAttribute::HydraFloatProduct" record
-    Then record read attribute "value" and value should be "[float:4]"
-    When select first "HydraAttribute::HydraBooleanProduct" record
-    Then record read attribute "value" and value should be "[boolean:true]"
-    When select first "HydraAttribute::HydraTextProduct" record
-    Then record read attribute "value" and value should be "[string:d]"
-    When select first "HydraAttribute::HydraDatetimeProduct" record
-    Then record read attribute "value" and value should be "[string:2012-01-04]"
+    Then table "hydra_string_products" should have 2 records:
+      | entity_id | hydra_attribute_id                        | value |
+      | 2         | [eval:Product.hydra_attribute('code').id] | 2     |
+      | 3         | [eval:Product.hydra_attribute('code').id] | 3     |
+    And table "hydra_text_products" should have 2 records:
+      | entity_id | hydra_attribute_id                        | value |
+      | 2         | [eval:Product.hydra_attribute('info').id] | b     |
+      | 3         | [eval:Product.hydra_attribute('info').id] | c     |
+    And table "hydra_integer_products" should have 2 records:
+      | entity_id | hydra_attribute_id                         | value |
+      | 2         | [eval:Product.hydra_attribute('total').id] | 2     |
+      | 3         | [eval:Product.hydra_attribute('total').id] | 3     |
+    And table "hydra_float_products" should have 2 records:
+      | entity_id | hydra_attribute_id                         | value |
+      | 2         | [eval:Product.hydra_attribute('price').id] | 1.20  |
+      | 3         | [eval:Product.hydra_attribute('price').id] | 1.30  |
+    And table "hydra_boolean_products" should have 2 records:
+      | entity_id | hydra_attribute_id                          | value    |
+      | 2         | [eval:Product.hydra_attribute('active').id] | [bool:t] |
+      | 3         | [eval:Product.hydra_attribute('active').id] | [bool:f] |
+    And table "hydra_datetime_products" should have 2 records:
+      | entity_id | hydra_attribute_id                           | value             |
+      | 2         | [eval:Product.hydra_attribute('started').id] | [date:2012-01-02] |
+      | 3         | [eval:Product.hydra_attribute('started').id] | [date:2012-01-03] |
 
     Given select first "Product" record
     And destroy record
 
-    When select first "HydraAttribute::HydraStringProduct" record
-    Then record read attribute "value" and value should be "[string:5]"
-    When select first "HydraAttribute::HydraFloatProduct" record
-    Then record read attribute "value" and value should be "[float:5]"
-    When select first "HydraAttribute::HydraBooleanProduct" record
-    Then record read attribute "value" and value should be "[boolean:true]"
-    When select first "HydraAttribute::HydraTextProduct" record
-    Then record read attribute "value" and value should be "[string:e]"
-    When select first "HydraAttribute::HydraDatetimeProduct" record
-    Then record read attribute "value" and value should be "[string:2012-01-05]"
+    Then table "hydra_string_products" should have 1 record:
+      | entity_id | hydra_attribute_id                        | value |
+      | 3         | [eval:Product.hydra_attribute('code').id] | 3     |
+    And table "hydra_text_products" should have 1 record:
+      | entity_id | hydra_attribute_id                        | value |
+      | 3         | [eval:Product.hydra_attribute('info').id] | c     |
+    And table "hydra_integer_products" should have 1 record:
+      | entity_id | hydra_attribute_id                         | value |
+      | 3         | [eval:Product.hydra_attribute('total').id] | 3     |
+    And table "hydra_float_products" should have 1 record:
+      | entity_id | hydra_attribute_id                         | value |
+      | 3         | [eval:Product.hydra_attribute('price').id] | 1.30  |
+    And table "hydra_boolean_products" should have 1 record:
+      | entity_id | hydra_attribute_id                          | value    |
+      | 3         | [eval:Product.hydra_attribute('active').id] | [bool:f] |
+    And table "hydra_datetime_products" should have 1 record:
+      | entity_id | hydra_attribute_id                           | value             |
+      | 3         | [eval:Product.hydra_attribute('started').id] | [date:2012-01-03] |
 
     Given select first "Product" record
     And destroy record
 
-    When select first "HydraAttribute::HydraStringProduct" record
-    Then record should be nil
-    When select first "HydraAttribute::HydraFloatProduct" record
-    Then record should be nil
-    When select first "HydraAttribute::HydraBooleanProduct" record
-    Then record should be nil
-    When select first "HydraAttribute::HydraTextProduct" record
-    Then record should be nil
-    When select first "HydraAttribute::HydraDatetimeProduct" record
-    Then record should be nil
+    Then table "hydra_string_products" should have 0 records
+    And table "hydra_text_products" should have 0 records
+    And table "hydra_integer_products" should have 0 records
+    And table "hydra_float_products" should have 0 records
+    And table "hydra_boolean_products" should have 0 records
+    And table "hydra_datetime_products" should have 0 records

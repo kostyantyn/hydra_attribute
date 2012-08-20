@@ -28,7 +28,7 @@ Then /^table "([^"]+)" should have the following (columns|indexes):$/ do |table_
   checked_params    = table.hashes.map { |hash| type_cast_hash(hash) }.sort_by { |param| param['name'] }
 
   unless connection_params.length == checked_params.length
-    raise %Q(Table "#{table_name}" has "#{connection_params.length}" #{method} but in our test "#{checked_params.length}". Diff: is "#{connection_params.map(&:name)}" but should be "#{checked_params.map { |h| h['name'] }}")
+    raise %(Table "#{table_name}" has "#{connection_params.length}" #{method} but in our test "#{checked_params.length}". Diff: is "#{connection_params.map(&:name)}" but should be "#{checked_params.map { |h| h['name'] }}")
   end
 
   connection_params.zip(checked_params).each do |(real_params, params)|
@@ -47,9 +47,19 @@ Then /^table "([^"]+)" should have (\d+) records?:$/ do |table_name, count, tabl
   step %(table "#{table_name}" should have #{count} records)
 
   table.hashes.each do |hash|
-    where  = hash.map { |name, value| %(#{name} = "#{type_cast_value(value)}") }.join(' AND ')
-    result = ActiveRecord::Base.connection.select_one("SELECT COUNT(*) AS count FROM #{table_name} WHERE #{where}")
-    result['count'].should >= 1
+    table  = Arel::Table.new(table_name, ActiveRecord::Base)
+    select = Arel.sql('COUNT(*)').as('count')
+    where  = hash.map { |name, value| table[name].eq(type_cast_value(value)) }.inject(:and)
+
+    result = ActiveRecord::Base.connection.select_one(table.project(select).where(where))
+    unless result['count']
+      raise %(Query "#{table.project(select).where(where).to_sql}" return nil)
+    end
+
+    unless result['count'] == 1
+      raise %(Query "#{table.project(select).where(where).to_sql}" return "#{result['count']}")
+    end
+    result['count'].should be(1)
   end
 end
 

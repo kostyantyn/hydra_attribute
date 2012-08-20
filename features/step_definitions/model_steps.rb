@@ -90,7 +90,7 @@ end
 
 Then /^model "([^"]+)" (should(?:\snot)?) respond to "([^"]+)"$/ do |klass, method, attributes|
   @model = klass.constantize.new
-  step %Q(model #{method} respond to "#{attributes}")
+  step %(model #{method} respond to "#{attributes}")
 end
 
 Then /^error "([^"]+)" (should(?:\snot)?) be risen when methods? "([^"]+)" (?:is|are) called$/ do |error_class, expect, methods|

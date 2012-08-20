@@ -7,15 +7,15 @@ module HydraAttribute
         return schema if schema == type && value.nil?
 
         case type
-        when 'integer'  then type_cast_value(value).to_i
-        when 'float'    then type_cast_value(value).to_f
-        when 'boolean'  then type_cast_value(value) == 'true' ? true : false
-        when 'nil'      then nil
-        when 'datetime' then ActiveSupport::TimeZone.new('UTC').parse(type_cast_value(value))
-        when 'symbol'   then type_cast_value(value).to_sym
-        when 'array'    then type_cast_value(value).split(',')
-        when 'eval'     then eval(type_cast_value(value))
-        when 'string'   then type_cast_value(value).to_s
+        when 'integer'       then type_cast_value(value).to_i
+        when 'float'         then type_cast_value(value).to_f
+        when /^bool(ean)?$/  then ::ActiveRecord::ConnectionAdapters::Column::TRUE_VALUES.include?(type_cast_value(value))
+        when 'nil'           then nil
+        when /^date(time)?$/ then ActiveSupport::TimeZone.new('UTC').parse(type_cast_value(value))
+        when 'symbol'        then type_cast_value(value).to_sym
+        when 'array'         then type_cast_value(value).split(',')
+        when 'eval'          then eval(type_cast_value(value))
+        when 'string'        then type_cast_value(value).to_s
         else value
         end
       end

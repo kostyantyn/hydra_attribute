@@ -5,7 +5,7 @@ end
 
 When /^filter "([^"]+)" records by "([^"]+)"$/ do |klass, attribute|
   @records = Object.const_get(klass)
-  step %Q(filter records by "#{attribute}")
+  step %(filter records by "#{attribute}")
 end
 
 When /^filter records by "([^"]+)"$/ do |attribute|
@@ -15,7 +15,7 @@ end
 
 When /^group "([^"]+)" by "([^"]+)"$/ do |klass, attributes|
   @records = Object.const_get(klass)
-  step %Q(group by "#{attributes}")
+  step %(group by "#{attributes}")
 end
 
 When /^group by "([^"]+)"$/ do |attributes|
@@ -24,7 +24,7 @@ end
 
 When /^(order|reorder) "([^"]+)" records by "([^"]+)"$/ do |sort_method, klass, attributes|
   @records = Object.const_get(klass)
-  step %Q(#{sort_method} records by "#{attributes}")
+  step %(#{sort_method} records by "#{attributes}")
 end
 
 When /^(order|reorder) records by "([^"]+)"$/ do |sort_method, attributes|

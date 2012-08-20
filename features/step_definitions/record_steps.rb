@@ -72,7 +72,7 @@ end
 
 Then /^total "([^"]+)" records should be "([^"]+)"$/ do |klass, count|
   @records = klass.constantize.scoped
-  step %Q(total records should be "#{count}")
+  step %(total records should be "#{count}")
 end
 
 Then /^records "(should|should_not)" have loaded associations:$/ do |should, table|
