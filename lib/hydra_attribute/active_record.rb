@@ -2,11 +2,11 @@ module HydraAttribute
   module ActiveRecord
     def self.append_features(base)
       unless base.ancestors.include?(::ActiveRecord::Base)
-        raise %Q(Cannot include HydraAttribute::ActiveRecord module because "#{base}" is not inherited from ActiveRecord::Base)
+        raise %(Cannot include HydraAttribute::ActiveRecord module because "#{base}" is not inherited from ActiveRecord::Base)
       end
 
       unless base.base_class.equal?(base)
-        raise %Q(HydraAttribute::ActiveRecord module should be included to base class "#{base.base_class}" instead of "#{base}")
+        raise %(HydraAttribute::ActiveRecord module should be included to base class "#{base.base_class}" instead of "#{base}")
       end
 
       super
