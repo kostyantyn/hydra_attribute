@@ -18,6 +18,10 @@ When /^set "([^"]+)" to "([^"]+)"$/ do |attribute, value|
   @model.send("#{attribute}=", type_cast_value(value))
 end
 
+When /^(save|destroy) model$/ do |method|
+  @model.send(method)
+end
+
 Given /^create "([^"]+)" model with attributes as "([^"]+):"$/ do |klass, format, table|
   Array.wrap(table.send(format)).each do |hash|
     klass.constantize.create!(type_cast_hash(hash))
