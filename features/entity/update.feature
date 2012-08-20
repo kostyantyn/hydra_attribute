@@ -7,10 +7,13 @@ Feature: update hydra attributes
 
   Background: create hydra attributes
     Given create hydra attributes for "Product" with role "admin" as "hashes":
-      | name  | backend_type | default_value | white_list     |
-      | code  | string       | ###           | [boolean:true] |
-      | title | string       |               | [boolean:true] |
-      | total | integer      | 1             | [boolean:true] |
+      | name   | backend_type | default_value | white_list     |
+      | code   | string       | ###           | [boolean:true] |
+      | title  | string       |               | [boolean:true] |
+      | info   | text         |               | [boolean:true] |
+      | total  | integer      | 1             | [boolean:true] |
+      | price  | float        |               | [boolean:true] |
+      | launch | datetime     |               | [boolean:true] |
     And create "Product" model
 
   Scenario Outline: update attributes
@@ -114,3 +117,31 @@ Feature: update hydra attributes
       | total | [integer:0] |
     And save record
     Then attribute "updated_at" should not be the same
+
+  Scenario: update hydra_set_id
+    Given create hydra sets for "Product" as "hashes":
+      | name    |
+      | Default |
+      | General |
+    And add "Product" hydra attributes to hydra set:
+      | hydra attribute name | hydra set name          |
+      | code                 | [array:Default]         |
+      | title                | [array:Default]         |
+      | info                 | [array:Default,General] |
+      | total                | [array:General]         |
+      | price                | [array:General]         |
+    And create "Product" model
+    And find last "Product" model
+
+    When set "hydra_set_id" to "[eval:Product.hydra_sets.find_by_name('Default').id]"
+    And  reload model
+    Then model attributes should include "code title info"
+
+    When set "hydra_set_id" to "[eval:Product.hydra_sets.find_by_name('General').id]"
+    And  reload model
+    Then model attributes should include "info total price"
+
+    When set "hydra_set_id" to "[nil:]"
+    And  reload model
+    Then model attributes should include "code title info total price launch"
+

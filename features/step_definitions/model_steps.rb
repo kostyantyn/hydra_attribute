@@ -22,6 +22,18 @@ When /^(save|destroy) model$/ do |method|
   @model.send(method)
 end
 
+When /^find "([^"]+)" model by attribute "([^"])" and value "([^"]+)"$/ do |class_name, attribute, value|
+  @model = class_name.constantize.send("find_by_#{attribute}", type_cast_value(value))
+end
+
+When /^find (first|last) "([^"]+)" model$/ do |method, class_name|
+  @model = class_name.constantize.send(method)
+end
+
+When /^reload model$/ do
+  @model.reload
+end
+
 Given /^create "([^"]+)" model with attributes as "([^"]+):"$/ do |klass, format, table|
   Array.wrap(table.send(format)).each do |hash|
     klass.constantize.create!(type_cast_hash(hash))
