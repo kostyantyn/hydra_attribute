@@ -1,13 +1,16 @@
 Feature: update hydra attributes
-  When update attribute
-  Then entity should be touched
+  When update hydra attribute
+  Then updated_at for entity should be updated
+
+  When update hydra_set_id
+  Then entity should have hydra attributes from this hydra set
 
   Background: create hydra attributes
     Given create hydra attributes for "Product" with role "admin" as "hashes":
-      | name           | backend_type     | default_value | white_list     |
-      | [string:code]  | [string:string]  | [string:###]  | [boolean:true] |
-      | [string:title] | [string:string]  |               | [boolean:true] |
-      | [string:total] | [string:integer] | [integer:1]   | [boolean:true] |
+      | name  | backend_type | default_value | white_list     |
+      | code  | string       | ###           | [boolean:true] |
+      | title | string       |               | [boolean:true] |
+      | total | integer      | 1             | [boolean:true] |
     And create "Product" model
 
   Scenario Outline: update attributes
@@ -28,8 +31,7 @@ Feature: update hydra attributes
       | [string:] | [string:] | [nil:]      | [string:] | [string:] | [nil:]      |
       |           |           | 3           | ###       | [nil:]    | [integer:3] |
 
-  # Is a better solution to call several scenarios but don't call hooks and backgrounds before?
-  Scenario: update the same model several times
+  Scenario: update the same model several times to test touch method
     Given select first "Product" record
     And save record
     Then last created "Product" should have the following attributes:

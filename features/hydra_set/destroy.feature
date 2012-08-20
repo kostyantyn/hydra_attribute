@@ -1,6 +1,6 @@
 Feature: destroy hydra set
   When destroy hydra set
-  Then column hydra_set_id should be set to NULL for entity tables
+  Then column hydra_set_id should be set to NULL for entity table
 
   Scenario: destroy hydra set
     Given create hydra sets for "Product" as "rows_hash":
