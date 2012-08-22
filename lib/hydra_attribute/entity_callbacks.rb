@@ -13,7 +13,7 @@ module HydraAttribute
     def save_hydra_values
       changed = false
       self.class.hydra_set_attribute_backend_types(hydra_set_id).each do |backend_type|
-        hydra_value_association(backend_type).save { changed = true }
+        changed = true if hydra_value_association(backend_type).save
       end
       touch if changed
     end

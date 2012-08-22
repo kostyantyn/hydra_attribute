@@ -38,12 +38,7 @@ module HydraAttribute
           model.save
           changed = true unless model.previous_changes.blank?
         end
-
-        if changed and block_given?
-          yield
-        else
-          changed
-        end
+        changed
       end
 
       def lock!(white_list = [])
