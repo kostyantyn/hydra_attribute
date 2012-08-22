@@ -26,7 +26,7 @@ module HydraAttribute
     private
 
     def build_associations
-      SUPPORT_TYPES.each do |type|
+      SUPPORTED_BACKEND_TYPES.each do |type|
         AssociationBuilder.build(klass, type)
       end
     end

@@ -43,7 +43,7 @@ module HydraAttribute
 
         Object.send(:remove_const, klass.to_sym) if Object.const_defined?(klass.to_sym)
 
-        ::HydraAttribute::SUPPORT_TYPES.each do |type|
+        ::HydraAttribute::SUPPORTED_BACKEND_TYPES.each do |type|
           class_name = "Hydra#{type.capitalize}#{klass}".to_sym
           ::HydraAttribute.send(:remove_const, class_name) if ::HydraAttribute.const_defined?(class_name)
         end

@@ -94,7 +94,7 @@ module HydraAttribute
     end
 
     def create_values(name)
-      SUPPORT_TYPES.each do |type|
+      SUPPORTED_BACKEND_TYPES.each do |type|
         table_name = value_table(name, type)
         create_table table_name do |t|
           t.integer :entity_id,          null: false
@@ -125,7 +125,7 @@ module HydraAttribute
     end
 
     def drop_values(name)
-      SUPPORT_TYPES.each do |type|
+      SUPPORTED_BACKEND_TYPES.each do |type|
         drop_table(value_table(name, type))
       end
     end
@@ -144,7 +144,7 @@ module HydraAttribute
 
     def values_exists?
       tables.any? do |table|
-        SUPPORT_TYPES.any? do |type|
+        SUPPORTED_BACKEND_TYPES.any? do |type|
           table.start_with?("hydra_#{type}_")
         end
       end

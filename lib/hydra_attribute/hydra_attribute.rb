@@ -14,7 +14,7 @@ module HydraAttribute
     with_options presence: true do |klass|
       klass.validates :entity_type,  inclusion: { in: lambda { |attr| [(attr.entity_type.constantize.name rescue nil)] } }
       klass.validates :name,         uniqueness: { scope: :entity_type }
-      klass.validates :backend_type, inclusion: SUPPORT_TYPES
+      klass.validates :backend_type, inclusion: SUPPORTED_BACKEND_TYPES
     end
 
     before_destroy :delete_dependent_values

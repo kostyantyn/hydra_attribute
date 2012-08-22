@@ -9,7 +9,7 @@ module HydraAttribute
       end
 
       def backend_type
-        @backend_type ||= SUPPORT_TYPES.find { |type| type == klass.model_name.demodulize.underscore.split('_')[1] }
+        @backend_type ||= SUPPORTED_BACKEND_TYPES.find { |type| type == klass.model_name.demodulize.underscore.split('_')[1] }
       end
     end
   end
