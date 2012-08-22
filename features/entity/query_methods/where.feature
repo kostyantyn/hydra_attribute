@@ -7,21 +7,21 @@ Feature: hydra attribute where conditions
 
   Background: create hydra attributes
     Given create hydra attributes for "Product" with role "admin" as "hashes":
-      | name    | backend_type | white_list     |
-      | code    | string       | [boolean:true] |
-      | summary | string       | [boolean:true] |
-      | title   | string       | [boolean:true] |
-      | price   | float        | [boolean:true] |
-      | active  | boolean      | [boolean:true] |
-      | state   | integer      | [boolean:true] |
+      | name    | backend_type | white_list |
+      | code    | string       | [bool:t]   |
+      | summary | string       | [bool:t]   |
+      | title   | string       | [bool:t]   |
+      | price   | float        | [bool:t]   |
+      | active  | boolean      | [bool:t]   |
+      | state   | integer      | [bool:t]   |
 
   Scenario: filter by one hydra attribute
     Given create "Product" model with attributes as "hashes":
-      | code | price        |
-      | 1    | [float:2.75] |
-      | 2    | [float:2.75] |
-      | 3    | [float:2.76] |
-      | 4    | [nil:]       |
+      | code | price |
+      | 1    | 2.75  |
+      | 2    | 2.75  |
+      | 3    | 2.76  |
+      | 4    |       |
     When filter "Product" by:
       | field | value |
       | price | 2.75  |
@@ -33,10 +33,10 @@ Feature: hydra attribute where conditions
 
   Scenario: filter by one hydra attribute with nil value
     Given create "Product" model with attributes as "hashes":
-      | code | price     |
-      | 1    | [nil:]    |
-      | 2    | [float:0] |
-      | 3    |           |
+      | code | price |
+      | 1    |       |
+      | 2    | 0     |
+      | 3    |       |
     When filter "Product" by:
       | field | value  |
       | price | [nil:] |
@@ -48,21 +48,21 @@ Feature: hydra attribute where conditions
 
   Scenario: filter by several fields including both the hydra and general attributes
     Given create "Product" model with attributes as "hashes":
-      | name | code | title | price        | active          | state  | summary |
-      | toy  | 1    | story | [float:2.40] | [boolean:true]  |        |         |
-      | toy  | 2    | story | [float:2.45] | [boolean:true]  |        | [nil:]  |
-      | toy  | 3    | story | [float:2.45] | [boolean:true]  | [nil:] | [nil:]  |
-      | toy  | 4    |       | [float:2.45] | [boolean:false] | [nil:] | [nil:]  |
-      |      | 5    |       | [float:2.45] | [boolean:true]  | [nil:] | [nil:]  |
-      | toy  | 6    |       | [float:2.46] | [boolean:true]  | [nil:] | [nil:]  |
+      | name | code | title | price | active | state  | summary |
+      | toy  | 1    | story | 2.40  | 1      |        |         |
+      | toy  | 2    | story | 2.45  | 1      |        |         |
+      | toy  | 3    | story | 2.45  | 1      |        |         |
+      | toy  | 4    |       | 2.45  | 0      |        |         |
+      |      | 5    |       | 2.45  | 1      |        |         |
+      | toy  | 6    |       | 2.46  | 1      |        |         |
     When filter "Product" by:
-      | field   | value          |
-      | name    | toy            |
-      | title   | story          |
-      | summary | [nil:]         |
-      | price   | [float:2.45]   |
-      | active  | [boolean:true] |
-      | state   | [nil:]         |
+      | field   | value        |
+      | name    | toy          |
+      | title   | story        |
+      | summary | [nil:]       |
+      | price   | [float:2.45] |
+      | active  | [bool:t]     |
+      | state   | [nil:]       |
     Then total records should be "2"
     And records should have the following attributes:
       | field | value |

@@ -7,13 +7,13 @@ Feature: update hydra attributes
 
   Background: create hydra attributes
     Given create hydra attributes for "Product" with role "admin" as "hashes":
-      | name   | backend_type | default_value | white_list     |
-      | code   | string       | ###           | [boolean:true] |
-      | title  | string       |               | [boolean:true] |
-      | info   | text         |               | [boolean:true] |
-      | total  | integer      | 1             | [boolean:true] |
-      | price  | float        |               | [boolean:true] |
-      | launch | datetime     |               | [boolean:true] |
+      | name   | backend_type | default_value | white_list |
+      | code   | string       | ###           | [bool:t]   |
+      | title  | string       |               | [bool:t]   |
+      | info   | text         |               | [bool:t]   |
+      | total  | integer      | 1             | [bool:t]   |
+      | price  | float        |               | [bool:t]   |
+      | launch | datetime     |               | [bool:t]   |
     And create "Product" model
 
   Scenario Outline: update attributes
@@ -29,44 +29,44 @@ Feature: update hydra attributes
       | total | <total> |
 
     Scenarios: attributes
-      | set code  | set title | set total   | code      | title     | total       |
-      | a         | b         | [integer:2] | a         | b         | [integer:2] |
-      | [string:] | [string:] | [nil:]      | [string:] | [string:] | [nil:]      |
-      |           |           | 3           | ###       | [nil:]    | [integer:3] |
+      | set code | set title | set total | code   | title  | total   |
+      | a        | b         | [int:2]   | a      | b      | [int:2] |
+      | [str:]   | [str:]    | [nil:]    | [str:] | [str:] | [nil:]  |
+      |          |           | 3         | ###    | [nil:] | [int:3] |
 
   Scenario: update the same model several times to test touch method
     Given select first "Product" record
     And save record
     Then last created "Product" should have the following attributes:
-      | code  | ###         |
-      | title | [nil:]      |
-      | total | [integer:1] |
+      | code  | ###     |
+      | title | [nil:]  |
+      | total | [int:1] |
 
     When assign attributes as "rows_hash":
-      | title | [string:] |
-      | total | [nil:]    |
+      | title | [str:] |
+      | total | [nil:] |
     And save record
     Then last created "Product" should have the following attributes:
-      | code  | ###       |
-      | title | [string:] |
-      | total | [nil:]    |
+      | code  | ###    |
+      | title | [str:] |
+      | total | [nil:] |
 
     When assign attributes as "rows_hash":
       | code  | a |
       | total | 2 |
     And save record
     Then last created "Product" should have the following attributes:
-      | code  | a           |
-      | title | [string:]   |
-      | total | [integer:2] |
+      | code  | a       |
+      | title | [str:]  |
+      | total | [int:2] |
 
     When assign attributes as "rows_hash":
       | title | b |
     And save record
     Then last created "Product" should have the following attributes:
-      | code  | a           |
-      | title | b           |
-      | total | [integer:2] |
+      | code  | a       |
+      | title | b       |
+      | total | [int:2] |
 
   Scenario: touch entity when attribute is updated
     Given select last "Product" record
@@ -77,8 +77,8 @@ Feature: update hydra attributes
     Given select last "Product" record
     And keep "updated_at" attribute
     When assign attributes as "rows_hash":
-      | code  | ###         |
-      | total | [integer:1] |
+      | code  | ###     |
+      | total | [int:1] |
     And save record
     Then attribute "updated_at" should be the same
 
@@ -106,15 +106,15 @@ Feature: update hydra attributes
     Given select last "Product" record
     And keep "updated_at" attribute
     When assign attributes as "rows_hash":
-      | code | [string:] |
+      | code | [str:] |
     And save record
     Then attribute "updated_at" should not be the same
 
     Given select last "Product" record
     And keep "updated_at" attribute
     When assign attributes as "rows_hash":
-      | title | [string:]   |
-      | total | [integer:0] |
+      | title | [str:]  |
+      | total | [int:0] |
     And save record
     Then attribute "updated_at" should not be the same
 

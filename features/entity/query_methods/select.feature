@@ -4,19 +4,19 @@ Feature: select concrete attributes
 
   Background: create hydra attributes
     Given create hydra attributes for "Product" with role "admin" as "hashes":
-      | name     | backend_type | white_list     |
-      | code     | integer      | [boolean:true] |
-      | price    | float        | [boolean:true] |
-      | title    | string       | [boolean:true] |
-      | note     | text         | [boolean:true] |
-      | active   | boolean      | [boolean:true] |
-      | schedule | datetime     | [boolean:true] |
+      | name     | backend_type | white_list |
+      | code     | integer      | [bool:t]   |
+      | price    | float        | [bool:t]   |
+      | title    | string       | [bool:t]   |
+      | note     | text         | [bool:t]   |
+      | active   | boolean      | [bool:t]   |
+      | schedule | datetime     | [bool:t]   |
     And create "Product" model with attributes as "hashes":
-      | name | code        | price     | title | note | active          | schedule              |
-      | a    | [integer:1] | [float:4] | q     | z    | [boolean:true]  | [datetime:2012-06-01] |
-      | b    | [integer:2] | [float:5] | w     | x    | [boolean:false] | [datetime:2012-06-02] |
-      | c    | [integer:3] | [float:6] |       | c    | [boolean:true]  | [datetime:2012-06-03] |
-      | d    | [nil:]      | [float:7] |       | v    | [boolean:false] | [datetime:2012-06-04] |
+      | name | code | price | title | note | active | schedule   |
+      | a    | 1    | 4     | q     | z    | 1      | 2012-06-01 |
+      | b    | 2    | 5     | w     | x    | 0      | 2012-06-02 |
+      | c    | 3    | 6     |       | c    | 1      | 2012-06-03 |
+      | d    |      | 7     |       | v    | 0      | 2012-06-04 |
 
   Scenario Outline: select concrete attributes
     When "Product" select only the following columns "<selected columns>"
@@ -43,8 +43,8 @@ Feature: select concrete attributes
 
     Scenarios: filter and select attributes
       | selected columns | expected columns           | filter attributes | methods                               | total |
-      | name code        | id hydra_set_id name code  | name=[string:a]   | price title note active schedule      | 1     |
-      | code             | id hydra_set_id code       | code=[integer:1]  | name price title note active schedule | 1     |
-      | name code        | id hydra_set_id name code  | code=[integer:1]  | price title note active schedule      | 1     |
+      | name code        | id hydra_set_id name code  | name=a            | price title note active schedule      | 1     |
+      | code             | id hydra_set_id code       | code=[int:1]      | name price title note active schedule | 1     |
+      | name code        | id hydra_set_id name code  | code=[int:1]      | price title note active schedule      | 1     |
       | code title       | id hydra_set_id code title | title=[nil:]      | name price note active schedule       | 2     |
       | code note        | id hydra_set_id code note  | title=[nil:]      | name price title active schedule      | 2     |

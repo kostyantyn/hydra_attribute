@@ -6,7 +6,7 @@ Feature: destroy model
     Given create hydra attributes for "Product" with role "admin" as "hashes":
       | name    | backend_type | default_value | white_list |
       | code    | string       |               | [bool:t]   |
-      | info    | text         | [string:]     | [bool:t]   |
+      | info    | text         | [str:]        | [bool:t]   |
       | total   | integer      | 0             | [bool:t]   |
       | price   | float        | 0             | [bool:t]   |
       | active  | boolean      | 0             | [bool:t]   |

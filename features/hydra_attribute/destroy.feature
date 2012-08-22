@@ -5,8 +5,8 @@ Feature: destroy hydra attributes
 
   Background: create hydra attributes
     Given create hydra attributes for "Product" with role "admin" as "hashes":
-      | name  | backend_type | white_list     |
-      | price | float        | [boolean:true] |
+      | name  | backend_type | white_list |
+      | price | float        | [bool:t]   |
 
   Scenario: entity should not respond to removed attribute
     When destroy all "HydraAttribute::HydraAttribute" models with attributes as "rows_hash":

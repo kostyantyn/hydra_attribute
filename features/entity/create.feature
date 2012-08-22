@@ -7,35 +7,35 @@ Feature: create models with hydra attributes
 
   Background: create hydra attributes
     Given create hydra attributes for "Product" with role "admin" as "hashes":
-      | name    | backend_type | default_value | white_list     |
-      | code    | string       | [nil:]        | [boolean:true] |
-      | info    | text         | [string:]     | [boolean:true] |
-      | total   | integer      | 0             | [boolean:true] |
-      | price   | float        | 0             | [boolean:true] |
-      | active  | boolean      | 0             | [boolean:true] |
-      | started | datetime     | 2012-01-01    | [boolean:true] |
+      | name    | backend_type | default_value | white_list |
+      | code    | string       | [nil:]        | [bool:t]   |
+      | info    | text         | [str:]        | [bool:t]   |
+      | total   | integer      | 0             | [bool:t]   |
+      | price   | float        | 0             | [bool:t]   |
+      | active  | boolean      | 0             | [bool:t]   |
+      | started | datetime     | 2012-01-01    | [bool:t]   |
 
   Scenario: don't pass any hydra attributes
     Given create "Product" model
     Then last created "Product" should have the following attributes:
-      | code    | [nil:]                |
-      | info    | [string:]             |
-      | price   | [float:0]             |
-      | total   | [integer:0]           |
-      | active  | [boolean:false]       |
-      | started | [datetime:2012-01-01] |
+      | code    | [nil:]            |
+      | info    | [str:]            |
+      | price   | [float:0]         |
+      | total   | [int:0]           |
+      | active  | [bool:f]          |
+      | started | [date:2012-01-01] |
 
   Scenario: pass two hydra attributes
     Given create "Product" model with attributes as "rows_hash":
       | code  | a      |
       | price | [nil:] |
     Then last created "Product" should have the following attributes:
-      | code    | a                     |
-      | info    | [string:]             |
-      | total   | [integer:0]           |
-      | price   | [nil:]                |
-      | active  | [boolean:false]       |
-      | started | [datetime:2012-01-01] |
+      | code    | a                 |
+      | info    | [str:]            |
+      | total   | [int:0]           |
+      | price   | [nil:]            |
+      | active  | [bool:f]          |
+      | started | [date:2012-01-01] |
 
   Scenario: pass all hydra attributes
     Given create "Product" model with attributes as "rows_hash":
@@ -47,11 +47,11 @@ Feature: create models with hydra attributes
       | started | 2012-05-05 |
 
     Then last created "Product" should have the following attributes:
-      | code    | a                     |
-      | price   | [float:2]             |
-      | active  | [boolean:true]        |
-      | info    | b                     |
-      | started | [datetime:2012-05-05] |
+      | code    | a                 |
+      | price   | [float:2]         |
+      | active  | [bool:t]          |
+      | info    | b                 |
+      | started | [date:2012-05-05] |
 
   Scenario: pass only hydra_set_id
     Given create hydra sets for "Product" as "hashes":

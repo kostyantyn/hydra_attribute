@@ -9,11 +9,11 @@ Feature: group conditions by hydra attributes
       | title | string       | [bool:t]   |
       | total | integer      | [bool:t]   |
     Given create "Product" model with attributes as "hashes":
-      | name | code    | title | total   |
-      | a    | [int:1] | q     | [int:5] |
-      | b    | [int:2] | w     | [int:5] |
-      | b    | [int:3] | w     | [nil:]  |
-      | c    | [int:4] | e     |         |
+      | name | code | title | total |
+      | a    | 1    | q     | 5     |
+      | b    | 2    | w     | 5     |
+      | b    | 3    | w     |       |
+      | c    | 4    | e     |       |
 
   Scenario Outline: group by attributes
     When group "Product" by "<group by>"

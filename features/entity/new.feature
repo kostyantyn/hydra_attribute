@@ -11,9 +11,9 @@ Feature: new entity
 
   Scenario Outline: models should respond to hydra attributes
     Given create hydra attributes for "Product" with role "admin" as "hashes":
-      | name  | backend_type | white_list      |
-      | code  | string       | [boolean:true]  |
-      | price | float        | [boolean:false] |
+      | name  | backend_type | white_list |
+      | code  | string       | [bool:t]   |
+      | price | float        | [bool:f]   |
     Then model "<model>" <action> respond to "<attributes>"
 
     Scenarios: hydra attributes
@@ -39,9 +39,9 @@ Feature: new entity
 
   Scenario: model should have appropriate hydra attributes in white list
     Given create hydra attributes for "Product" with role "admin" as "hashes":
-      | name  | backend_type | white_list      |
-      | code  | string       | [boolean:true]  |
-      | price | float        | [boolean:false] |
+      | name  | backend_type | white_list |
+      | code  | string       | [bool:t]   |
+      | price | float        | [bool:f]   |
     # imitate initialization model class with already created hydra attributes
     When redefine "Product" class to use hydra attributes
     Then class "Product" should have "code" in white list
@@ -53,11 +53,11 @@ Feature: new entity
       | Default |
       | General |
     And create hydra attributes for "Product" with role "admin" as "hashes":
-      | name  | backend_type | white_list     |
-      | code  | string       | [boolean:true] |
-      | title | string       | [boolean:true] |
-      | price | float        | [boolean:true] |
-      | total | integer      | [boolean:true] |
+      | name  | backend_type | white_list |
+      | code  | string       | [bool:t]   |
+      | title | string       | [bool:t]   |
+      | price | float        | [bool:t]   |
+      | total | integer      | [bool:t]   |
     And add "Product" hydra attributes to hydra set:
       | hydra attribute name | hydra set name          |
       | code                 | [array:Default]         |
@@ -65,12 +65,12 @@ Feature: new entity
       | price                | [array:General]         |
 
     When build "Product" model:
-      | hydra_set_id | [string:[eval:Product.hydra_sets.find_by_name('Default').id]] |
+      | hydra_set_id | [str:[eval:Product.hydra_sets.find_by_name('Default').id]] |
     Then model should respond to "code title"
     And model should not respond to "price total"
 
     When build "Product" model:
-      | hydra_set_id | [string:[eval:Product.hydra_sets.find_by_name('General').id]] |
+      | hydra_set_id | [str:[eval:Product.hydra_sets.find_by_name('General').id]] |
     Then model should not respond to "code total"
     And model should respond to "title price"
 
@@ -83,11 +83,11 @@ Feature: new entity
       | Default |
       | General |
     And create hydra attributes for "Product" with role "admin" as "hashes":
-      | name  | backend_type | white_list     |
-      | title | string       | [boolean:true] |
-      | code  | string       | [boolean:true] |
-      | total | integer      | [boolean:true] |
-      | price | float        | [boolean:true] |
+      | name  | backend_type | white_list |
+      | title | string       | [bool:t]   |
+      | code  | string       | [bool:t]   |
+      | total | integer      | [bool:t]   |
+      | price | float        | [bool:t]   |
     And add "Product" hydra attributes to hydra set:
       | hydra attribute name | hydra set name          |
       | title                | [array:Default]         |

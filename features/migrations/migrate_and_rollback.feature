@@ -18,11 +18,11 @@ Feature: migrate to and rollback from hydra EAV stack
       | wheels |
       | cars   |
     And table "wheels" should have the following columns:
-      | name | type             | limit  | default | null            | precision | scale  |
-      | id   | [symbol:integer] | [nil:] | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
+      | name | type          | limit  | default | null     | precision | scale  |
+      | id   | [sym:integer] | [nil:] | [nil:]  | [bool:f] | [nil:]    | [nil:] |
     And table "cars" should have the following columns:
-      | name | type             | limit  | default | null            | precision | scale  |
-      | id   | [symbol:integer] | [nil:] | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
+      | name | type          | limit  | default | null     | precision | scale  |
+      | id   | [sym:integer] | [nil:] | [nil:]  | [bool:f] | [nil:]    | [nil:] |
 
     When migrate to hydra entity "wheels"
     Then should have the following 11 tables:
@@ -39,111 +39,111 @@ Feature: migrate to and rollback from hydra EAV stack
       | hydra_boolean_wheels  |
       | hydra_datetime_wheels |
     And table "wheels" should have the following columns:
-      | name         | type             | limit  | default | null            | precision | scale  |
-      | id           | [symbol:integer] | [nil:] | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
-      | hydra_set_id | [symbol:integer] | [nil:] | [nil:]  | [boolean:true]  | [nil:]    | [nil:] |
+      | name         | type          | limit  | default | null     | precision | scale  |
+      | id           | [sym:integer] | [nil:] | [nil:]  | [bool:f] | [nil:]    | [nil:] |
+      | hydra_set_id | [sym:integer] | [nil:] | [nil:]  | [bool:t] | [nil:]    | [nil:] |
     And table "wheels" should have the following indexes:
-      | name                      | columns              | unique          |
-      | wheels_hydra_set_id_index | [array:hydra_set_id] | [boolean:false] |
+      | name                      | columns              | unique   |
+      | wheels_hydra_set_id_index | [array:hydra_set_id] | [bool:f] |
     And table "cars" should have the following columns:
-      | name | type             | limit  | default | null            | precision | scale  |
-      | id   | [symbol:integer] | [nil:] | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
+      | name | type          | limit  | default | null     | precision | scale  |
+      | id   | [sym:integer] | [nil:] | [nil:]  | [bool:f] | [nil:]    | [nil:] |
     And table "hydra_attributes" should have the following columns:
-      | name          | type              | limit         | default         | null            | precision | scale  |
-      | id            | [symbol:integer]  | [nil:]        | [nil:]          | [boolean:false] | [nil:]    | [nil:] |
-      | entity_type   | [symbol:string]   | [integer:32]  | [nil:]          | [boolean:false] | [nil:]    | [nil:] |
-      | name          | [symbol:string]   | [integer:32]  | [nil:]          | [boolean:false] | [nil:]    | [nil:] |
-      | backend_type  | [symbol:string]   | [integer:16]  | [nil:]          | [boolean:false] | [nil:]    | [nil:] |
-      | default_value | [symbol:string]   | [integer:255] | [nil:]          | [boolean:true]  | [nil:]    | [nil:] |
-      | white_list    | [symbol:boolean]  | [nil:]        | [boolean:false] | [boolean:false] | [nil:]    | [nil:] |
-      | created_at    | [symbol:datetime] | [nil:]        | [nil:]          | [boolean:true]  | [nil:]    | [nil:] |
-      | updated_at    | [symbol:datetime] | [nil:]        | [nil:]          | [boolean:true]  | [nil:]    | [nil:] |
+      | name          | type           | limit     | default  | null     | precision | scale  |
+      | id            | [sym:integer]  | [nil:]    | [nil:]   | [bool:f] | [nil:]    | [nil:] |
+      | entity_type   | [sym:string]   | [int:32]  | [nil:]   | [bool:f] | [nil:]    | [nil:] |
+      | name          | [sym:string]   | [int:32]  | [nil:]   | [bool:f] | [nil:]    | [nil:] |
+      | backend_type  | [sym:string]   | [int:16]  | [nil:]   | [bool:f] | [nil:]    | [nil:] |
+      | default_value | [sym:string]   | [int:255] | [nil:]   | [bool:t] | [nil:]    | [nil:] |
+      | white_list    | [sym:boolean]  | [nil:]    | [bool:f] | [bool:f] | [nil:]    | [nil:] |
+      | created_at    | [sym:datetime] | [nil:]    | [nil:]   | [bool:t] | [nil:]    | [nil:] |
+      | updated_at    | [sym:datetime] | [nil:]    | [nil:]   | [bool:t] | [nil:]    | [nil:] |
     And table "hydra_attributes" should have the following indexes:
-      | name                   | columns                  | unique         |
-      | hydra_attributes_index | [array:entity_type,name] | [boolean:true] |
+      | name                   | columns                  | unique   |
+      | hydra_attributes_index | [array:entity_type,name] | [bool:t] |
     And table "hydra_sets" should have the following columns:
-      | name          | type              | limit         | default | null            | precision | scale  |
-      | id            | [symbol:integer]  | [nil:]        | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
-      | entity_type   | [symbol:string]   | [integer:32]  | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
-      | name          | [symbol:string]   | [integer:32]  | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
-      | created_at    | [symbol:datetime] | [nil:]        | [nil:]  | [boolean:true]  | [nil:]    | [nil:] |
-      | updated_at    | [symbol:datetime] | [nil:]        | [nil:]  | [boolean:true]  | [nil:]    | [nil:] |
+      | name        | type           | limit    | default | null     | precision | scale  |
+      | id          | [sym:integer]  | [nil:]   | [nil:]  | [bool:f] | [nil:]    | [nil:] |
+      | entity_type | [sym:string]   | [int:32] | [nil:]  | [bool:f] | [nil:]    | [nil:] |
+      | name        | [sym:string]   | [int:32] | [nil:]  | [bool:f] | [nil:]    | [nil:] |
+      | created_at  | [sym:datetime] | [nil:]   | [nil:]  | [bool:t] | [nil:]    | [nil:] |
+      | updated_at  | [sym:datetime] | [nil:]   | [nil:]  | [bool:t] | [nil:]    | [nil:] |
     And table "hydra_sets" should have the following indexes:
-      | name             | columns                  | unique         |
-      | hydra_sets_index | [array:entity_type,name] | [boolean:true] |
+      | name             | columns                  | unique   |
+      | hydra_sets_index | [array:entity_type,name] | [bool:t] |
     And table "hydra_attribute_sets" should have the following columns:
-      | name               | type              | limit  | default | null            | precision | scale  |
-      | hydra_attribute_id | [symbol:integer]  | [nil:] | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
-      | hydra_set_id       | [symbol:integer]  | [nil:] | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
+      | name               | type          | limit  | default | null     | precision | scale  |
+      | hydra_attribute_id | [sym:integer] | [nil:] | [nil:]  | [bool:f] | [nil:]    | [nil:] |
+      | hydra_set_id       | [sym:integer] | [nil:] | [nil:]  | [bool:f] | [nil:]    | [nil:] |
     And table "hydra_attribute_sets" should have the following indexes:
-      | name                       | columns                                 | unique         |
-      | hydra_attribute_sets_index | [array:hydra_attribute_id,hydra_set_id] | [boolean:true] |
+      | name                       | columns                                 | unique   |
+      | hydra_attribute_sets_index | [array:hydra_attribute_id,hydra_set_id] | [bool:t] |
     And table "hydra_string_wheels" should have the following columns:
-      | name               | type              | limit         | default | null            | precision | scale  |
-      | id                 | [symbol:integer]  | [nil:]        | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
-      | entity_id          | [symbol:integer]  | [nil:]        | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
-      | hydra_attribute_id | [symbol:integer]  | [nil:]        | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
-      | value              | [symbol:string]   | [integer:255] | [nil:]  | [boolean:true]  | [nil:]    | [nil:] |
-      | created_at         | [symbol:datetime] | [nil:]        | [nil:]  | [boolean:true]  | [nil:]    | [nil:] |
-      | updated_at         | [symbol:datetime] | [nil:]        | [nil:]  | [boolean:true]  | [nil:]    | [nil:] |
+      | name               | type           | limit     | default | null     | precision | scale  |
+      | id                 | [sym:integer]  | [nil:]    | [nil:]  | [bool:f] | [nil:]    | [nil:] |
+      | entity_id          | [sym:integer]  | [nil:]    | [nil:]  | [bool:f] | [nil:]    | [nil:] |
+      | hydra_attribute_id | [sym:integer]  | [nil:]    | [nil:]  | [bool:f] | [nil:]    | [nil:] |
+      | value              | [sym:string]   | [int:255] | [nil:]  | [bool:t] | [nil:]    | [nil:] |
+      | created_at         | [sym:datetime] | [nil:]    | [nil:]  | [bool:t] | [nil:]    | [nil:] |
+      | updated_at         | [sym:datetime] | [nil:]    | [nil:]  | [bool:t] | [nil:]    | [nil:] |
     And table "hydra_string_wheels" should have the following indexes:
-      | name                      | columns                              | unique         |
-      | hydra_string_wheels_index | [array:entity_id,hydra_attribute_id] | [boolean:true] |
+      | name                      | columns                              | unique   |
+      | hydra_string_wheels_index | [array:entity_id,hydra_attribute_id] | [bool:t] |
     And table "hydra_text_wheels" should have the following columns:
-      | name               | type              | limit         | default | null            | precision | scale  |
-      | id                 | [symbol:integer]  | [nil:]        | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
-      | entity_id          | [symbol:integer]  | [nil:]        | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
-      | hydra_attribute_id | [symbol:integer]  | [nil:]        | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
-      | value              | [symbol:text]     | [nil:]        | [nil:]  | [boolean:true]  | [nil:]    | [nil:] |
-      | created_at         | [symbol:datetime] | [nil:]        | [nil:]  | [boolean:true]  | [nil:]    | [nil:] |
-      | updated_at         | [symbol:datetime] | [nil:]        | [nil:]  | [boolean:true]  | [nil:]    | [nil:] |
+      | name               | type           | limit  | default | null     | precision | scale  |
+      | id                 | [sym:integer]  | [nil:] | [nil:]  | [bool:f] | [nil:]    | [nil:] |
+      | entity_id          | [sym:integer]  | [nil:] | [nil:]  | [bool:f] | [nil:]    | [nil:] |
+      | hydra_attribute_id | [sym:integer]  | [nil:] | [nil:]  | [bool:f] | [nil:]    | [nil:] |
+      | value              | [sym:text]     | [nil:] | [nil:]  | [bool:t] | [nil:]    | [nil:] |
+      | created_at         | [sym:datetime] | [nil:] | [nil:]  | [bool:t] | [nil:]    | [nil:] |
+      | updated_at         | [sym:datetime] | [nil:] | [nil:]  | [bool:t] | [nil:]    | [nil:] |
     And table "hydra_text_wheels" should have the following indexes:
-      | name                    | columns                              | unique         |
-      | hydra_text_wheels_index | [array:entity_id,hydra_attribute_id] | [boolean:true] |
+      | name                    | columns                              | unique   |
+      | hydra_text_wheels_index | [array:entity_id,hydra_attribute_id] | [bool:t] |
     And table "hydra_integer_wheels" should have the following columns:
-      | name               | type              | limit         | default | null            | precision | scale  |
-      | id                 | [symbol:integer]  | [nil:]        | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
-      | entity_id          | [symbol:integer]  | [nil:]        | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
-      | hydra_attribute_id | [symbol:integer]  | [nil:]        | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
-      | value              | [symbol:integer]  | [nil:]        | [nil:]  | [boolean:true]  | [nil:]    | [nil:] |
-      | created_at         | [symbol:datetime] | [nil:]        | [nil:]  | [boolean:true]  | [nil:]    | [nil:] |
-      | updated_at         | [symbol:datetime] | [nil:]        | [nil:]  | [boolean:true]  | [nil:]    | [nil:] |
+      | name               | type           | limit  | default | null     | precision | scale  |
+      | id                 | [sym:integer]  | [nil:] | [nil:]  | [bool:f] | [nil:]    | [nil:] |
+      | entity_id          | [sym:integer]  | [nil:] | [nil:]  | [bool:f] | [nil:]    | [nil:] |
+      | hydra_attribute_id | [sym:integer]  | [nil:] | [nil:]  | [bool:f] | [nil:]    | [nil:] |
+      | value              | [sym:integer]  | [nil:] | [nil:]  | [bool:t] | [nil:]    | [nil:] |
+      | created_at         | [sym:datetime] | [nil:] | [nil:]  | [bool:t] | [nil:]    | [nil:] |
+      | updated_at         | [sym:datetime] | [nil:] | [nil:]  | [bool:t] | [nil:]    | [nil:] |
     And table "hydra_integer_wheels" should have the following indexes:
-      | name                       | columns                              | unique         |
-      | hydra_integer_wheels_index | [array:entity_id,hydra_attribute_id] | [boolean:true] |
+      | name                       | columns                              | unique   |
+      | hydra_integer_wheels_index | [array:entity_id,hydra_attribute_id] | [bool:t] |
     And table "hydra_float_wheels" should have the following columns:
-      | name               | type              | limit         | default | null            | precision | scale  |
-      | id                 | [symbol:integer]  | [nil:]        | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
-      | entity_id          | [symbol:integer]  | [nil:]        | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
-      | hydra_attribute_id | [symbol:integer]  | [nil:]        | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
-      | value              | [symbol:float]    | [nil:]        | [nil:]  | [boolean:true]  | [nil:]    | [nil:] |
-      | created_at         | [symbol:datetime] | [nil:]        | [nil:]  | [boolean:true]  | [nil:]    | [nil:] |
-      | updated_at         | [symbol:datetime] | [nil:]        | [nil:]  | [boolean:true]  | [nil:]    | [nil:] |
+      | name               | type           | limit  | default | null     | precision | scale  |
+      | id                 | [sym:integer]  | [nil:] | [nil:]  | [bool:f] | [nil:]    | [nil:] |
+      | entity_id          | [sym:integer]  | [nil:] | [nil:]  | [bool:f] | [nil:]    | [nil:] |
+      | hydra_attribute_id | [sym:integer]  | [nil:] | [nil:]  | [bool:f] | [nil:]    | [nil:] |
+      | value              | [sym:float]    | [nil:] | [nil:]  | [bool:t] | [nil:]    | [nil:] |
+      | created_at         | [sym:datetime] | [nil:] | [nil:]  | [bool:t] | [nil:]    | [nil:] |
+      | updated_at         | [sym:datetime] | [nil:] | [nil:]  | [bool:t] | [nil:]    | [nil:] |
     And table "hydra_float_wheels" should have the following indexes:
-      | name                     | columns                              | unique         |
-      | hydra_float_wheels_index | [array:entity_id,hydra_attribute_id] | [boolean:true] |
+      | name                     | columns                              | unique   |
+      | hydra_float_wheels_index | [array:entity_id,hydra_attribute_id] | [bool:t] |
     And table "hydra_boolean_wheels" should have the following columns:
-      | name               | type              | limit         | default | null            | precision | scale  |
-      | id                 | [symbol:integer]  | [nil:]        | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
-      | entity_id          | [symbol:integer]  | [nil:]        | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
-      | hydra_attribute_id | [symbol:integer]  | [nil:]        | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
-      | value              | [symbol:boolean]  | [nil:]        | [nil:]  | [boolean:true]  | [nil:]    | [nil:] |
-      | created_at         | [symbol:datetime] | [nil:]        | [nil:]  | [boolean:true]  | [nil:]    | [nil:] |
-      | updated_at         | [symbol:datetime] | [nil:]        | [nil:]  | [boolean:true]  | [nil:]    | [nil:] |
+      | name               | type           | limit  | default | null     | precision | scale  |
+      | id                 | [sym:integer]  | [nil:] | [nil:]  | [bool:f] | [nil:]    | [nil:] |
+      | entity_id          | [sym:integer]  | [nil:] | [nil:]  | [bool:f] | [nil:]    | [nil:] |
+      | hydra_attribute_id | [sym:integer]  | [nil:] | [nil:]  | [bool:f] | [nil:]    | [nil:] |
+      | value              | [sym:boolean]  | [nil:] | [nil:]  | [bool:t] | [nil:]    | [nil:] |
+      | created_at         | [sym:datetime] | [nil:] | [nil:]  | [bool:t] | [nil:]    | [nil:] |
+      | updated_at         | [sym:datetime] | [nil:] | [nil:]  | [bool:t] | [nil:]    | [nil:] |
     And table "hydra_boolean_wheels" should have the following indexes:
-      | name                       | columns                              | unique         |
-      | hydra_boolean_wheels_index | [array:entity_id,hydra_attribute_id] | [boolean:true] |
+      | name                       | columns                              | unique   |
+      | hydra_boolean_wheels_index | [array:entity_id,hydra_attribute_id] | [bool:t] |
     And table "hydra_datetime_wheels" should have the following columns:
-      | name               | type              | limit         | default | null            | precision | scale  |
-      | id                 | [symbol:integer]  | [nil:]        | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
-      | entity_id          | [symbol:integer]  | [nil:]        | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
-      | hydra_attribute_id | [symbol:integer]  | [nil:]        | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
-      | value              | [symbol:datetime] | [nil:]        | [nil:]  | [boolean:true]  | [nil:]    | [nil:] |
-      | created_at         | [symbol:datetime] | [nil:]        | [nil:]  | [boolean:true]  | [nil:]    | [nil:] |
-      | updated_at         | [symbol:datetime] | [nil:]        | [nil:]  | [boolean:true]  | [nil:]    | [nil:] |
+      | name               | type           | limit  | default | null     | precision | scale  |
+      | id                 | [sym:integer]  | [nil:] | [nil:]  | [bool:f] | [nil:]    | [nil:] |
+      | entity_id          | [sym:integer]  | [nil:] | [nil:]  | [bool:f] | [nil:]    | [nil:] |
+      | hydra_attribute_id | [sym:integer]  | [nil:] | [nil:]  | [bool:f] | [nil:]    | [nil:] |
+      | value              | [sym:datetime] | [nil:] | [nil:]  | [bool:t] | [nil:]    | [nil:] |
+      | created_at         | [sym:datetime] | [nil:] | [nil:]  | [bool:t] | [nil:]    | [nil:] |
+      | updated_at         | [sym:datetime] | [nil:] | [nil:]  | [bool:t] | [nil:]    | [nil:] |
     And table "hydra_datetime_wheels" should have the following indexes:
-      | name                        | columns                              | unique         |
-      | hydra_datetime_wheels_index | [array:entity_id,hydra_attribute_id] | [boolean:true] |
+      | name                        | columns                              | unique   |
+      | hydra_datetime_wheels_index | [array:entity_id,hydra_attribute_id] | [bool:t] |
 
     When migrate to hydra entity "cars"
     Then should have the following 17 tables:
@@ -166,37 +166,37 @@ Feature: migrate to and rollback from hydra EAV stack
       | hydra_boolean_cars    |
       | hydra_datetime_cars   |
     And table "cars" should have the following columns:
-      | name         | type             | limit  | default | null            | precision | scale  |
-      | id           | [symbol:integer] | [nil:] | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
-      | hydra_set_id | [symbol:integer] | [nil:] | [nil:]  | [boolean:true]  | [nil:]    | [nil:] |
+      | name         | type          | limit  | default | null     | precision | scale  |
+      | id           | [sym:integer] | [nil:] | [nil:]  | [bool:f] | [nil:]    | [nil:] |
+      | hydra_set_id | [sym:integer] | [nil:] | [nil:]  | [bool:t] | [nil:]    | [nil:] |
     And table "cars" should have the following indexes:
-      | name                    | columns              | unique          |
-      | cars_hydra_set_id_index | [array:hydra_set_id] | [boolean:false] |
+      | name                    | columns              | unique   |
+      | cars_hydra_set_id_index | [array:hydra_set_id] | [bool:f] |
 
     When rollback from hydra entity "wheels"
     Then should have the following 11 tables:
-      | tables                |
-      | wheels                |
-      | hydra_attributes      |
-      | hydra_sets            |
-      | hydra_attribute_sets  |
-      | cars                  |
-      | hydra_string_cars     |
-      | hydra_text_cars       |
-      | hydra_float_cars      |
-      | hydra_integer_cars    |
-      | hydra_boolean_cars    |
-      | hydra_datetime_cars   |
+      | tables               |
+      | wheels               |
+      | hydra_attributes     |
+      | hydra_sets           |
+      | hydra_attribute_sets |
+      | cars                 |
+      | hydra_string_cars    |
+      | hydra_text_cars      |
+      | hydra_float_cars     |
+      | hydra_integer_cars   |
+      | hydra_boolean_cars   |
+      | hydra_datetime_cars  |
     And table "wheels" should have the following columns:
-      | name | type             | limit  | default | null            | precision | scale  |
-      | id   | [symbol:integer] | [nil:] | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
+      | name | type          | limit  | default | null     | precision | scale  |
+      | id   | [sym:integer] | [nil:] | [nil:]  | [bool:f] | [nil:]    | [nil:] |
     And table "cars" should have the following columns:
-      | name         | type             | limit  | default | null            | precision | scale  |
-      | id           | [symbol:integer] | [nil:] | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
-      | hydra_set_id | [symbol:integer] | [nil:] | [nil:]  | [boolean:true]  | [nil:]    | [nil:] |
+      | name         | type          | limit  | default | null     | precision | scale  |
+      | id           | [sym:integer] | [nil:] | [nil:]  | [bool:f] | [nil:]    | [nil:] |
+      | hydra_set_id | [sym:integer] | [nil:] | [nil:]  | [bool:t] | [nil:]    | [nil:] |
     And table "cars" should have the following indexes:
-      | name                    | columns              | unique          |
-      | cars_hydra_set_id_index | [array:hydra_set_id] | [boolean:false] |
+      | name                    | columns              | unique   |
+      | cars_hydra_set_id_index | [array:hydra_set_id] | [bool:f] |
 
     When rollback from hydra entity "cars"
     Then should have the following 2 tables:
@@ -204,8 +204,8 @@ Feature: migrate to and rollback from hydra EAV stack
       | wheels |
       | cars   |
     And table "wheels" should have the following columns:
-      | name      | type             | limit  | default | null            | precision | scale  |
-      | string:id | [symbol:integer] | [nil:] | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
+      | name      | type          | limit  | default | null     | precision | scale  |
+      | string:id | [sym:integer] | [nil:] | [nil:]  | [bool:f] | [nil:]    | [nil:] |
     And table "cars" should have the following columns:
-      | name | type             | limit  | default | null            | precision | scale  |
-      | id   | [symbol:integer] | [nil:] | [nil:]  | [boolean:false] | [nil:]    | [nil:] |
+      | name | type          | limit  | default | null     | precision | scale  |
+      | id   | [sym:integer] | [nil:] | [nil:]  | [bool:f] | [nil:]    | [nil:] |
