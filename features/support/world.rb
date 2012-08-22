@@ -7,7 +7,7 @@ module HydraAttribute
         return schema if schema == type && value.nil?
 
         case type
-        when 'integer'       then type_cast_value(value).to_i
+        when /^int(eger)?$/  then type_cast_value(value).to_i
         when 'float'         then type_cast_value(value).to_f
         when /^bool(ean)?$/  then ::ActiveRecord::ConnectionAdapters::Column::TRUE_VALUES.include?(type_cast_value(value))
         when 'nil'           then nil
@@ -26,7 +26,8 @@ module HydraAttribute
       end
 
       def type_cast_attributes(attributes)
-        attributes.split(/(?<=\])\s+/).flatten.each_with_object({}) do |attribute, hash|
+        # 'a=[b c] c=a c=[v abc]' => ["a=[b c]", "c=a", "c=[v abc]"]
+        attributes.gsub(/\s+(\w+=)/, '<###>\1').split('<###>').each_with_object({}) do |attribute, hash|
           name, value = type_cast_attribute(attribute)
           hash[name]  = value
         end

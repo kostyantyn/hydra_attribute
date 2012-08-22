@@ -4,16 +4,16 @@ Feature: group conditions by hydra attributes
 
   Background: create models and describe hydra attributes
     Given create hydra attributes for "Product" with role "admin" as "hashes":
-      | name  | backend_type | white_list     |
-      | code  | integer      | [boolean:true] |
-      | title | string       | [boolean:true] |
-      | total | integer      | [boolean:true] |
+      | name  | backend_type | white_list |
+      | code  | integer      | [bool:t]   |
+      | title | string       | [bool:t]   |
+      | total | integer      | [bool:t]   |
     Given create "Product" model with attributes as "hashes":
-      | name | code        | title | total       |
-      | a    | [integer:1] | q     | [integer:5] |
-      | b    | [integer:2] | w     | [integer:5] |
-      | b    | [integer:3] | w     | [nil:]      |
-      | c    | [integer:4] | e     |             |
+      | name | code    | title | total   |
+      | a    | [int:1] | q     | [int:5] |
+      | b    | [int:2] | w     | [int:5] |
+      | b    | [int:3] | w     | [nil:]  |
+      | c    | [int:4] | e     |         |
 
   Scenario Outline: group by attributes
     When group "Product" by "<group by>"
@@ -22,10 +22,10 @@ Feature: group conditions by hydra attributes
     And "last" record should have "<last attribute>"
 
     Scenarios: group attributes
-      | group by   | total | first attribute                  | last attribute                   |
-      | code       | 4     | code=[integer:1]                 | code=[integer:4]                 |
-      | name       | 3     | name=[string:a] code=[integer:1] | name=[string:c] code=[integer:4] |
-      | name title | 3     | name=[string:a] code=[integer:1] | name=[string:c] code=[integer:4] |
+      | group by   | total | first attribute     | last attribute      |
+      | code       | 4     | code=[int:1]        | code=[int:4]        |
+      | name       | 3     | name=a code=[int:1] | name=c code=[int:4] |
+      | name title | 3     | name=a code=[int:1] | name=c code=[int:4] |
 
   Scenario Outline: group by attributes with filter
     When group "Product" by "<group by>"
@@ -35,8 +35,8 @@ Feature: group conditions by hydra attributes
     And "last" record should have "<last attribute>"
 
     Scenarios: group attributes
-      | group by   | filter           | total | first attribute                  | last attribute                   |
-      | code       | title=[string:w] | 2     | code=[integer:2]                 | code=[integer:3]                 |
-      | name       | title=[string:w] | 1     | name=[string:b] title=[string:w] | name=[string:b] title=[string:w] |
-      | name title | title=[string:w] | 1     | name=[string:b] title=[string:w] | name=[string:b] title=[string:w] |
-      | name title | total=[nil:]     | 2     | name=[string:b] title=[string:w] | name=[string:c] title=[string:e] |
+      | group by   | filter       | total | first attribute | last attribute |
+      | code       | title=w      | 2     | code=[int:2]    | code=[int:3]   |
+      | name       | title=w      | 1     | name=b title=w  | name=b title=w |
+      | name title | title=w      | 1     | name=b title=w  | name=b title=w |
+      | name title | total=[nil:] | 2     | name=b title=w  | name=c title=e |
