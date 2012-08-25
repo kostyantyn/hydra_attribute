@@ -13,7 +13,7 @@ module HydraAttribute
         when 'nil'   then nil
         when 'date'  then ActiveSupport::TimeZone.new('UTC').parse(type_cast_value(value))
         when 'sym'   then type_cast_value(value).to_sym
-        when 'array' then type_cast_value(value).split(',')
+        when 'array' then value.split(',').map { |v| type_cast_value(v) }
         when 'eval'  then eval(type_cast_value(value))
         when 'str'   then type_cast_value(value).to_s
         else value
