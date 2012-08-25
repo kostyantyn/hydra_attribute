@@ -22,7 +22,7 @@ When /^(save|destroy) model$/ do |method|
   @model.send(method)
 end
 
-When /^find "([^"]+)" model by attribute "([^"])" and value "([^"]+)"$/ do |class_name, attribute, value|
+When /^find "([^"]+)" model by attribute "([^"]+)" and value "([^"]+)"$/ do |class_name, attribute, value|
   @model = class_name.constantize.send("find_by_#{attribute}", type_cast_value(value))
 end
 
@@ -46,10 +46,14 @@ Given /^create hydra attributes for "([^"]+)" with role "([^"]+)" as "([^"]+)":$
   end
 end
 
-Given /^create hydra sets for "([^"]+)" as "([^"]+)":/ do |klass, format, table|
+Given /^create hydra sets for "([^"]+)" as "([^"]+)":$/ do |klass, format, table|
   Array.wrap(table.send(format)).each do |hash|
-    klass.constantize.hydra_sets.create!(type_cast_hash(hash))
+    step %(create hydra set "#{hash['name']}" for "#{klass}")
   end
+end
+
+Given /^create hydra set "([^"]+)" for "([^"]+)"$/ do |hydra_set_name, klass|
+  klass.constantize.hydra_sets.create!(name: type_cast_value(hydra_set_name))
 end
 
 Given /^add "([^"]+)" hydra attributes to hydra set:$/ do |klass, table|
@@ -88,6 +92,10 @@ Then /^model attributes (should(?:\snot)?) include "([^"]+)"$/ do |method, attri
   end
 end
 
+Then /^model attributes (should(?:\snot)?) match "([^"]+)"$/ do |match, attribute|
+  @model.attributes.keys.send(match) =~ Array(type_cast_value(attribute))
+end
+
 Then /^model "([^"]+)" (should(?:\snot)?) respond to "([^"]+)"$/ do |klass, method, attributes|
   @model = klass.constantize.new
   step %(model #{method} respond to "#{attributes}")
@@ -99,10 +107,14 @@ Then /^error "([^"]+)" (should(?:\snot)?) be risen when methods? "([^"]+)" (?:is
   end
 end
 
-Then /^(last|first) created "([^"]+)" (should|should not) have the following attributes:$/ do |method, klass, match, table|
-  table.rows_hash.each_with_object(klass.constantize.send(method)) do |(attribute, value), model|
-    model.send(attribute).send(match) == type_cast_value(value)
+Then /^(last|first) created "([^"]+)" (should|should not) have the following attributes:$/ do |position, klass, match, table|
+  table.rows_hash.each do |attribute, value|
+    step %(#{position} created "#{klass}" #{match} have attribute "#{attribute}" with value "#{value}")
   end
+end
+
+Then /^(last|first) created "([^"]+)" (should|should not) have attribute "([^"]+)" with value "([^"]+)"$/ do |position, klass, match, attribute, value|
+  klass.constantize.send(position).send(attribute).send(match) == type_cast_value(value)
 end
 
 Then /^class "([^"]+)" (should(?:\snot)?) have "([^"]+)" in white list$/ do |klass, accept, attribute|
