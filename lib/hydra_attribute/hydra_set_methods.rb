@@ -10,22 +10,26 @@ module HydraAttribute
     end
 
     module ClassMethods
+      extend Memoize
+
       def hydra_sets
-        @hydra_sets ||= HydraSet.where(entity_type: base_class.model_name)
+        HydraSet.where(entity_type: base_class.model_name)
       end
+      hydra_memoize :hydra_sets
 
       def hydra_set(identifier)
-        @hydra_set ||= {}
-        @hydra_set[identifier] ||= hydra_sets.find do |hydra_set|
+        hydra_sets.find do |hydra_set|
           hydra_set.id == identifier || hydra_set.name == identifier
         end
       end
+      hydra_memoize :hydra_set
 
       %w(id name).each do |prefix|
         module_eval <<-EOS, __FILE__, __LINE__ + 1
           def hydra_set_#{prefix}s
-            @hydra_set_#{prefix}s ||= hydra_sets.map(&:#{prefix})
+            hydra_sets.map(&:#{prefix})
           end
+          hydra_memoize :hydra_set_#{prefix}s
         EOS
       end
 

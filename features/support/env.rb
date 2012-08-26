@@ -1,7 +1,6 @@
 require 'active_record'
 require 'hydra_attribute'
 require 'database_cleaner'
-require 'database_cleaner/cucumber'
 
 ActiveSupport.on_load(:active_record) do
   self.default_timezone = :utc
