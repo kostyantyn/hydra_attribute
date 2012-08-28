@@ -155,10 +155,9 @@ module HydraAttribute
         end
 
         private
-
-        def hydra_helper
-          @hydra_helper ||= Helper.new(self)
-        end
+          def hydra_helper
+            @hydra_helper ||= Helper.new(self)
+          end
       end
     end
   end

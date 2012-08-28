@@ -30,22 +30,21 @@ module HydraAttribute
     end
 
     private
+      def delete_dependent_values
+        value_class = AssociationBuilder.class_name(entity_type.constantize, backend_type).constantize
+        value_class.delete_all(hydra_attribute_id: id)
+      end
 
-    def delete_dependent_values
-      value_class = AssociationBuilder.class_name(entity_type.constantize, backend_type).constantize
-      value_class.delete_all(hydra_attribute_id: id)
-    end
+      def reload_attribute_methods
+        entity_type.constantize.reset_hydra_attribute_methods! # TODO should not remove all generated methods just for this attribute
+      end
 
-    def reload_attribute_methods
-      entity_type.constantize.reset_hydra_attribute_methods! # TODO should not remove all generated methods just for this attribute
-    end
+      def add_to_white_list
+        entity_type.constantize.accessible_attributes.add(name)
+      end
 
-    def add_to_white_list
-      entity_type.constantize.accessible_attributes.add(name)
-    end
-
-    def remove_from_white_list
-      entity_type.constantize.accessible_attributes.delete(name)
-    end
+      def remove_from_white_list
+        entity_type.constantize.accessible_attributes.delete(name)
+      end
   end
 end

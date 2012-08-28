@@ -85,29 +85,29 @@ module HydraAttribute
 
       private
 
-      # Optimized method
-      # Remove unnecessary callbacks
-      def add_to_target(record)
-        @target << record
-        record
-      end
-
-      # Optimized method
-      # Attributes are written via low level function without additional checks
-      def build_record(options, _)
-        reflection.klass.new do |record|
-          unless options.has_key?(:value)
-            options[:value] = owner.class.hydra_attribute(options[:hydra_attribute_id]).default_value
-          end
-
-          record.send :write_attribute, 'id', options[:id]
-          record.send :write_attribute, 'entity_id', owner.id
-          record.send :write_attribute, 'hydra_attribute_id', options[:hydra_attribute_id]
-          record.send :write_attribute, 'value', options[:value]
-
-          hydra_set_target << record unless hydra_set_target.include?(record)
+        # Optimized method
+        # Remove unnecessary callbacks
+        def add_to_target(record)
+          @target << record
+          record
         end
-      end
+
+        # Optimized method
+        # Attributes are written via low level function without additional checks
+        def build_record(options, _)
+          reflection.klass.new do |record|
+            unless options.has_key?(:value)
+              options[:value] = owner.class.hydra_attribute(options[:hydra_attribute_id]).default_value
+            end
+
+            record.send :write_attribute, 'id', options[:id]
+            record.send :write_attribute, 'entity_id', owner.id
+            record.send :write_attribute, 'hydra_attribute_id', options[:hydra_attribute_id]
+            record.send :write_attribute, 'value', options[:value]
+
+            hydra_set_target << record unless hydra_set_target.include?(record)
+          end
+        end
     end
   end
 end

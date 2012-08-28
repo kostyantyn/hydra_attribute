@@ -16,15 +16,14 @@ module HydraAttribute
     after_destroy :detach_entities
     after_commit  :clear_entity_cache
 
-  private
+    private
+      def clear_entity_cache
+        entity_type.constantize.clear_hydra_set_cache!
+        entity_type.constantize.clear_hydra_attribute_cache!
+      end
 
-    def clear_entity_cache
-      entity_type.constantize.clear_hydra_set_cache!
-      entity_type.constantize.clear_hydra_attribute_cache!
-    end
-
-    def detach_entities
-      entity_type.constantize.where(hydra_set_id: id).update_all(hydra_set_id: nil)
-    end
+      def detach_entities
+        entity_type.constantize.where(hydra_set_id: id).update_all(hydra_set_id: nil)
+      end
   end
 end

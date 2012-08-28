@@ -24,15 +24,14 @@ module HydraAttribute
     end
 
     private
-
-    def build_associations
-      SUPPORTED_BACKEND_TYPES.each do |type|
-        AssociationBuilder.build(klass, type)
+      def build_associations
+        SUPPORTED_BACKEND_TYPES.each do |type|
+          AssociationBuilder.build(klass, type)
+        end
       end
-    end
 
-    def build_white_list
-      klass.hydra_attributes.each(&:toggle_white_list!)
-    end
+      def build_white_list
+        klass.hydra_attributes.each(&:toggle_white_list!)
+      end
   end
 end

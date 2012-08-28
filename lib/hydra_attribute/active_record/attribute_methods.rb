@@ -142,19 +142,18 @@ module HydraAttribute
       end
 
       private
-
-      def method_missing(method, *args, &block)
-        if self.class.hydra_attribute_methods_generated?
-          super
-        else
-          self.class.define_hydra_attribute_methods
-          if respond_to_without_attributes?(method)
-            send(method, *args, &block)
-          else
+        def method_missing(method, *args, &block)
+          if self.class.hydra_attribute_methods_generated?
             super
+          else
+            self.class.define_hydra_attribute_methods
+            if respond_to_without_attributes?(method)
+              send(method, *args, &block)
+            else
+              super
+            end
           end
         end
-      end
     end
   end
 end
