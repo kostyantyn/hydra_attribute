@@ -1,33 +1,31 @@
 require 'spec_helper'
 
 describe HydraAttribute::Memoize do
-  describe '#memorize' do
-    it 'should cache method result' do
-      anonymous = Class.new do
-        extend HydraAttribute::Memoize
+  def anonymous(arity = 0)
+    params = (1..arity).map{ |i| "a#{i}" }.join(', ')
 
-        def my_method
-          result
+    anonymous = Class.new do
+      extend HydraAttribute::Memoize
+
+      class_eval <<-EOS, __FILE__, __LINE__ + 1
+        def my_method(#{params})
+          result(#{params})
         end
         hydra_memoize :my_method
-      end
+      EOS
+    end
+    anonymous.new
+  end
 
-      instance = anonymous.new
+  describe '#memorize' do
+    it 'method without parameters' do
+      instance = anonymous
       instance.should_receive(:result).once.and_return([1,2,3])
       2.times { instance.my_method.should == [1,2,3] }
     end
 
-    it 'should cache method result with one parameter' do
-      anonymous = Class.new do
-        extend HydraAttribute::Memoize
-
-        def my_method(a)
-          result(a)
-        end
-        hydra_memoize :my_method
-      end
-
-      instance = anonymous.new
+    it 'method with one parameter' do
+      instance = anonymous(1)
       instance.should_receive(:result).with(1).once.and_return([1,1,1])
       instance.should_receive(:result).with(2).once.and_return([2,2,2])
 
@@ -35,17 +33,8 @@ describe HydraAttribute::Memoize do
       2.times { instance.my_method(2).should == [2,2,2] }
     end
 
-    it 'should cache method result with two parameters' do
-      anonymous = Class.new do
-        extend HydraAttribute::Memoize
-
-        def my_method(a, b)
-          result(a, b)
-        end
-        hydra_memoize :my_method
-      end
-
-      instance = anonymous.new
+    it 'method with two parameters' do
+      instance = anonymous(2)
       instance.should_receive(:result).with(1, 1).once.and_return([1,1,1])
       instance.should_receive(:result).with(1, 2).once.and_return([1,1,2])
       instance.should_receive(:result).with(2, 1).once.and_return([2,2,1])
@@ -53,6 +42,17 @@ describe HydraAttribute::Memoize do
       2.times { instance.my_method(1, 1).should == [1,1,1] }
       2.times { instance.my_method(1, 2).should == [1,1,2] }
       2.times { instance.my_method(2, 1).should == [2,2,1] }
+    end
+
+    it 'method with three parameters' do
+      instance = anonymous(3)
+      instance.should_receive(:result).with(1, 1, 2).once.and_return([1,1,2])
+      instance.should_receive(:result).with(1, 2, 2).once.and_return([1,2,2])
+      instance.should_receive(:result).with(2, 2, 1).once.and_return([2,2,1])
+
+      2.times { instance.my_method(1, 1, 2).should == [1,1,2] }
+      2.times { instance.my_method(1, 2, 2).should == [1,2,2] }
+      2.times { instance.my_method(2, 2, 1).should == [2,2,1] }
     end
   end
 end
