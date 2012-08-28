@@ -3,12 +3,12 @@ module HydraAttribute
     def hydra_memoize(*methods)
       methods.each do |method_name|
         bound_method = instance_method(method_name)
-        alias_method "unmemorized_#{method_name}", method_name
+        alias_method "unmemoized_#{method_name}", method_name
 
         if bound_method.arity.abs == 0
           module_eval <<-EOS, __FILE__, __LINE__ + 1
             def #{method_name}
-              @#{method_name} ||= unmemorized_#{method_name}
+              @#{method_name} ||= unmemoized_#{method_name}
             end
           EOS
         else
@@ -19,13 +19,13 @@ module HydraAttribute
             "#{hash_call}[#{arg}]"
           end
 
-          hash = keys.reverse.inject("unmemorized_#{method_name}(#{keys.join(', ')})") do |code, key|
+          hash = keys.reverse.inject("unmemoized_#{method_name}(#{keys.join(', ')})") do |code, key|
             "Hash.new { |hash, #{key}| hash[#{key}] = #{code} }"
           end
 
           module_eval <<-EOS, __FILE__, __LINE__ + 1
             def #{method_name}(#{args.join(', ')})      # def method(a1)
-              @#{method_name} ||= #{hash}               #   @method ||= Hash.new { |hash, key1| hash[key1] = unmemorized_method(key1) }
+              @#{method_name} ||= #{hash}               #   @method ||= Hash.new { |hash, key1| hash[key1] = unmemoized_method(key1) }
               #{call}                                   #   @method[a1]
             end                                         # end
           EOS
