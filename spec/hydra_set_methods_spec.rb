@@ -187,4 +187,24 @@ describe HydraAttribute::HydraSetMethods do
       Product.hydra_set_names.should == [general.name]
     end
   end
+
+  describe '.clear_hydra_set_cache!' do
+    it 'should reset cache' do
+      Product.should_receive(:unmemoized_hydra_sets).twice.and_return([])
+      Product.should_receive(:unmemoized_hydra_set).twice
+      Product.should_receive(:unmemoized_hydra_set_ids).twice
+      Product.should_receive(:unmemoized_hydra_set_names).twice
+
+      block = proc do
+        Product.hydra_sets
+        Product.hydra_set('Default')
+        Product.hydra_set_ids
+        Product.hydra_set_names
+      end
+
+      2.times(&block)
+      Product.clear_hydra_set_cache!
+      2.times(&block)
+    end
+  end
 end

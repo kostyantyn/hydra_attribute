@@ -34,10 +34,9 @@ module HydraAttribute
       end
 
       def clear_hydra_set_cache!
-        @hydra_sets      = nil
-        @hydra_set       = nil
-        @hydra_set_ids   = nil
-        @hydra_set_names = nil
+        [:@hydra_sets, :@hydra_set, :@hydra_set_ids, :@hydra_set_names].each do |variable|
+          remove_instance_variable(variable) if instance_variable_defined?(variable)
+        end
       end
     end
 

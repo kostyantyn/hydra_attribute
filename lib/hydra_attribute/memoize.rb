@@ -8,7 +8,8 @@ module HydraAttribute
         if bound_method.arity.abs == 0
           module_eval <<-EOS, __FILE__, __LINE__ + 1
             def #{method_name}
-              @#{method_name} ||= unmemoized_#{method_name}
+              @#{method_name} = unmemoized_#{method_name} unless instance_variable_defined?(:@#{method_name})
+              @#{method_name}
             end
           EOS
         else
