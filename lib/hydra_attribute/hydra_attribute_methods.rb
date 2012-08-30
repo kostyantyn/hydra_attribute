@@ -3,41 +3,48 @@ module HydraAttribute
     extend ActiveSupport::Concern
 
     module ClassMethods
+      extend Memoize
+
       def hydra_attributes
-        @hydra_attributes ||= HydraAttribute.where(entity_type: base_class.model_name)
+        HydraAttribute.where(entity_type: base_class.model_name)
       end
+      hydra_memoize :hydra_attributes
 
       def hydra_attribute(identifier)
-        @hydra_attribute ||= {}
-        @hydra_attribute[identifier] ||= hydra_attributes.find do |hydra_attribute|
+        hydra_attributes.find do |hydra_attribute|
           hydra_attribute.id == identifier || hydra_attribute.name == identifier
         end
       end
+      hydra_memoize :hydra_attribute
 
       def hydra_attribute_backend_types
-        @hydra_attribute_backend_types ||= hydra_attributes.map(&:backend_type).uniq
+        hydra_attributes.map(&:backend_type).uniq
       end
+      hydra_memoize :hydra_attribute_backend_types
 
       %w(id name).each do |prefix|
         module_eval <<-EOS, __FILE__, __LINE__ + 1
           def hydra_attribute_#{prefix}s
-            @hydra_attribute_#{prefix}s ||= hydra_attributes.map(&:#{prefix})
+            hydra_attributes.map(&:#{prefix})
           end
+          hydra_memoize :hydra_attribute_#{prefix}s
         EOS
       end
 
       def hydra_attributes_by_backend_type
-        @hydra_attributes_by_backend_type ||= hydra_attributes.group_by(&:backend_type)
+        hydra_attributes.group_by(&:backend_type)
       end
+      hydra_memoize :hydra_attributes_by_backend_type
 
       %w(id name).each do |prefix|
         module_eval <<-EOS, __FILE__, __LINE__ + 1
           def hydra_attribute_#{prefix}s_by_backend_type
-            @hydra_attribute_#{prefix}s_by_backend_type ||= hydra_attributes.each_with_object({}) do |hydra_attribute, object|
+            hydra_attributes.each_with_object({}) do |hydra_attribute, object|
               object[hydra_attribute.backend_type] ||= []
               object[hydra_attribute.backend_type] << hydra_attribute.#{prefix}
             end
           end
+          hydra_memoize :hydra_attribute_#{prefix}s_by_backend_type
         EOS
       end
 
@@ -63,26 +70,26 @@ module HydraAttribute
       %w(id name backend_type).each do |prefix|
         module_eval <<-EOS, __FILE__, __LINE__ + 1
           def hydra_set_attribute_#{prefix}s(hydra_set_id)
-            @hydra_set_attribute_#{prefix}s ||= {}
-            @hydra_set_attribute_#{prefix}s[hydra_set_id] ||= hydra_set_attributes(hydra_set_id).map(&:#{prefix})
+            hydra_set_attributes(hydra_set_id).map(&:#{prefix})
           end
+          hydra_memoize :hydra_set_attribute_#{prefix}s
         EOS
       end
 
       def hydra_set_attributes_by_backend_type(hydra_set_id)
-        @hydra_set_attributes_by_backend_type ||= {}
-        @hydra_set_attributes_by_backend_type[hydra_set_id] ||= hydra_set_attributes(hydra_set_id).group_by(&:backend_type)
+        hydra_set_attributes(hydra_set_id).group_by(&:backend_type)
       end
+      hydra_memoize :hydra_set_attributes_by_backend_type
 
       %w(id name).each do |prefix|
         module_eval <<-EOS, __FILE__, __LINE__ + 1
           def hydra_set_attribute_#{prefix}s_by_backend_type(hydra_set_id)
-            @hydra_set_attribute_#{prefix}s_by_backend_type ||= {}
-            @hydra_set_attribute_#{prefix}s_by_backend_type[hydra_set_id] ||= hydra_set_attributes(hydra_set_id).each_with_object({}) do |hydra_attribute, object|
+            hydra_set_attributes(hydra_set_id).each_with_object({}) do |hydra_attribute, object|
               object[hydra_attribute.backend_type] ||= []
               object[hydra_attribute.backend_type] << hydra_attribute.#{prefix}
             end
           end
+          hydra_memoize :hydra_set_attribute_#{prefix}s_by_backend_type
         EOS
       end
 
@@ -101,18 +108,24 @@ module HydraAttribute
       end
 
       def clear_hydra_attribute_cache!
-        @hydra_attributes                     = nil
-        @hydra_attribute                      = nil
-        @hydra_set_attributes_by_backend_type = nil
-
-        %w(id name backend_type).each do |prefix|
-          instance_variable_set("@hydra_attribute_#{prefix}s", nil)
-          instance_variable_set("@hydra_set_attribute_#{prefix}s", nil)
-        end
-
-        %w(id name).each do |prefix|
-          instance_variable_set("@hydra_attribute_#{prefix}s_by_backend_type", nil)
-          instance_variable_set("@hydra_set_attribute_#{prefix}s_by_backend_type", nil)
+        [
+          :@hydra_attributes,
+          :@hydra_attribute,
+          :@hydra_attribute_ids,
+          :@hydra_attribute_names,
+          :@hydra_attribute_backend_types,
+          :@hydra_attributes_by_backend_type,
+          :@hydra_attribute_ids_by_backend_type,
+          :@hydra_attribute_names_by_backend_type,
+          :@hydra_set_attributes,
+          :@hydra_set_attribute_ids,
+          :@hydra_set_attribute_names,
+          :@hydra_set_attribute_backend_types,
+          :@hydra_set_attributes_by_backend_type,
+          :@hydra_set_attribute_ids_by_backend_type,
+          :@hydra_set_attribute_names_by_backend_type
+        ].each do |variable|
+          remove_instance_variable(variable) if instance_variable_defined?(variable)
         end
       end
     end
