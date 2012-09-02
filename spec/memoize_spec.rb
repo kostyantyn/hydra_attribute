@@ -17,7 +17,7 @@ describe HydraAttribute::Memoize do
     anonymous.new
   end
 
-  describe '#memorize' do
+  describe '#memoize' do
     it 'method without parameters' do
       instance = anonymous
       instance.should_receive(:result).once.and_return([1,2,3])
