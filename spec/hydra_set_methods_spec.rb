@@ -16,33 +16,36 @@ describe HydraAttribute::HydraSetMethods do
     end
 
     it 'should cache result' do
-      HydraAttribute::HydraSet.should_receive(:where).once.and_return([])
+      Product.should_receive(:unmemoized_hydra_sets).once
 
       2.times { Product.hydra_sets }
     end
 
     it 'should reset method cache after creating hydra set' do
-      Product.hydra_sets # cache
-      default = Product.hydra_sets.create!(name: 'Default')
+      hydra_sets = Product.hydra_sets
+      Product.should_receive(:unmemoized_hydra_sets).once
 
-      Product.hydra_sets.should == [default]
+      Product.hydra_sets
+      hydra_sets.create!(name: 'Default')
+      Product.hydra_sets
     end
 
     it 'should reset method cache after updating hydra set' do
-      Product.hydra_sets.create!(name: 'Default')
-      Product.hydra_sets # cache
+      hydra_set = Product.hydra_sets.create!(name: 'Default')
+      Product.should_receive(:unmemoized_hydra_sets).twice
 
-      Product.hydra_sets.first.update_attributes(name: 'General')
-      Product.hydra_sets.first.name.should == 'General'
+      Product.hydra_sets
+      hydra_set.update_attributes(name: 'General')
+      Product.hydra_sets
     end
 
     it 'should reset method cache after destroying hydra set' do
-      default = Product.hydra_sets.create!(name: 'Default')
-      general = Product.hydra_sets.create!(name: 'General')
-      default.destroy
+      hydra_set = Product.hydra_sets.create!(name: 'Default')
+      Product.should_receive(:unmemoized_hydra_sets).twice
 
-      Product.should have(1).hydra_sets
-      Product.hydra_sets.should == [general]
+      Product.hydra_sets
+      hydra_set.destroy
+      Product.hydra_sets
     end
   end
 
@@ -64,43 +67,35 @@ describe HydraAttribute::HydraSetMethods do
     end
 
     it 'should cache result' do
-      Product.hydra_sets.create(name: 'Default')
-      Product.hydra_sets.create(name: 'General')
-
-      hydra_sets = Product.hydra_sets
-      Product.should_receive(:hydra_sets).once.and_return(hydra_sets)
+      Product.should_receive(:unmemoized_hydra_set).once
 
       2.times { Product.hydra_set('General') }
     end
 
-    it 'should cache nil result' do
-      Product.should_receive(:hydra_sets).once.and_return([])
-
-      2.times { Product.hydra_set('Default') }
-    end
-
     it 'should reset method cache after creating hydra set' do
-      Product.hydra_set('Default') # cache
-      default = Product.hydra_sets.create!(name: 'Default')
+      Product.should_receive(:unmemoized_hydra_set).twice
 
-      Product.hydra_set('Default').should == default
+      Product.hydra_set('Default')
+      Product.hydra_sets.create!(name: 'Default')
+      Product.hydra_set('Default')
     end
 
     it 'should reset method cache after updating hydra set' do
       default = Product.hydra_sets.create!(name: 'Default')
-      Product.hydra_set('Default').update_attributes(name: 'General')
+      Product.should_receive(:unmemoized_hydra_set).twice
 
-      Product.hydra_set('Default').should be_nil
-      Product.hydra_set('General').should == default
+      Product.hydra_set('Default')
+      default.update_attributes(name: 'General')
+      Product.hydra_set('Default')
     end
 
     it 'should reset method cache after destroying hydra set' do
-      Product.hydra_sets.create!(name: 'Default')
-      Product.hydra_sets.create!(name: 'General')
-      Product.hydra_set('Default').destroy
+      default = Product.hydra_sets.create!(name: 'Default')
+      Product.should_receive(:unmemoized_hydra_set).twice
 
-      Product.hydra_set('Default').should be_nil
-      Product.hydra_set('General').should_not be_nil
+      Product.hydra_set('Default')
+      default.destroy
+      Product.hydra_set('Default')
     end
   end
 
@@ -113,36 +108,35 @@ describe HydraAttribute::HydraSetMethods do
     end
 
     it 'should cache result' do
-      default = Product.hydra_sets.create(name: 'Default')
-      general = Product.hydra_sets.create(name: 'General')
+      Product.should_receive(:unmemoized_hydra_set_ids).once
 
-      Product.should_receive(:hydra_sets).once.and_return([default, general])
-      2.times { Product.hydra_set_ids.should == [default.id, general.id] }
+      2.times { Product.hydra_set_ids }
     end
 
     it 'should reset method cache after creating hydra set' do
-      Product.hydra_set_ids # cache
-      default = Product.hydra_sets.create!(name: 'Default')
+      Product.should_receive(:unmemoized_hydra_set_ids).twice
 
-      Product.hydra_set_ids.should == [default.id]
+      Product.hydra_set_ids
+      Product.hydra_sets.create(name: 'Default')
+      Product.hydra_set_ids
     end
 
     it 'should reset method cache after updating hydra set' do
-      Product.hydra_set_ids # cache
-      default = Product.hydra_sets.create!(name: 'Default')
-      default.update_attributes(name: 'General')
+      hydra_set = Product.hydra_sets.create(name: 'Default')
+      Product.should_receive(:unmemoized_hydra_set_ids).twice
 
-      Product.should_receive(:hydra_sets).once.and_return([default])
-      2.times { Product.hydra_set_ids.should == [default.id] }
+      Product.hydra_set_ids
+      hydra_set.update_attributes(name: 'General')
+      Product.hydra_set_ids
     end
 
     it 'should reset method cache after destroying hydra set' do
-      default = Product.hydra_sets.create!(name: 'Default')
-      general = Product.hydra_sets.create!(name: 'General')
-      default.destroy
+      hydra_set = Product.hydra_sets.create(name: 'Default')
+      Product.should_receive(:unmemoized_hydra_set_ids).twice
 
-      Product.should have(1).hydra_set_ids
-      Product.hydra_set_ids.should == [general.id]
+      Product.hydra_set_ids
+      hydra_set.destroy
+      Product.hydra_set_ids
     end
   end
 
@@ -155,36 +149,35 @@ describe HydraAttribute::HydraSetMethods do
     end
 
     it 'should cache result' do
-      default = Product.hydra_sets.create(name: 'Default')
-      general = Product.hydra_sets.create(name: 'General')
+      Product.should_receive(:unmemoized_hydra_set_names).once
 
-      Product.should_receive(:hydra_sets).once.and_return([default, general])
-      2.times { Product.hydra_set_names.should == [default.name, general.name] }
+      2.times { Product.hydra_set_names }
     end
 
     it 'should reset method cache after creating hydra set' do
-      Product.hydra_set_names # cache
-      default = Product.hydra_sets.create!(name: 'Default')
+      Product.should_receive(:unmemoized_hydra_set_names).twice
 
-      Product.hydra_set_names.should == [default.name]
+      Product.hydra_set_names
+      Product.hydra_sets.create(name: 'Default')
+      Product.hydra_set_names
     end
 
     it 'should reset method cache after updating hydra set' do
-      Product.hydra_set_names # cache
-      default = Product.hydra_sets.create!(name: 'Default')
-      default.update_attributes(name: 'General')
+      hydra_set = Product.hydra_sets.create(name: 'Default')
+      Product.should_receive(:unmemoized_hydra_set_names).twice
 
-      Product.should_receive(:hydra_sets).once.and_return([default])
-      2.times { Product.hydra_set_names.should == [default.name] }
+      Product.hydra_set_names
+      hydra_set.update_attributes(name: 'General')
+      Product.hydra_set_names
     end
 
     it 'should reset method cache after destroying hydra set' do
-      default = Product.hydra_sets.create!(name: 'Default')
-      general = Product.hydra_sets.create!(name: 'General')
-      default.destroy
+      hydra_set = Product.hydra_sets.create(name: 'Default')
+      Product.should_receive(:unmemoized_hydra_set_names).twice
 
-      Product.should have(1).hydra_set_names
-      Product.hydra_set_names.should == [general.name]
+      Product.hydra_set_names
+      hydra_set.destroy
+      Product.hydra_set_names
     end
   end
 
