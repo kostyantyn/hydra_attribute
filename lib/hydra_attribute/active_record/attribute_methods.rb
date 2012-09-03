@@ -53,7 +53,7 @@ module HydraAttribute
             generated_hydra_attribute_methods.module_eval <<-EOS, __FILE__, __LINE__ + 1
               #{defn}
                 if hydra_set_id? and self.class.hydra_set_attribute_ids(hydra_set_id).exclude?(#{hydra_attribute.id})
-                  raise MissingAttributeInHydraSetError, 'Attribute "#{hydra_attribute.name}" does not exist in hydra set "\#{hydra_set(hydra_set_id).name}"'
+                  raise MissingAttributeInHydraSetError, %(Hydra attribute "#{hydra_attribute.name}" does not exist in hydra set "\#{self.class.hydra_set(hydra_set_id).name}")
                 end
 
                 if value_model = hydra_value_model(#{hydra_attribute.id})
