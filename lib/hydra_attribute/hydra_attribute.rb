@@ -18,8 +18,16 @@ module HydraAttribute
     end
 
     before_destroy :delete_dependent_values
-    after_commit   :reload_attribute_methods
+    after_commit   :clear_entity_cache
     after_commit   :toggle_white_list!
+
+    # @COMPATIBILITY with 3.1.x association module is directly added to the class instead of including module
+    def hydra_sets_with_clearing_cache=(value)
+      self.hydra_sets_without_clearing_cache = value
+      clear_entity_cache
+      value
+    end
+    alias_method_chain :hydra_sets=, :clearing_cache
 
     def toggle_white_list!
       if destroyed? or !white_list?
@@ -35,8 +43,8 @@ module HydraAttribute
         value_class.delete_all(hydra_attribute_id: id)
       end
 
-      def reload_attribute_methods
-        entity_type.constantize.reset_hydra_attribute_methods! # TODO should not remove all generated methods just for this attribute
+      def clear_entity_cache
+        entity_type.constantize.clear_hydra_method_cache!
       end
 
       def add_to_white_list

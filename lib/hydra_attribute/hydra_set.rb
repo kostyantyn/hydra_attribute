@@ -16,10 +16,17 @@ module HydraAttribute
     after_destroy :detach_entities
     after_commit  :clear_entity_cache
 
+    # @COMPATIBILITY with 3.1.x association module is directly added to the class instead of including module
+    def hydra_attributes_with_clearing_cache=(value)
+      self.hydra_attributes_without_clearing_cache = value
+      clear_entity_cache
+      value
+    end
+    alias_method_chain :hydra_attributes=, :clearing_cache
+
     private
       def clear_entity_cache
-        entity_type.constantize.clear_hydra_set_cache!
-        entity_type.constantize.clear_hydra_attribute_cache!
+        entity_type.constantize.clear_hydra_method_cache!
       end
 
       def detach_entities
