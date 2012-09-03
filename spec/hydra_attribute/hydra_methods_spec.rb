@@ -25,14 +25,11 @@ describe HydraAttribute::HydraMethods do
       let!(:hydra_attribute2) { Product.hydra_attributes.create(name: 'b', backend_type: 'string') }
 
       it 'should return hydra attribute ids for specific hydra set' do
-        Product.hydra_set_attribute_ids(hydra_set.id).should have(1).hydra_attribute
-        Product.hydra_set_attribute_ids(hydra_set.id).first.should == hydra_attribute1.id
+        Product.hydra_set_attribute_ids(hydra_set.id).should == [hydra_attribute1.id]
       end
 
       it 'should return all hydra attribute ids if hydra set does not exist' do
-        Product.hydra_set_attribute_ids(0).should have(2).hydra_attributes
-        Product.hydra_set_attribute_ids(0).first.should == hydra_attribute1.id
-        Product.hydra_set_attribute_ids(0).last.should  == hydra_attribute2.id
+        Product.hydra_set_attribute_ids(0).should =~ [hydra_attribute1.id, hydra_attribute2.id]
       end
     end
 
@@ -75,14 +72,11 @@ describe HydraAttribute::HydraMethods do
       let!(:hydra_attribute2) { Product.hydra_attributes.create(name: 'b', backend_type: 'string') }
 
       it 'should return hydra attribute names for specific hydra set' do
-        Product.hydra_set_attribute_names(hydra_set.id).should have(1).hydra_attribute
-        Product.hydra_set_attribute_names(hydra_set.id).first.should == hydra_attribute1.name
+        Product.hydra_set_attribute_names(hydra_set.id).should == [hydra_attribute1.name]
       end
 
       it 'should return all hydra attribute names if hydra set does not exist' do
-        Product.hydra_set_attribute_names(0).should have(2).hydra_attributes
-        Product.hydra_set_attribute_names(0).first.should == hydra_attribute1.name
-        Product.hydra_set_attribute_names(0).last.should  == hydra_attribute2.name
+        Product.hydra_set_attribute_names(0).should =~ [hydra_attribute1.name, hydra_attribute2.name]
       end
     end
 
@@ -358,8 +352,8 @@ describe HydraAttribute::HydraMethods do
 
     describe 'hydra set does not exist' do
       it 'should return all hydra attributes for specific backend type' do
-        Product.hydra_set_attributes_for_backend_type(0, 'string').should   =~ [hydra_attr1, hydra_attr2]
-        Product.hydra_set_attributes_for_backend_type(0, 'integer').should  =~ [hydra_attr3, hydra_attr4]
+        Product.hydra_set_attributes_for_backend_type(0, 'string').should  =~ [hydra_attr1, hydra_attr2]
+        Product.hydra_set_attributes_for_backend_type(0, 'integer').should =~ [hydra_attr3, hydra_attr4]
       end
 
       it 'should return blank array if there are not any hydra attributes' do
@@ -388,8 +382,8 @@ describe HydraAttribute::HydraMethods do
 
     describe 'hydra set does not exist' do
       it 'should return all hydra attribute ids for specific backend type' do
-        Product.hydra_set_attribute_ids_for_backend_type(0, 'string').should   =~ [hydra_attr1.id, hydra_attr2.id]
-        Product.hydra_set_attribute_ids_for_backend_type(0, 'integer').should  =~ [hydra_attr3.id, hydra_attr4.id]
+        Product.hydra_set_attribute_ids_for_backend_type(0, 'string').should  =~ [hydra_attr1.id, hydra_attr2.id]
+        Product.hydra_set_attribute_ids_for_backend_type(0, 'integer').should =~ [hydra_attr3.id, hydra_attr4.id]
       end
 
       it 'should return blank array if there are not any hydra attributes' do
@@ -418,8 +412,8 @@ describe HydraAttribute::HydraMethods do
 
     describe 'hydra set does not exist' do
       it 'should return all hydra attribute names for specific backend type' do
-        Product.hydra_set_attribute_names_for_backend_type(0, 'string').should   =~ [hydra_attr1.name, hydra_attr2.name]
-        Product.hydra_set_attribute_names_for_backend_type(0, 'integer').should  =~ [hydra_attr3.name, hydra_attr4.name]
+        Product.hydra_set_attribute_names_for_backend_type(0, 'string').should  =~ [hydra_attr1.name, hydra_attr2.name]
+        Product.hydra_set_attribute_names_for_backend_type(0, 'integer').should =~ [hydra_attr3.name, hydra_attr4.name]
       end
 
       it 'should return blank array if there are not any hydra attributes' do
