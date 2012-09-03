@@ -124,15 +124,20 @@ describe HydraAttribute::HydraMethods do
       let!(:hydra_attribute1) { hydra_set.hydra_attributes.create(name: 'a', backend_type: 'string') }
       let!(:hydra_attribute2) { Product.hydra_attributes.create(name: 'b', backend_type: 'integer') }
 
-      it 'should return hydra attribute names for specific hydra set' do
-        Product.hydra_set_attribute_backend_types(hydra_set.id).should have(1).hydra_attribute
-        Product.hydra_set_attribute_backend_types(hydra_set.id).first.should == hydra_attribute1.backend_type
+      it 'should return hydra attribute backend types for specific hydra set' do
+        Product.hydra_set_attribute_backend_types(hydra_set.id).should == [hydra_attribute1.backend_type]
       end
 
-      it 'should return all hydra attribute names if hydra set does not exist' do
-        Product.hydra_set_attribute_backend_types(0).should have(2).hydra_attributes
-        Product.hydra_set_attribute_backend_types(0).first.should == hydra_attribute1.backend_type
-        Product.hydra_set_attribute_backend_types(0).last.should  == hydra_attribute2.backend_type
+      it 'should return all hydra attribute backend types if hydra set does not exist' do
+        Product.hydra_set_attribute_backend_types(0).should =~ [hydra_attribute1.backend_type, hydra_attribute2.backend_type]
+      end
+
+      it 'should return uniq attribute backend type names' do
+        hydra_set.hydra_attributes.create(name: 'c', backend_type: 'string')
+        hydra_set.hydra_attributes.create(name: 'd', backend_type: 'integer')
+
+        backend_types = Product.hydra_set_attribute_backend_types(hydra_set.id)
+        backend_types.should =~ %w(string integer)
       end
     end
 

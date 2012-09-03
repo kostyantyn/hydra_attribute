@@ -19,7 +19,12 @@ module HydraAttribute
         hydra_set.nil? ? hydra_attributes : hydra_set.hydra_attributes
       end
 
-      %w(id name backend_type).each do |prefix|
+      def hydra_set_attribute_backend_types(hydra_set_id)
+        hydra_set_attributes(hydra_set_id).map(&:backend_type).uniq
+      end
+      hydra_memoize :hydra_set_attribute_backend_types
+
+      %w(id name).each do |prefix|
         module_eval <<-EOS, __FILE__, __LINE__ + 1
           def hydra_set_attribute_#{prefix}s(hydra_set_id)
             hydra_set_attributes(hydra_set_id).map(&:#{prefix})
