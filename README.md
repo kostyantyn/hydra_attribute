@@ -139,6 +139,12 @@ Product.group(:color).count
 # {"green"=>3, "red"=>1}
 ```
 
+## Wiki Docs
+* [README](https://github.com/kostyantyn/hydra_attribute/blob/master/README.md)
+* [Create migration](https://github.com/kostyantyn/hydra_attribute/wiki/Create-migration)
+* [Create attributes in runtime](https://github.com/kostyantyn/hydra_attribute/wiki/Create-attributes-in-runtime)
+* [Create sets of attributes](https://github.com/kostyantyn/hydra_attribute/wiki/Create-sets-of-attributes)
+
 ## Notice
 
 The each new minor version doesn't guarantee back compatibility with previous one 
