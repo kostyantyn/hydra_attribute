@@ -1,8 +1,9 @@
-# hydra_attribute
-[![Build Status](https://secure.travis-ci.org/kostyantyn/hydra_attribute.png)](http://travis-ci.org/kostyantyn/hydra_attribute)
+# hydra_attribute [![Build Status](https://secure.travis-ci.org/kostyantyn/hydra_attribute.png)](http://travis-ci.org/kostyantyn/hydra_attribute)
+
+[Wiki](https://github.com/kostyantyn/hydra_attribute/wiki) | [RDocs](http://rdoc.info/github/kostyantyn/hydra_attribute)
 
 hydra_attribute is an implementation of
-[EAV pattern](http://en.wikipedia.org/wiki/Entity–attribute–value_model) for ActiveRecord models.
+[EAV (Entity-Attribute-Value) pattern](http://en.wikipedia.org/wiki/Entity–attribute–value_model) for ActiveRecord models.
 
 ## Requirements
 * ruby >= 1.9.2
