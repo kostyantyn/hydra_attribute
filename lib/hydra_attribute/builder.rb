@@ -20,7 +20,7 @@ module HydraAttribute
 
     def build
       build_associations
-      build_white_list
+      update_mass_assignment_security
     end
 
     private
@@ -30,8 +30,8 @@ module HydraAttribute
         end
       end
 
-      def build_white_list
-        klass.hydra_attributes.each(&:toggle_white_list!)
+      def update_mass_assignment_security
+        klass.hydra_attributes.each(&:update_mass_assignment_security)
       end
   end
 end

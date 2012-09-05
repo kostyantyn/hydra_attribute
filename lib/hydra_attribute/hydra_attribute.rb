@@ -19,7 +19,7 @@ module HydraAttribute
 
     before_destroy :delete_dependent_values
     after_commit   :clear_entity_cache
-    after_commit   :toggle_white_list!
+    after_commit   :update_mass_assignment_security
 
     # @COMPATIBILITY with 3.1.x association module is directly added to the class instead of including module
     def hydra_sets_with_clearing_cache=(value)
@@ -29,7 +29,7 @@ module HydraAttribute
     end
     alias_method_chain :hydra_sets=, :clearing_cache
 
-    def toggle_white_list!
+    def update_mass_assignment_security
       if destroyed? or !white_list?
         remove_from_white_list
       else
