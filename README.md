@@ -165,6 +165,7 @@ Product.group(:color).count
 * [Create migration](https://github.com/kostyantyn/hydra_attribute/wiki/Create-migration)
 * [Create attributes in runtime](https://github.com/kostyantyn/hydra_attribute/wiki/Create-attributes-in-runtime)
 * [Create sets of attributes](https://github.com/kostyantyn/hydra_attribute/wiki/Create-sets-of-attributes)
+* [Query methods](https://github.com/kostyantyn/hydra_attribute/wiki/Query-methods)
 
 ## Notice
 
