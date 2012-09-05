@@ -53,6 +53,23 @@ Feature: create models with hydra attributes
       | info    | b                 |
       | started | [date:2012-05-05] |
 
+  Scenario: create hydra attribute in runtime
+    # create product to cache all hydra attributes
+    Given create "Product" model
+    And create hydra attributes for "Product" with role "admin" as "hashes":
+      | name     | backend_type | default_value | white_list |
+      | quantity | integer      | [nil:]        | [bool:t]   |
+    And create "Product" model with attributes as "rows_hash":
+      | quantity | 5 |
+    Then last created "Product" should have the following attributes:
+      | code     | [nil:]            |
+      | info     | [str:]            |
+      | price    | [float:0]         |
+      | total    | [int:0]           |
+      | active   | [bool:f]          |
+      | started  | [date:2012-01-01] |
+      | quantity | [int:5]           |
+
   Scenario: pass only hydra_set_id
     Given create hydra sets for "Product" as "hashes":
       | name    |

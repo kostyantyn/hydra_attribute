@@ -24,7 +24,7 @@ module HydraAttribute
     # @COMPATIBILITY with 3.1.x association module is directly added to the class instead of including module
     def hydra_sets_with_clearing_cache=(value)
       self.hydra_sets_without_clearing_cache = value
-      clear_entity_cache
+      entity_type.constantize.clear_hydra_method_cache!
       value
     end
     alias_method_chain :hydra_sets=, :clearing_cache
@@ -44,7 +44,7 @@ module HydraAttribute
       end
 
       def clear_entity_cache
-        entity_type.constantize.clear_hydra_method_cache!
+        entity_type.constantize.reset_hydra_attribute_methods!
       end
 
       def add_to_white_list
