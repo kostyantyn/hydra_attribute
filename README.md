@@ -1,6 +1,6 @@
 # hydra_attribute [![Build Status](https://secure.travis-ci.org/kostyantyn/hydra_attribute.png)](http://travis-ci.org/kostyantyn/hydra_attribute)
 
-[Wiki](https://github.com/kostyantyn/hydra_attribute/wiki) | [RDocs](http://rdoc.info/github/kostyantyn/hydra_attribute)
+[Wiki](https://github.com/kostyantyn/hydra_attribute/wiki) | [RDoc](http://rdoc.info/github/kostyantyn/hydra_attribute)
 
 hydra_attribute is an implementation of
 [EAV (Entity-Attribute-Value) pattern](http://en.wikipedia.org/wiki/Entity–attribute–value_model) for ActiveRecord models.
@@ -37,7 +37,8 @@ class CreateHydraAttributeTables < ActiveRecord::Migration
 end
 ```
 
-##### or if we have already the entity table
+**or if we have already the entity table**
+
 ```ruby    
 class CreateHydraAttributeTables < ActiveRecord::Migration
   def up
@@ -95,9 +96,9 @@ Creating method accepts the following options:
 Product.create.attributes
 # {"id"=>1, created_at"=>..., "updated_at"=>..., "color"=>"green", "title"=>nil, "total"=>1}
 Product.create(color: 'red', title: 'toy').attributes
-# {"id"=>1, "created_at"=>..., "updated_at"=>..., "color"=>"red", "title"=>"toy", "total"=>1}
+# {"id"=>2, "created_at"=>..., "updated_at"=>..., "color"=>"red", "title"=>"toy", "total"=>1}
 Product.create(title: 'book', total: 2).attributes
-# {"id"=>1, "created_at"=>..., "updated_at"=>..., "color"=>"green", "title"=>"book", "total"=>2} 
+# {"id"=>3, "created_at"=>..., "updated_at"=>..., "color"=>"green", "title"=>"book", "total"=>2} 
 ```
 
 ##### Add the new attribute in runtime
