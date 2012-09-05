@@ -53,7 +53,7 @@ end
 
 ## Usage
 
-##### Create model
+### Create model
 ```shell
 rails generate model Product type:string name:string --migration=false
 rake db:migrate
@@ -73,7 +73,7 @@ class Product < ActiveRecord::Base
 end
 ```
 
-##### Create some hydra attributes from `rails console`
+### Create hydra attributes
 ```ruby
 Product.hydra_attributes.create(name: 'color', backend_type: 'string', default_value: 'green')
 Product.hydra_attributes.create(name: 'title', backend_type: 'string')
@@ -90,8 +90,7 @@ Creating method accepts the following options:
     Product.hydra_attributes.create({name: 'title', backend_type: 'string', white_list: true}, as: :admin)
   ```
 
-##### Create several objects
-
+### Create records
 ```ruby
 Product.create
 #<Product id: 1, hydra_set_id: nil, created_at: ..., updated_at: ..., color: "green", title: nil, total: 1>
@@ -101,44 +100,65 @@ Product.create(title: 'book', total: 2)
 #<Product id: 3, hydra_set_id: nil, created_at: ..., updated_at: ..., color: "green", title: "book", total: 2>
 ```
 
-##### Add the new attribute in runtime
+### Add new hydra attribute in runtime
 ```ruby
 Product.hydra_attributes.create(name: 'price', backend_type: 'float', default_value: 0.0)
 Product.create(title: 'car', price: 2.50)
-#<Product id: 4, hydra_set_id: nil, created_at: ..., updated_at: ..., color: "green", title: "car", total: 2, price: 2.50>
+#<Product id: 4, hydra_set_id: nil, created_at: ..., updated_at: ..., color: "green", title: "car", total: 2, price: 2.5>
 ```
 
-##### Obtain data
+### Create hydra set
+**Hydra set** allows set unique attribute list for each entity.
+
 ```ruby
-Product.where(color: 'red').map(&:attributes)
-# [{"id"=>2, "created_at"=>..., "updated_at"=>..., "color"=>"red", "title"=>"toy", "price"=>0.0, "total"=>1}] 
-Product.where(color: 'green', price: nil).map(&:attributes)
-# [{"id"=>1, "created_at"=>..., "updated_at"=>..., "color"=>"green", "title"=>nil, "price"=>0.0, "total"=>1},  
-#  {"id"=>3, "created_at"=>..., "updated_at"=>..., "color"=>"green", "title"=>"book", "price"=>0.0, "total"=>2}] 
+hydra_set = Product.hydra_sets.create(name: 'Default')
+hydra_set.hydra_attributes = Product.hydra_attributes.where(name: %w(color title price))
+
+Product.create(color: 'black', title: 'ipod', price: 49.95, total: 5) do |product|
+  product.hydra_set_id = hydra_set.id
+end
+#<Product id: 5, hydra_set_id: 1, created_at: ..., updated_at: ..., color: "black", title: "ipod", price: 49.95>
+```
+**Notice:** the `total` attribute was skipped because it doesn't exist in hydra set.
+
+### Obtain data
+```ruby
+Product.where(color: 'red')
+# [#<Product id: 2, hydra_set_id: nil, created_at: ..., updated_at: ..., color: "red", title: "toy", price: 0.0, total: 1>]
+Product.where(color: 'green', price: nil)
+# [
+    #<Product id: 1, hydra_set_id: nil, created_at: ..., updated_at: ..., color: "green", title: nil, price: 0.0, total: 1>,
+    #<Product id: 3, hydra_set_id: nil, created_at: ..., updated_at: ..., color: "green", title: "book", price: 0.0, total: 2>
+# ]
 ```
 **Notice**: the attribute `price` was added in runtime and records that were created before have not this attribute
 so they matched this condition `where(price: nil)`
 
-##### Order data
+### Order data
 ```ruby
-Product.order(:color).first.attributes
-# {"id"=>1, "created_at"=>..., "updated_at"=>..., "color"=>"green", "title"=>nil, "price"=>0.0, "total"=>1} 
-Product.order(:color).reverse_order.first.attributes
-# {"id"=>2, "created_at"=>..., "updated_at"=>..., "color"=>"red", "title"=>"toy", "price"=>0.0, "total"=>1}
+Product.order(:color, :title).first
+#<Product id: 5, hydra_set_id: 1, created_at: ..., updated_at: ..., color: "black", title: "ipod", price: 49.95>
+Product.order(:color, :title).reverse_order.first
+#<Product id: 2, hydra_set_id: nil, created_at: ..., updated_at: ..., color: "red", title: "toy", price: 0.0, total: 1>
 ```
 
-##### Select concrete attributes
+### Select concrete attributes
 ```ruby
-Product.select([:color, :title]).map(&:attributes)
-# [{"id"=>1, "color"=>"green", "title"=>nil}, {"id"=>2, "color"=>"red", "title"=>"toy"},  
-#  {"id"=>3, "color"=>"green", "title"=>"book"}, {"id"=>4, "color"=>"green", "title"=>"car"}]
+Product.select([:color, :title])
+# [
+    #<Product id: 1, hydra_set_id: nil, color: "green", title: nil>,
+    #<Product id: 2, hydra_set_id: nil, color: "red", title: "toy">,
+    #<Product id: 3, hydra_set_id: nil, color: "green", title: "book">,
+    #<Product id: 4, hydra_set_id: nil, color: "green", title: "car">,
+    #<Product id: 5, hydra_set_id: 1, color: "black", title: "ipod">
+# ] 
 ```
-**Notice**: `id` attribute will be added if we want to select hydra attribute
+**Notice:** `id` and `hydra_set_id` attributes are forced added because they are important for correct work.
 
-##### Group by attribute
+### Group by attribute
 ```ruby
 Product.group(:color).count
-# {"green"=>3, "red"=>1}
+# {"black"=>1, "green"=>3, "red"=>1}
 ```
 
 ## Wiki Docs
