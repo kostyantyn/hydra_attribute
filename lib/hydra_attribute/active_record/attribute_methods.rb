@@ -136,9 +136,8 @@ module HydraAttribute
       end
 
       def inspect
-        attrs  = self.class.column_names.map { |name| "#{name}: #{attribute_for_inspect(name)}" }
-        attrs += hydra_value_models.map { |model| "#{model.hydra_attribute_name}: #{model.attribute_for_inspect('value')}" }
-        "#<#{self.class} #{attrs.join(', ')}>"
+        attrs = hydra_value_models.map { |model| "#{model.hydra_attribute_name}: #{model.attribute_for_inspect('value')}" }
+        super.gsub(/>$/, ", #{attrs.join(', ')}>")
       end
 
       private
