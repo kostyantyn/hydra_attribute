@@ -91,7 +91,6 @@ Creating method accepts the following options:
   ```
 
 ##### Create several objects
-
 ```ruby
 Product.create
 #<Product id: 1, hydra_set_id: nil, created_at: ..., updated_at: ..., color: "green", title: nil, total: 1>
@@ -105,8 +104,22 @@ Product.create(title: 'book', total: 2)
 ```ruby
 Product.hydra_attributes.create(name: 'price', backend_type: 'float', default_value: 0.0)
 Product.create(title: 'car', price: 2.50)
-#<Product id: 4, hydra_set_id: nil, created_at: ..., updated_at: ..., color: "green", title: "car", total: 2, price: 2.50>
+#<Product id: 4, hydra_set_id: nil, created_at: ..., updated_at: ..., color: "green", title: "car", total: 2, price: 2.5>
 ```
+
+##### Create hydra set
+**Hydra set** allows set unique attribute list for each entity.
+
+```ruby
+hydra_set = Product.hydra_sets.create(name: 'Default')
+hydra_set.hydra_attributes = Product.hydra_attributes.where(name: %w(color title price))
+
+Product.create(color: 'black', title: 'ipod', price: 49.95, total: 5) do |product|
+  product.hydra_set_id = hydra_set.id
+end
+#<Product id: 5, hydra_set_id: 1, created_at: ..., updated_at: ..., color: "black", title: "ipod", price: 49.95>
+```
+**Notice:** the `total` attribute was skipped because it doesn't exist in hydra set.
 
 ##### Obtain data
 ```ruby
