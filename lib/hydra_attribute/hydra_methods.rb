@@ -14,8 +14,8 @@ module HydraAttribute
     module ClassMethods
       extend Memoize
 
-      def hydra_set_attributes(hydra_set_id)
-        hydra_set = hydra_set(hydra_set_id)
+      def hydra_set_attributes(hydra_set_identifier)
+        hydra_set = hydra_set(hydra_set_identifier)
         hydra_set.nil? ? hydra_attributes : hydra_set.hydra_attributes
       end
 
