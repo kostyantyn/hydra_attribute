@@ -19,29 +19,29 @@ module HydraAttribute
         hydra_set.nil? ? hydra_attributes : hydra_set.hydra_attributes
       end
 
-      def hydra_set_attribute_backend_types(hydra_set_id)
-        hydra_set_attributes(hydra_set_id).map(&:backend_type).uniq
+      def hydra_set_attribute_backend_types(hydra_set_identifier)
+        hydra_set_attributes(hydra_set_identifier).map(&:backend_type).uniq
       end
       hydra_memoize :hydra_set_attribute_backend_types
 
       %w(id name).each do |prefix|
         module_eval <<-EOS, __FILE__, __LINE__ + 1
-          def hydra_set_attribute_#{prefix}s(hydra_set_id)
-            hydra_set_attributes(hydra_set_id).map(&:#{prefix})
+          def hydra_set_attribute_#{prefix}s(hydra_set_identifier)
+            hydra_set_attributes(hydra_set_identifier).map(&:#{prefix})
           end
           hydra_memoize :hydra_set_attribute_#{prefix}s
         EOS
       end
 
-      def hydra_set_attributes_by_backend_type(hydra_set_id)
-        hydra_set_attributes(hydra_set_id).group_by(&:backend_type)
+      def hydra_set_attributes_by_backend_type(hydra_set_identifier)
+        hydra_set_attributes(hydra_set_identifier).group_by(&:backend_type)
       end
       hydra_memoize :hydra_set_attributes_by_backend_type
 
       %w(id name).each do |prefix|
         module_eval <<-EOS, __FILE__, __LINE__ + 1
-          def hydra_set_attribute_#{prefix}s_by_backend_type(hydra_set_id)
-            hydra_set_attributes(hydra_set_id).each_with_object({}) do |hydra_attribute, object|
+          def hydra_set_attribute_#{prefix}s_by_backend_type(hydra_set_identifier)
+            hydra_set_attributes(hydra_set_identifier).each_with_object({}) do |hydra_attribute, object|
               object[hydra_attribute.backend_type] ||= []
               object[hydra_attribute.backend_type] << hydra_attribute.#{prefix}
             end
@@ -50,15 +50,15 @@ module HydraAttribute
         EOS
       end
 
-      def hydra_set_attributes_for_backend_type(hydra_set_id, backend_type)
-        hydra_attributes = hydra_set_attributes_by_backend_type(hydra_set_id)[backend_type]
+      def hydra_set_attributes_for_backend_type(hydra_set_identifier, backend_type)
+        hydra_attributes = hydra_set_attributes_by_backend_type(hydra_set_identifier)[backend_type]
         hydra_attributes.nil? ? [] : hydra_attributes
       end
 
       %w(id name).each do |prefix|
         module_eval <<-EOS, __FILE__, __LINE__ + 1
-          def hydra_set_attribute_#{prefix}s_for_backend_type(hydra_set_id, backend_type)
-            values = hydra_set_attribute_#{prefix}s_by_backend_type(hydra_set_id)[backend_type]
+          def hydra_set_attribute_#{prefix}s_for_backend_type(hydra_set_identifier, backend_type)
+            values = hydra_set_attribute_#{prefix}s_by_backend_type(hydra_set_identifier)[backend_type]
             values.nil? ? [] : values
           end
         EOS
