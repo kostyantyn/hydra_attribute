@@ -52,8 +52,7 @@ module HydraAttribute
       end
       hydra_memoize :hydra_attribute_backend_types
 
-      ##
-      # :method: hydra_attribute_ids
+      # @!method hydra_attribute_ids
       # Returns array of attribute ids.
       # This method is cacheable therefore, the definition of values is carried out only once.
       #
@@ -64,7 +63,7 @@ module HydraAttribute
       #   Product.hydra_attribute_ids # [1, 2, 3]
 
       ##
-      # :method: hydra_attribute_names
+      # @!method hydra_attribute_names
       # Returns array of attribute names.
       # This method is cacheable therefore, the definition of values is carried out only once.
       #
@@ -92,8 +91,7 @@ module HydraAttribute
       end
       hydra_memoize :hydra_attributes_by_backend_type
 
-      ##
-      # :method: hydra_attribute_ids_by_backend_type
+      # @!method hydra_attribute_ids_by_backend_type
       # Group attribute ids by backend type.
       # This method is cacheable therefore, the group operation is carried out only once.
       #
@@ -104,8 +102,7 @@ module HydraAttribute
       #   Product.hydra_attribute_ids_by_backend_type
       #   # {"string" => [1, 2], "integer" => [3]}
 
-      ##
-      # :method: hydra_attribute_names_by_backend_type
+      # @!method hydra_attribute_names_by_backend_type
       # Group attribute names by backend type.
       # This method is cacheable therefore, the group operation is carried out only once.
       #
@@ -143,8 +140,7 @@ module HydraAttribute
         hydra_attributes.nil? ? [] : hydra_attributes
       end
 
-      ##
-      # :method: hydra_attribute_ids_for_backend_type(backend_type)
+      # @!method hydra_attribute_ids_for_backend_type(backend_type)
       # Returns array of attribute ids for passed backend type.
       # If no attributes, returns blank array.
       #
@@ -155,8 +151,7 @@ module HydraAttribute
       #   Product.hydra_attributes_for_backend_type('string') # [1, 2]
       #   Product.hydra_attributes_for_backend_type('float')  # []
 
-      ##
-      # :method: hydra_attribute_names_for_backend_type(backend_type)
+      # @!method hydra_attribute_names_for_backend_type(backend_type)
       # Returns array of attribute names for passed backend type.
       # If no attributes, returns blank array.
       #
