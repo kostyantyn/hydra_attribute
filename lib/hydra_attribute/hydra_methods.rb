@@ -404,6 +404,22 @@ module HydraAttribute
       end
     end
 
+    # Returns hash with attribute names and values based on attribute set.
+    #
+    # @example
+    #   Product.hydra_attributes.create(name: 'name', backend_type: 'string')
+    #
+    #   hydra_set = Product.hydra_sets.create(name: 'Default')
+    #   hydra_set.hydra_attributes.create(name: 'title', backend_type: 'string')
+    #   hydra_set.hydra_attributes.create(name: 'color', backend_type: 'string')
+    #
+    #   product = Product.new
+    #   product.hydra_attributes # {"name"=>nil, "title"=>nil, "color"=>nil}
+    #
+    #   product.hydra_set_id = hydra_set.id
+    #   product.hydra_attributes # {"title"=>nil, "color"=>nil}
+    #
+    # @return [Hash] contains attribute names and values
     def hydra_attributes
       hydra_value_models.inject({}) do |hydra_attributes, model|
         hydra_attributes[model.hydra_attribute_name] = model.value
@@ -411,6 +427,59 @@ module HydraAttribute
       end
     end
 
+    # @!method hydra_attribute_ids
+    # Returns attribute ids
+    #
+    # @example
+    #   Product.hydra_attributes.create(name: 'name', backend_type: 'string')    # 1
+    #
+    #   hydra_set = Product.hydra_sets.create(name: 'Default')
+    #   hydra_set.hydra_attributes.create(name: 'title', backend_type: 'string') # 2
+    #   hydra_set.hydra_attributes.create(name: 'color', backend_type: 'string') # 3
+    #
+    #   product = Product.new
+    #   product.hydra_attribute_ids # [1, 2, 3]
+    #
+    #   product.hydra_set_id = hydra_set.id
+    #   product.hydra_attribute_ids # [2, 3]
+    #
+    # @return [Array] contains attribute ids
+
+    # @!method hydra_attribute_names
+    # Returns attribute names
+    #
+    # @example
+    #   Product.hydra_attributes.create(name: 'name', backend_type: 'string')
+    #
+    #   hydra_set = Product.hydra_sets.create(name: 'Default')
+    #   hydra_set.hydra_attributes.create(name: 'title', backend_type: 'string')
+    #   hydra_set.hydra_attributes.create(name: 'color', backend_type: 'string')
+    #
+    #   product = Product.new
+    #   product.hydra_attribute_names # ["name", "title", "color"]
+    #
+    #   product.hydra_set_id = hydra_set.id
+    #   product.hydra_attribute_names # ["title", "color"]
+    #
+    # @return [Array] contains attribute names
+
+    # @!method hydra_attribute_backend_types
+    # Returns attribute backend types
+    #
+    # @example
+    #   Product.hydra_attributes.create(name: 'name', backend_type: 'string')
+    #
+    #   hydra_set = Product.hydra_sets.create(name: 'Default')
+    #   hydra_set.hydra_attributes.create(name: 'price', backend_type: 'float')
+    #   hydra_set.hydra_attributes.create(name: 'total', backend_type: 'integer')
+    #
+    #   product = Product.new
+    #   product.hydra_attribute_backend_types # ["string", "float", "integer"]
+    #
+    #   product.hydra_set_id = hydra_set.id
+    #   product.hydra_attribute_backend_types # ["float", "integer"]
+    #
+    # @return [Array] contains attribute backend types
     %w(ids names backend_types).each do |prefix|
       module_eval <<-EOS, __FILE__, __LINE__ + 1
         def hydra_attribute_#{prefix}
@@ -419,6 +488,11 @@ module HydraAttribute
       EOS
     end
 
+    # Finds attribute representation as a model by identifier
+    #
+    # @note This method is cacheable
+    # @param identifier [Fixnum, String] id or name of attribute
+    # @returns [ActiveRecord::Base]
     def hydra_value_model(identifier)
       hydra_attribute = self.class.hydra_attribute(identifier)
       if hydra_attribute
@@ -428,6 +502,10 @@ module HydraAttribute
     end
     hydra_memoize :hydra_value_model
 
+    # Returns all attributes as models
+    #
+    # @note This method is cacheable
+    # @return [Array] contains values models
     def hydra_value_models
       self.class.hydra_set_attribute_backend_types(hydra_set_id).inject([]) do |models, backend_type|
         models + hydra_value_association(backend_type).all_models
@@ -436,6 +514,7 @@ module HydraAttribute
     hydra_memoize :hydra_value_models
 
     private
+      # Resets locked attributes after setting new hydra_set_id
       def write_attribute_with_hydra_set_id(attr_name, value)
         if attr_name.to_s == 'hydra_set_id'
           self.class.hydra_attribute_backend_types.each do |backend_type|
