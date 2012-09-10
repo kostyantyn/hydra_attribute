@@ -1,5 +1,5 @@
 module HydraAttribute
-  module Memoize
+  module Memoizable
     def hydra_memoize(*methods)
       methods.each do |method_name|
         bound_method = instance_method(method_name)

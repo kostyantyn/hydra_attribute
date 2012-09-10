@@ -1,7 +1,7 @@
 module HydraAttribute
   module HydraMethods
     extend ActiveSupport::Concern
-    extend Memoize
+    extend Memoizable
 
     include HydraSetMethods
     include HydraAttributeMethods
@@ -12,7 +12,7 @@ module HydraAttribute
     end
 
     module ClassMethods
-      extend Memoize
+      extend Memoizable
 
       def hydra_set_attributes(hydra_set_identifier)
         hydra_set = hydra_set(hydra_set_identifier)

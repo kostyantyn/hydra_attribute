@@ -5,7 +5,7 @@ module HydraAttribute
     extend ActiveSupport::Concern
 
     module ClassMethods
-      extend Memoize
+      extend Memoizable
 
       # Returns prepared +ActiveRecord::Relation+ object with preloaded attributes for current entity.
       #

@@ -1,11 +1,11 @@
 require 'spec_helper'
 
-describe HydraAttribute::Memoize do
+describe HydraAttribute::Memoizable do
   def anonymous(arity = 0)
     params = (1..arity).map{ |i| "a#{i}" }.join(', ')
 
     anonymous = Class.new do
-      extend HydraAttribute::Memoize
+      extend HydraAttribute::Memoizable
 
       class_eval <<-EOS, __FILE__, __LINE__ + 1
         def my_method(#{params})

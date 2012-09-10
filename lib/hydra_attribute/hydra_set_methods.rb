@@ -19,7 +19,7 @@ module HydraAttribute
     extend ActiveSupport::Concern
 
     module ClassMethods
-      extend Memoize
+      extend Memoizable
 
       # Returns attribute sets for current entity.
       #
