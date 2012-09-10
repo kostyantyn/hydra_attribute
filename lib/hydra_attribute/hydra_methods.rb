@@ -492,7 +492,7 @@ module HydraAttribute
     #
     # @note This method is cacheable
     # @param identifier [Fixnum, String] id or name of attribute
-    # @returns [ActiveRecord::Base]
+    # @return [ActiveRecord::Base]
     def hydra_value_model(identifier)
       hydra_attribute = self.class.hydra_attribute(identifier)
       if hydra_attribute
