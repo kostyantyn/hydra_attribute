@@ -222,9 +222,5 @@ module HydraAttribute
         end
       end
     end
-
-    def hydra_attribute?(name)
-      self.class.hydra_attribute_names.include?(name.to_s)
-    end
   end
 end

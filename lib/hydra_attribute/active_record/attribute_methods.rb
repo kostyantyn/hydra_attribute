@@ -99,7 +99,7 @@ module HydraAttribute
           attr_name = self.class.send(:attribute_method_matcher, name).attr_name
         end
 
-        if hydra_attribute?(attr_name)
+        if self.class.hydra_attribute_names.include?(attr_name)
           self.class.hydra_set_attribute_names(hydra_set_id).include?(attr_name)
         else
           super
