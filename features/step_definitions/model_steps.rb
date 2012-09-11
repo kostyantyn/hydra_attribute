@@ -66,6 +66,19 @@ Given /^add "([^"]+)" hydra attributes to hydra set:$/ do |klass, table|
   end
 end
 
+Given /^add hydra attribute "([^"]+)" to hydra set "([^"]+)" for entity "([^"]+)"$/ do |hydra_attribute, hydra_set, entity_class|
+  entity = entity_class.constantize
+  entity.hydra_set(type_cast_value(hydra_set)).hydra_attributes << entity.hydra_attribute(type_cast_value(hydra_attribute))
+end
+
+Given /^set hydra attributes? "([^"]+)" to hydra set "([^"]+)" for entity "([^"]+)"$/ do |hydra_attributes, hydra_set, entity_class|
+  entity    = entity_class.constantize
+  hydra_set = entity.hydra_set(type_cast_value(hydra_set))
+
+  hydra_attributes = Array(type_cast_value(hydra_attributes)).map { |attr| entity.hydra_attribute(attr) }
+  hydra_set.hydra_attributes = hydra_attributes
+end
+
 Given /^(load and )?(save|create|update(?: all| attributes)?|destroy(?: all)?|delete(?: all)?)(?: for)? "([^"]+)" models? with attributes as "([^"]+)":$/ do |load, action, klass, format, table|
   action = action.gsub(' ', '_')
   klass  = klass.constantize

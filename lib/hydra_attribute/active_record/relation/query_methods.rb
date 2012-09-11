@@ -4,7 +4,7 @@ module HydraAttribute
       module QueryMethods
         extend ActiveSupport::Concern
 
-        MULTI_VALUE_METHODS = [:hydra_joins_aliases, :hydra_select_values]
+        MULTI_VALUE_METHODS = [:hydra_joins_aliases, :hydra_select_values, :hydra_attributes]
 
         included do
           attr_writer *MULTI_VALUE_METHODS
@@ -25,6 +25,7 @@ module HydraAttribute
             opts.inject(self) do |relation, (name, value)|
               if klass.hydra_attribute_names.include?(name.to_s)
                 relation, name = relation.clone, name.to_s
+                relation.hydra_attributes    << name
                 relation.hydra_joins_aliases << hydra_helper.ref_alias(name, value)
                 relation.joins_values += hydra_helper.build_joins(name, value)
                 relation.where_values += build_where(hydra_helper.where_options(name, value))
@@ -56,6 +57,11 @@ module HydraAttribute
           if @hydra_select_values.any? or @select_values.any?
             @select_values << hydra_helper.prepend_table_name(klass.primary_key)
             @select_values << hydra_helper.prepend_table_name('hydra_set_id')
+          end
+
+          if hydra_attributes.any?
+            hydra_sets = klass.hydra_sets.select { |hydra_set| hydra_set.hydra_attributes.any? { |attr| attr.name.in?(hydra_attributes) } }
+            @where_values << table[:hydra_set_id].in(hydra_sets.map(&:id)).or(table[:hydra_set_id].eq(nil))
           end
 
           super

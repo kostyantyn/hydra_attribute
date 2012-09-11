@@ -68,3 +68,48 @@ Feature: hydra attribute where conditions
       | field | value |
       | code  | 2     |
       | code  | 3     |
+
+  Scenario: select entity if it has attribute in attribute set
+    Given  create hydra set "Default" for "Product"
+    And set hydra attributes "[array:code,title]" to hydra set "Default" for entity "Product"
+    And create "Product" models with attributes as "hashes":
+      | hydra_set_id                           | code | title |
+      |                                        | abc1 | book  |
+      | [eval:Product.hydra_set('Default').id] | abc2 | book  |
+    When filter "Product" by:
+      | field | value |
+      | title | book  |
+    Then total records should be "2"
+    And records should have the following attributes:
+      | field | value |
+      | code  | abc1  |
+      | code  | abc2  |
+
+  Scenario: when filter attribute by nil value then entities without this attribute in attribute set should not be selected
+    Given create hydra set "Default" for "Product"
+    And create "Product" model
+    And create "Product" model with attributes as "rows_hash":
+      | hydra_set_id | [eval:Product.hydra_set('Default').id] |
+    When filter "Product" by:
+      | field | value  |
+      | code  | [nil:] |
+    Then total records should be "1"
+    And records should have the following attributes:
+      | field        | value  |
+      | hydra_set_id | [nil:] |
+
+  Scenario: when filter attribute by value then entities which don't have this attribute in attribute set any more should not be selected
+    Given create hydra set "Default" for "Product"
+    And add hydra attribute "code" to hydra set "Default" for entity "Product"
+    And create "Product" models with attributes as "hashes":
+      | hydra_set_id                           | code |
+      |                                        | abc  |
+      | [eval:Product.hydra_set('Default').id] | abc  |
+    And set hydra attributes "title" to hydra set "Default" for entity "Product"
+    When filter "Product" by:
+      | field | value |
+      | code  | abc   |
+    Then total records should be "1"
+    And records should have the following attributes:
+      | field        | value  |
+      | hydra_set_id | [nil:] |
