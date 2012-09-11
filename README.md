@@ -3,7 +3,7 @@
 [Wiki](https://github.com/kostyantyn/hydra_attribute/wiki) | [RDoc](http://rdoc.info/github/kostyantyn/hydra_attribute)
 
 hydra_attribute is an implementation of
-[EAV (Entity-Attribute-Value) pattern](http://en.wikipedia.org/wiki/Entity–attribute–value_model) for ActiveRecord models.
+[EAV (Entity-Attribute-Value) pattern](http://en.wikipedia.org/wiki/Entity–attribute–value_model) for ActiveRecord models. It allows to create or remove attributes in runtime. Also each record may have different sets of attributes, for example: Product with ID 1 can have different set of attributes than Product with ID 2.
 
 ## Requirements
 * ruby >= 1.9.2
