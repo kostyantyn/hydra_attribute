@@ -37,7 +37,7 @@ class CreateHydraAttributeTables < ActiveRecord::Migration
 end
 ```
 
-**or if we have already the entity table**
+**or if we have the entity table already**
 
 ```ruby    
 class CreateHydraAttributeTables < ActiveRecord::Migration
@@ -59,14 +59,7 @@ rails generate model Product type:string name:string --migration=false
 rake db:migrate
 ```
 
-and add `use_hydra_attributes` to Product class
-```ruby
-class Product < ActiveRecord::Base
-  use_hydra_attributes
-end
-```
-
-**Starting from version 0.4.0 `use_hydra_attributes` method will be removed.**
+and include `HydraAttribute::ActiveRecord` to Product class
 ```ruby
 class Product < ActiveRecord::Base
   include HydraAttribute::ActiveRecord
@@ -81,10 +74,10 @@ Product.hydra_attributes.create(name: 'total', backend_type: 'integer', default_
 ```
 
 Creating method accepts the following options:
-* **name**. The **required** parameter. Allowed any string.   
-* **backend_type**. The **required** parameter. Allowed one of the following strings: `string`, `text`, `integer`, `float`, `boolean` and `datetime`.
-* **default_value**. The **optional** parameter. Allowed any value. By default is `nil`.
-* **white_list**. The **optional** parameter. Should be `true` or `flase`. By defauls is `false`. if pass `white_list: true` this attribute will be added to white list and will be allowed for mass-assignment. This parameter is in black list for creation by default so if you want to pass it, you have to pass the role `as: :admin` too.
+* **name**. The **required** parameter. Any string is allowed.   
+* **backend_type**. The **required** parameter. One of the following strings is allowed: `string`, `text`, `integer`, `float`, `boolean` and `datetime`.
+* **default_value**. The **optional** parameter. Any value is allowed. `nil` is default.
+* **white_list**. The **optional** parameter. Should be `true` or `flase`. `false` is default. If `white_list: true` is passed, this attribute will be added to white list and will be allowed for mass-assignment. This parameter is in black list for creation by default so if you want to pass it, you have to pass the role `as: :admin` too.
 
   ```ruby
     Product.hydra_attributes.create({name: 'title', backend_type: 'string', white_list: true}, as: :admin)
@@ -108,7 +101,7 @@ Product.create(title: 'car', price: 2.50)
 ```
 
 ### Create hydra set
-**Hydra set** allows set unique attribute list for each entity.
+**Hydra set** allows to set the unique attribute list for each entity.
 
 ```ruby
 hydra_set = Product.hydra_sets.create(name: 'Default')
@@ -119,7 +112,7 @@ Product.create(color: 'black', title: 'ipod', price: 49.95, total: 5) do |produc
 end
 #<Product id: 5, hydra_set_id: 1, created_at: ..., updated_at: ..., color: "black", title: "ipod", price: 49.95>
 ```
-**Notice:** the `total` attribute was skipped because it doesn't exist in hydra set.
+**Notice:** the `total` attribute has been skipped because it doesn't exist in hydra set.
 
 ### Obtain data
 ```ruby
@@ -131,8 +124,7 @@ Product.where(color: 'green', price: nil)
     #<Product id: 3, hydra_set_id: nil, created_at: ..., updated_at: ..., color: "green", title: "book", price: 0.0, total: 2>
 # ]
 ```
-**Notice**: the attribute `price` was added in runtime and records that were created before have not this attribute
-so they matched this condition `where(price: nil)`
+**Notice**: the attribute `price` has been added in runtime. Records that had been created before this attribute don't have it therefore they satisfy the following condition: `where(price: nil)`
 
 ### Order data
 ```ruby
@@ -153,7 +145,7 @@ Product.select([:color, :title])
     #<Product id: 5, hydra_set_id: 1, color: "black", title: "ipod">
 # ] 
 ```
-**Notice:** `id` and `hydra_set_id` attributes are forced added because they are important for correct work.
+**Notice:** `id` and `hydra_set_id` attributes are forcibly added because they are important for correct work.
 
 ### Group by attribute
 ```ruby
@@ -171,8 +163,7 @@ Product.group(:color).count
 
 ## Notice
 
-The each new minor version doesn't guarantee back compatibility with previous one 
-until the first major version will be released. 
+The each new minor version doesn't guarantee back compatibility with previous one until the first major version is released. 
 
 ## Contributing
 
