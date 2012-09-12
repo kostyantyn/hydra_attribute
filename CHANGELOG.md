@@ -1,3 +1,8 @@
+**0.4.0 (September 13, 2012)**
+* Add attribute sets
+* Add helper methods for attributes and attribute sets
+* Remove `use_hydra_attributes` method from `ActiveRecord::Base`. Module `HydraAttribute::ActiveRecord` should be included instead
+
 **0.3.2 (July 31, 2012)**
 * Add `white_list` option which allows to add attribute to white list for entity during creation
 
