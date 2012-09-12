@@ -160,6 +160,7 @@ Product.group(:color).count
 * [Query methods](https://github.com/kostyantyn/hydra_attribute/wiki/Query-methods)
 * [Database schema](https://github.com/kostyantyn/hydra_attribute/wiki/Database-schema)
 * [Helper methods](https://github.com/kostyantyn/hydra_attribute/wiki/Helper-methods)
+* [Migrate from 0.3.2 to 0.4.0](https://github.com/kostyantyn/hydra_attribute/wiki/Migrate-from-0.3.2-to-0.4.0) 
 
 ## Notice
 
