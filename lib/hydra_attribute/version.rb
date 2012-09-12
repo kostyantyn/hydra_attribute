@@ -1,3 +1,3 @@
 module HydraAttribute
-  VERSION = '0.4.0.rc2'
+  VERSION = '0.4.0'
 end
