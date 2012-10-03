@@ -1,3 +1,6 @@
+**0.4.1 (October 3, 2012)**
+* Fixed bug which din't allow to use hydra attributes for STI models
+
 **0.4.0 (September 13, 2012)**
 * Add attribute sets
 * Add helper methods for attributes and attribute sets
