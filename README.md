@@ -55,7 +55,7 @@ end
 
 ### Create model
 ```shell
-rails generate model Product type:string name:string --migration=false
+rails generate model Product --migration=false
 rake db:migrate
 ```
 
