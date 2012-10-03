@@ -14,22 +14,22 @@ module HydraAttribute
 
       module ClassMethods
         def hydra_attribute_methods_generated?
-          @hydra_attribute_methods_generated ||= false
+          base_class.instance_variable_get(:@hydra_attribute_methods_generated) || base_class.instance_variable_set(:@hydra_attribute_methods_generated, false)
         end
 
         def generated_hydra_attribute_methods
-          @generated_hydra_attribute_methods ||= begin
-            mod = Module.new
-            include mod
-            mod
-          end
+          return base_class.instance_variable_get(:@generated_hydra_attribute_methods) if base_class.instance_variable_defined?(:@generated_hydra_attribute_methods)
+
+          mod = Module.new
+          base_class.send(:include, mod)
+          base_class.instance_variable_set(:@generated_hydra_attribute_methods, mod)
         end
 
         def define_hydra_attribute_methods
-          @hydra_attribute_methods_mutex.synchronize do
+          base_class.instance_variable_get(:@hydra_attribute_methods_mutex).synchronize do
             return if hydra_attribute_methods_generated?
             hydra_attributes.each { |hydra_attribute| define_hydra_attribute_method(hydra_attribute) }
-            @hydra_attribute_methods_generated = true
+            base_class.instance_variable_set(:@hydra_attribute_methods_generated, true)
           end
         end
 
@@ -70,7 +70,7 @@ module HydraAttribute
           generated_hydra_attribute_methods.module_eval do
             instance_methods.each { |m| undef_method(m) }
           end
-          @hydra_attribute_methods_generated = false
+          base_class.instance_variable_set(:@hydra_attribute_methods_generated, false)
 
           clear_hydra_method_cache!
         end
