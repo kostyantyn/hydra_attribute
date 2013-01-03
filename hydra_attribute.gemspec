@@ -14,7 +14,7 @@ Gem::Specification.new do |gem|
   gem.required_ruby_version = Gem::Requirement.new('>= 1.9.2')
   gem.version               = HydraAttribute::VERSION
 
-  gem.add_dependency('activerecord', '>= 3.1.0')
+  gem.add_dependency('activerecord', '~> 3.1')
 
   gem.add_development_dependency('rspec')
   gem.add_development_dependency('cucumber')
