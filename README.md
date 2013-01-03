@@ -5,9 +5,14 @@
 hydra_attribute is an implementation of
 [EAV (Entity-Attribute-Value) pattern](http://en.wikipedia.org/wiki/Entity–attribute–value_model) for ActiveRecord models. It allows to create or remove attributes in runtime. Also each record may have different sets of attributes, for example: Product with ID 1 can have different set of attributes than Product with ID 2.
 
+## Notice
+Until the first major version is released:
+* each new minor version doesn't guarantee back compatibility with previous one
+* gem isn't stable enough for using in production
+
 ## Requirements
 * ruby >= 1.9.2
-* active_record >= 3.1
+* active_record ~> 3.1
 
 ## Installation
 
@@ -161,10 +166,6 @@ Product.group(:color).count
 * [Database schema](https://github.com/kostyantyn/hydra_attribute/wiki/Database-schema)
 * [Helper methods](https://github.com/kostyantyn/hydra_attribute/wiki/Helper-methods)
 * [Migrate from 0.3.2 to 0.4.0](https://github.com/kostyantyn/hydra_attribute/wiki/Migrate-from-0.3.2-to-0.4.0) 
-
-## Notice
-
-The each new minor version doesn't guarantee back compatibility with previous one until the first major version is released. 
 
 ## Contributing
 
