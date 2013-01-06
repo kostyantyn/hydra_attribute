@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe HydraAttribute::HydraMethods do
+describe HydraAttribute::HydraEntity do
   describe '.hydra_set_attributes' do
     let!(:hydra_set)        { Product.hydra_sets.create(name: 'Default') }
     let!(:hydra_attribute1) { hydra_set.hydra_attributes.create(name: 'a', backend_type: 'string') }

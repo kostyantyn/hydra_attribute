@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe HydraAttribute::HydraAttributeMethods do
+describe HydraAttribute::HydraEntity::AttributeMethods do
   describe '.hydra_attributes' do
     it 'should return blank array if there are not any hydra attributes for entity' do
       Product.hydra_attributes.should be_blank

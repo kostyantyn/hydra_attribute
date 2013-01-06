@@ -1,13 +1,15 @@
+require 'hydra_attribute/hydra_entity/callbacks'
+require 'hydra_attribute/hydra_entity/attribute_methods'
+
 module HydraAttribute
 
-  # @see HydraAttribute::HydraMethods::ClassMethods ClassMethods for additional documentation
-  module HydraMethods
+  # @see HydraAttribute::HydraEntity::ClassMethods ClassMethods for additional documentation
+  module HydraEntity
     extend ActiveSupport::Concern
     extend Memoizable
 
-    include HydraSetMethods
-    include HydraAttributeMethods
-    include HydraValueMethods
+    include AttributeMethods
+    include Callbacks
 
     included do
       alias_method_chain :write_attribute, :hydra_set_id

@@ -3,8 +3,6 @@ module HydraAttribute
     module AttributeMethods
       extend ActiveSupport::Concern
 
-      include HydraMethods
-
       NAME_COMPILABLE_REGEXP = /\A[a-zA-Z_]\w*[!?=]?\z/
       CALL_COMPILABLE_REGEXP = /\A[a-zA-Z_]\w*[!?]?\z/
 

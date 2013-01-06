@@ -4,9 +4,9 @@ module HydraAttribute
 
     def initialize(klass)
       [
+        HydraEntity,
         ActiveRecord::Scoping,
         ActiveRecord::AttributeMethods,
-        EntityCallbacks
       ].each do |m|
         klass.send :include, m
       end

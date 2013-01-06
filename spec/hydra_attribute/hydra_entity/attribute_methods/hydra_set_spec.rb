@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe HydraAttribute::HydraSetMethods do
+describe HydraAttribute::HydraEntity::AttributeMethods::HydraSet do
   describe '.hydra_sets' do
     it 'should return blank array if there are not any hydra sets for entity' do
       Product.hydra_sets.should be_blank
