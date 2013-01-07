@@ -170,23 +170,7 @@ module HydraAttribute
     #
     # @return [ActiveRecord::ConnectionAdapters::Column]
     def column
-      @column ||= column_class.new(name, attributes[:value], backend_type)
-    end
-
-    # TODO cache column class in entity model
-    def column_class
-      @column_class ||= case connection
-      when ::ActiveRecord::ConnectionAdapters::Mysql2Adapter
-        ::ActiveRecord::ConnectionAdapters::Mysql2Adapter::Column
-      when ::ActiveRecord::ConnectionAdapters::MysqlAdapter
-        ::ActiveRecord::ConnectionAdapters::MysqlAdapter::Column
-      when ::ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
-        ::ActiveRecord::ConnectionAdapters::PostgreSQLColumn
-      when ::ActiveRecord::ConnectionAdapters::SQLiteAdapter
-        ::ActiveRecord::ConnectionAdapters::SQLiteColumn
-      else
-        ::ActiveRecord::ConnectionAdapters::Column
-      end
+      @column ||= ::ActiveRecord::ConnectionAdapters::Column.new(name, attributes[:value], backend_type)
     end
 
     private
