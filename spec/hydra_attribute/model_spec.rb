@@ -43,7 +43,7 @@ describe HydraAttribute::Model do
     end
 
     it 'should return array of models if table has records' do
-      query  = 'INSERT INTO custom_products(name, price, quantity) '
+      query  = 'INSERT INTO custom_products (name, price, quantity) '
       query += 'VALUES ("one", 2.5, 5), ("two", 3.5, 6)'
       ActiveRecord::Base.connection.exec_query(query)
 
@@ -68,7 +68,7 @@ describe HydraAttribute::Model do
     end
 
     it 'should return model if record exists' do
-      query  = 'INSERT INTO custom_products(id, name, price, quantity) '
+      query  = 'INSERT INTO custom_products (id, name, price, quantity) '
       query += 'VALUES (1, "book", 2.2, 3)'
       ActiveRecord::Base.connection.exec_query(query)
 
@@ -90,7 +90,7 @@ describe HydraAttribute::Model do
 
     describe 'table has records' do
       before(:each) do
-        query  = 'INSERT INTO custom_products(id, name, price, quantity) '
+        query  = 'INSERT INTO custom_products (id, name, price, quantity) '
         query += 'VALUES (1, "one", 1.1, 2), (2, "two", 2.2, 2), (3, "three", 3.3, 4)'
         ActiveRecord::Base.connection.exec_query(query)
       end
@@ -150,7 +150,7 @@ describe HydraAttribute::Model do
 
   describe '.update' do
     it 'should update record by its ID' do
-      query  = 'INSERT INTO custom_products(id, name, price, quantity) '
+      query  = 'INSERT INTO custom_products (id, name, price, quantity) '
       query += 'VALUES (1, "one", 1.1, 2)'
       ActiveRecord::Base.connection.exec_query(query)
 

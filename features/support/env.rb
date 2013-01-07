@@ -1,6 +1,5 @@
 require 'active_record'
 require 'hydra_attribute'
-require 'database_cleaner'
 
 ActiveSupport.on_load(:active_record) do
   self.default_timezone = :utc
@@ -12,7 +11,6 @@ ActiveSupport.on_load(:active_record) do
 end
 
 ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')
-DatabaseCleaner.strategy = :truncation
 
 class Migration < ActiveRecord::Migration
   def up
@@ -30,9 +28,13 @@ Migration.new.up
 
 Before do
   redefine_hydra_entity('Product')
-  DatabaseCleaner.start
 end
 
 After do
-  DatabaseCleaner.clean
+  ActiveRecord::Base.connection_pool.connections.each do |connection|
+    (connection.tables - %w[schema_migrations]).each do |table_name|
+      connection.exec_query("DELETE FROM #{table_name}")
+      connection.exec_query("DELETE FROM sqlite_sequence WHERE name='#{table_name}'") # SQLite
+    end
+  end
 end
