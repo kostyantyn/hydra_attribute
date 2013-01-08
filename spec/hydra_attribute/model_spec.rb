@@ -43,9 +43,11 @@ describe HydraAttribute::Model do
     end
 
     it 'should return array of models if table has records' do
-      query  = 'INSERT INTO custom_products (name, price, quantity) '
-      query += 'VALUES ("one", 2.5, 5), ("two", 3.5, 6)'
-      ActiveRecord::Base.connection.exec_query(query)
+      q1 = %[INSERT INTO "custom_products" ("name", "price", "quantity") VALUES ('one', 2.5, 5)]
+      q2 = %[INSERT INTO "custom_products" ("name", "price", "quantity") VALUES ('two', 3.5, 6)]
+
+      ActiveRecord::Base.connection.exec_query(q1)
+      ActiveRecord::Base.connection.exec_query(q2)
 
       all = CustomProduct.all
       all.should have(2).items
@@ -68,9 +70,8 @@ describe HydraAttribute::Model do
     end
 
     it 'should return model if record exists' do
-      query  = 'INSERT INTO custom_products (id, name, price, quantity) '
-      query += 'VALUES (1, "book", 2.2, 3)'
-      ActiveRecord::Base.connection.exec_query(query)
+      q1 = %[INSERT INTO "custom_products" ("id", "name", "price", "quantity") VALUES (1, 'book', 2.2, 3)]
+      ActiveRecord::Base.connection.exec_query(q1)
 
       model = CustomProduct.find(1)
       model.should be_a_kind_of(CustomProduct)
@@ -90,9 +91,13 @@ describe HydraAttribute::Model do
 
     describe 'table has records' do
       before(:each) do
-        query  = 'INSERT INTO custom_products (id, name, price, quantity) '
-        query += 'VALUES (1, "one", 1.1, 2), (2, "two", 2.2, 2), (3, "three", 3.3, 4)'
-        ActiveRecord::Base.connection.exec_query(query)
+        q1 = %[INSERT INTO "custom_products" ("id", "name", "price", "quantity") VALUES (1, 'one', 1.1, 2)]
+        q2 = %[INSERT INTO "custom_products" ("id", "name", "price", "quantity") VALUES (2, 'two', 2.2, 2)]
+        q3 = %[INSERT INTO "custom_products" ("id", "name", "price", "quantity") VALUES (3, 'three', 3.3, 4)]
+
+        ActiveRecord::Base.connection.exec_query(q1)
+        ActiveRecord::Base.connection.exec_query(q2)
+        ActiveRecord::Base.connection.exec_query(q3)
       end
 
       it 'should return blank array if records do not match condition' do
@@ -140,7 +145,7 @@ describe HydraAttribute::Model do
   describe '.create' do
     it 'should create record and return ID of this record' do
       id     = CustomProduct.create(name: 'apple', price: 2.50, quantity: 5)
-      result = ActiveRecord::Base.connection.select_one("SELECT * FROM custom_products WHERE id=#{id}")
+      result = ActiveRecord::Base.connection.select_one(%[SELECT * FROM "custom_products" WHERE id=#{id}])
 
       result['name'].should     == 'apple'
       result['price'].should    == 2.50
@@ -150,13 +155,12 @@ describe HydraAttribute::Model do
 
   describe '.update' do
     it 'should update record by its ID' do
-      query  = 'INSERT INTO custom_products (id, name, price, quantity) '
-      query += 'VALUES (1, "one", 1.1, 2)'
-      ActiveRecord::Base.connection.exec_query(query)
+      q = %[INSERT INTO "custom_products" ("id", "name", "price", "quantity") VALUES (1, 'one', 1.1, 2)]
+      ActiveRecord::Base.connection.exec_query(q)
 
       CustomProduct.update(1, name: 'book', price: 2.5)
 
-      result = ActiveRecord::Base.connection.select_one('SELECT * FROM custom_products WHERE id=1')
+      result = ActiveRecord::Base.connection.select_one(%[SELECT * FROM "custom_products" WHERE id=1])
       result['id'].should       == 1
       result['name'].should     == 'book'
       result['price'].should    == 2.5
