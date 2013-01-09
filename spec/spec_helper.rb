@@ -44,6 +44,7 @@ end
 
 RSpec.configure do |config|
   config.before do
+    Thread.current[:hydra_attribute] = nil
     redefine_hydra_entity('Product')
   end
 

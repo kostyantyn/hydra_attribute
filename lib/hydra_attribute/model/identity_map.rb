@@ -27,7 +27,7 @@ module HydraAttribute
         # @yield
         # @return [Object]
         def cache(key, value = nil, &block)
-          indentity_map.cache(key, value, &block)
+          identity_map.cache(key, value, &block)
         end
       end
     end
