@@ -16,6 +16,36 @@ describe HydraAttribute::Model do
     Object.send(:remove_const, 'CustomProduct')
   end
 
+  describe '.define_attribute_methods' do
+    before do
+      ::ActiveRecord::Base.connection.create_table(:example_products) do |t|
+        t.string  :title
+        t.float   :price
+        t.integer :count
+      end
+      Object.const_set('ExampleProduct', Class.new)
+      ExampleProduct.send(:include, HydraAttribute::Model)
+    end
+
+    after do
+      ::ActiveRecord::Base.connection.drop_table(:example_products)
+      Object.send(:remove_const, 'ExampleProduct')
+    end
+
+    it 'should generate attribute setter and getter' do
+      methods = [:title, :title=, :price, :price=, :count, :count=]
+      methods.each do |method|
+        ExampleProduct.method_defined?(method).should be_false
+      end
+
+      ExampleProduct.define_attribute_methods
+
+      methods.each do |method|
+        ExampleProduct.method_defined?(method).should be_true
+      end
+    end
+  end
+
   describe '.connection' do
     it 'should return database adapter object' do
       CustomProduct.connection.should == ActiveRecord::Base.connection
@@ -165,6 +195,77 @@ describe HydraAttribute::Model do
       result['name'].should     == 'book'
       result['price'].should    == 2.5
       result['quantity'].should == 2
+    end
+  end
+
+  describe '#attributes' do
+    it 'should return all attributes' do
+      product = CustomProduct.new(name: 'a', price: 2)
+      product.attributes.should == {name: 'a', price: 2}
+    end
+  end
+
+  describe '#persisted?' do
+    it 'should return true if ID exists' do
+      product = CustomProduct.new(id: 1)
+      product.should be_persisted
+    end
+
+    it 'should return false if ID does not exist' do
+      product = CustomProduct.new
+      product.should_not be_persisted
+    end
+
+    it 'should return false if ID exists but it is blank' do
+      product = CustomProduct.new(id: nil)
+      product.should_not be_persisted
+
+      product = CustomProduct.new(id: '')
+      product.should_not be_persisted
+    end
+  end
+
+  describe 'auto generated attribute methods' do
+    before do
+      ::ActiveRecord::Base.connection.create_table(:example_products) do |t|
+        t.string  :title
+        t.float   :price
+        t.integer :count
+      end
+      Object.const_set('ExampleProduct', Class.new)
+      ExampleProduct.send(:include, HydraAttribute::Model)
+    end
+
+    after do
+      ::ActiveRecord::Base.connection.drop_table(:example_products)
+      Object.send(:remove_const, 'ExampleProduct')
+    end
+
+    it 'should respond to attribute methods' do
+      ExampleProduct.new.should respond_to(:title)
+      ExampleProduct.new.should respond_to(:title=)
+      ExampleProduct.new.should respond_to(:price)
+      ExampleProduct.new.should respond_to(:price=)
+      ExampleProduct.new.should respond_to(:count)
+      ExampleProduct.new.should respond_to(:count=)
+    end
+
+    it 'should get values from attributes' do
+      product = ExampleProduct.new(title: 'a', price: 2, count: 3)
+      product.title.should == 'a'
+      product.price.should == 2
+      product.count.should == 3
+    end
+
+    it 'should set values to attributes' do
+      product = ExampleProduct.new
+      product.title = 'b'
+      product.price = 3
+      product.count = 4
+
+      product.title.should == 'b'
+      product.price.should == 3
+      product.count.should == 4
     end
   end
 end

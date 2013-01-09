@@ -6,11 +6,52 @@ module HydraAttribute
 
     included do
       include IdentityMap
-
-      attr_reader :attributes
     end
 
     module ClassMethods
+      # Creates +Mutex+ object
+      #
+      # @return [Mutex]
+      def attribute_methods_mutex
+        @attribute_methods_mutex ||= Mutex.new
+      end
+
+      # Holds generated attribute methods status
+      #
+      # @return [TrueClass, FalseClass]
+      def generated_attribute_methods?
+        @generated_attribute_methods ||= false
+      end
+
+      # Define attribute methods based on column names
+      #
+      # @return [NilClass]
+      def define_attribute_methods
+        attribute_methods_mutex.synchronize do
+          return if generated_attribute_methods?
+          column_names.each do |column_name|
+            define_attribute_method(column_name)
+          end
+          @generated_attribute_methods = true
+        end
+      end
+
+      # Defines attribute getter and setter
+      #
+      # @param [String] column_name
+      # @return [NilClass]
+      def define_attribute_method(column_name)
+        class_eval <<-EOS, __FILE__, __LINE__ + 1
+          def #{column_name}                    # def name
+            attributes[:#{column_name}]         #   attributes[:name]
+          end                                   # end
+
+          def #{column_name}=(value)            # def name=(value)
+            attributes[:#{column_name}] = value #   attributes[:name] = value
+          end                                   # end
+        EOS
+      end
+
       # Returns database adapter
       #
       # @return [ActiveRecord::ConnectionAdapters::AbstractAdapter]
@@ -23,6 +64,20 @@ module HydraAttribute
       # @return [String]
       def table_name
         @table_name ||= name.tableize
+      end
+
+      # Returns table columns
+      #
+      # @return [Array<ActiveRecord::ConnectionAdapters::Column>]
+      def columns
+        connection.schema_cache.columns[table_name]
+      end
+
+      # Returns column names
+      #
+      # @return [Array<String>]
+      def column_names
+        @column_names ||= columns.map(&:name)
       end
 
       # Returns arel table
@@ -147,19 +202,11 @@ module HydraAttribute
       @attributes = attributes
     end
 
-    # Returns model ID
+    # Return all attributes
     #
-    # @return [Integer, NilClass]
-    def id
-      attributes[:id]
-    end
-
-    # Sets model ID
-    #
-    # @param [Integer] new_id
-    # @return [Integer]
-    def id=(new_id)
-      attributes[:id] = new_id
+    # @return [Hash]
+    def attributes
+      @attributes
     end
 
     # Checks if model is saved in database
@@ -168,5 +215,35 @@ module HydraAttribute
     def persisted?
       id.present?
     end
+
+    # Redefines base method because attribute methods define dynamically
+    #
+    # @param [Symbol] method
+    # @param [FalseClass, TrueClass] include_private
+    # @return [FalseClass, TrueClass]
+    def respond_to?(method, include_private = false)
+      self.class.define_attribute_methods unless self.class.generated_attribute_methods?
+      super
+    end
+
+    private
+      # Redefine method for auto generation attribute methods
+      #
+      # @param [Symbol] symbol
+      # @params[Array] args
+      # @yield
+      # @return [Object]
+      def method_missing(symbol, *args, &block)
+        if self.class.generated_attribute_methods?
+          super
+        else
+          self.class.define_attribute_methods
+          if respond_to?(symbol)
+            send(symbol, *args, &block)
+          else
+            super
+          end
+        end
+      end
   end
 end
