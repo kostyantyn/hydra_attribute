@@ -216,6 +216,19 @@ module HydraAttribute
       id.present?
     end
 
+    # Saves model
+    # If model is persisted, update it otherwise create it.
+    #
+    # @return [TrueClass]
+    def save
+      if persisted?
+        self.class.update(id, attributes.except(:id))
+      else
+        self.id = self.class.create(attributes)
+      end
+      true
+    end
+
     # Redefines base method because attribute methods define dynamically
     #
     # @param [Symbol] method

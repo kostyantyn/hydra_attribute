@@ -225,6 +225,33 @@ describe HydraAttribute::Model do
     end
   end
 
+  describe '#save' do
+    it 'should create record if id does not exist' do
+      product = CustomProduct.new(name: 'my name', price: 2.50, quantity: 4)
+      product.save
+      product.id.should_not be_nil
+
+      results = ActiveRecord::Base.connection.select_one("SELECT * FROM custom_products WHERE id=#{product.id}")
+      results['id'].should       == product.id
+      results['name'].should     == 'my name'
+      results['price'].should    == 2.50
+      results['quantity'].should == 4
+    end
+
+    it 'should update record if id exists' do
+      ActiveRecord::Base.connection.insert('INSERT INTO custom_products(id, name, price, quantity) VALUES (1, "book", 35.5, 6)')
+
+      product = CustomProduct.new(id: 1, name: 'book 2', price: 45.7, quantity: 10)
+      product.save
+
+      results = ActiveRecord::Base.connection.select_one("SELECT * FROM custom_products WHERE id=#{product.id}")
+      results['id'].should       == product.id
+      results['name'].should     == 'book 2'
+      results['price'].should    == 45.7
+      results['quantity'].should == 10
+    end
+  end
+
   describe 'auto generated attribute methods' do
     before do
       ::ActiveRecord::Base.connection.create_table(:example_products) do |t|
