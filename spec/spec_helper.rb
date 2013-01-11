@@ -1,4 +1,3 @@
-require 'active_record'
 require 'hydra_attribute'
 
 ActiveSupport.on_load(:active_record) do

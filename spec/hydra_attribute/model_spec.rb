@@ -95,8 +95,10 @@ describe HydraAttribute::Model do
   end
 
   describe '.find' do
-    it 'should return nil if cannot find a record' do
-      CustomProduct.find(1).should be_nil
+    it 'should raise HydraAttribute::RecordNotFound if cannot find a record' do
+      lambda do
+        CustomProduct.find(1)
+      end.should raise_error(HydraAttribute::RecordNotFound, %q(Couldn't find CustomProduct with id=1))
     end
 
     it 'should return model if record exists' do

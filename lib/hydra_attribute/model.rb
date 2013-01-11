@@ -1,7 +1,11 @@
+require 'active_record/errors'
 require 'hydra_attribute/model/identity_map'
 require 'hydra_attribute/model/mediator'
 
 module HydraAttribute
+  class RecordNotFound < ::ActiveRecord::RecordNotFound
+  end
+
   module Model
     extend ActiveSupport::Concern
 
@@ -102,7 +106,8 @@ module HydraAttribute
       # @return [HydraAttribute::Model]
       def find(id)
         result = connection.select_one(compile_select({id: id}, Arel.star, 1))
-        new(result) if result
+        raise RecordNotFound, "Couldn't find #{self.name} with id=#{id}" unless result
+        new(result)
       end
 
       # Finds records with where filter
