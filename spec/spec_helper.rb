@@ -55,5 +55,7 @@ RSpec.configure do |config|
         connection.exec_query("DELETE FROM sqlite_sequence WHERE name='#{table_name}'") # SQLite
       end
     end
+
+    HydraAttribute::Model::Mediator.instance_variable_set(:@subscriptions, nil)
   end
 end

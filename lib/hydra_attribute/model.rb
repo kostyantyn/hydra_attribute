@@ -1,4 +1,5 @@
 require 'hydra_attribute/model/identity_map'
+require 'hydra_attribute/model/mediator'
 
 module HydraAttribute
   module Model
@@ -6,6 +7,7 @@ module HydraAttribute
 
     included do
       include IdentityMap
+      include Mediator
     end
 
     module ClassMethods
