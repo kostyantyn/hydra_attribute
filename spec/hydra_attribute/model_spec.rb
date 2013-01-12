@@ -228,60 +228,86 @@ describe HydraAttribute::Model do
   end
 
   describe '#save' do
-    it 'should create blank record' do
-      product = CustomProduct.new
-      product.save
-      product.id.should_not be_nil
-      ActiveRecord::Base.connection.select_value("SELECT COUNT(*) FROM custom_products WHERE id=#{product.id}").should be(1)
-    end
-
-    it 'should create record with several fields' do
-      product = CustomProduct.new(name: 'my name', price: 2.50, quantity: 4)
-      product.save
-      product.id.should_not be_nil
-
-      results = ActiveRecord::Base.connection.select_one("SELECT * FROM custom_products WHERE id=#{product.id}")
-      results['id'].should       == product.id
-      results['name'].should     == 'my name'
-      results['price'].should    == 2.50
-      results['quantity'].should == 4
-    end
-
-    it 'should not commit insert query if error was raised during saving' do
-      Class.new do
-        include HydraAttribute::Model::Mediator
-        observe 'CustomProduct', after_create: :after_create
-        def self.after_create(*) raise Exception, 'Testing rollback' end
+    describe 'create' do
+      it 'should create blank record' do
+        product = CustomProduct.new
+        product.save
+        product.id.should_not be_nil
+        ActiveRecord::Base.connection.select_value("SELECT COUNT(*) FROM custom_products WHERE id=#{product.id}").should be(1)
       end
 
-      lambda { CustomProduct.new.save }.should raise_error(Exception, 'Testing rollback')
-      CustomProduct.connection.select_value('SELECT COUNT(*) FROM custom_products').should be(0)
-    end
+      it 'should create record with several fields' do
+        product = CustomProduct.new(name: 'my name', price: 2.50, quantity: 4)
+        product.save
+        product.id.should_not be_nil
 
-    it 'should update record if id exists' do
-      ActiveRecord::Base.connection.insert('INSERT INTO custom_products(id, name, price, quantity) VALUES (1, "book", 35.5, 6)')
-
-      product = CustomProduct.new(id: 1, name: 'book 2', price: 45.7, quantity: 10)
-      product.save
-
-      results = ActiveRecord::Base.connection.select_one("SELECT * FROM custom_products WHERE id=#{product.id}")
-      results['id'].should       == product.id
-      results['name'].should     == 'book 2'
-      results['price'].should    == 45.7
-      results['quantity'].should == 10
-    end
-
-    it 'should not update record if error was raised during saving' do
-      ActiveRecord::Base.connection.insert('INSERT INTO custom_products(id, name, price, quantity) VALUES (1, "book", 35.5, 6)')
-
-      Class.new do
-        include HydraAttribute::Model::Mediator
-        observe 'CustomProduct', after_update: :after_update
-        def self.after_update(*) raise Exception, 'Testing rollback' end
+        results = ActiveRecord::Base.connection.select_one("SELECT * FROM custom_products WHERE id=#{product.id}")
+        results['id'].should       == product.id
+        results['name'].should     == 'my name'
+        results['price'].should    == 2.50
+        results['quantity'].should == 4
       end
 
-      lambda { CustomProduct.new(id: 1, name: 'ball').save }.should raise_error(Exception, 'Testing rollback')
-      CustomProduct.connection.select_value("SELECT name FROM custom_products WHERE id=1").should == 'book'
+      it 'should not commit insert query if error was raised during saving' do
+        Class.new do
+          include HydraAttribute::Model::Mediator
+          observe 'CustomProduct', after_create: :after_create
+          def self.after_create(*) raise Exception, 'Testing rollback' end
+        end
+
+        lambda { CustomProduct.new.save }.should raise_error(Exception, 'Testing rollback')
+        CustomProduct.connection.select_value('SELECT COUNT(*) FROM custom_products').should be(0)
+      end
+    end
+
+    describe 'update' do
+      it 'should update record if id exists' do
+        ActiveRecord::Base.connection.insert('INSERT INTO custom_products(id, name, price, quantity) VALUES (1, "book", 35.5, 6)')
+
+        product = CustomProduct.new(id: 1, name: 'book 2', price: 45.7, quantity: 10)
+        product.save
+
+        results = ActiveRecord::Base.connection.select_one("SELECT * FROM custom_products WHERE id=#{product.id}")
+        results['id'].should       == product.id
+        results['name'].should     == 'book 2'
+        results['price'].should    == 45.7
+        results['quantity'].should == 10
+      end
+
+      it 'should not update record if error was raised during saving' do
+        ActiveRecord::Base.connection.insert('INSERT INTO custom_products(id, name, price, quantity) VALUES (1, "book", 35.5, 6)')
+
+        Class.new do
+          include HydraAttribute::Model::Mediator
+          observe 'CustomProduct', after_update: :after_update
+          def self.after_update(*) raise Exception, 'Testing rollback' end
+        end
+
+        lambda { CustomProduct.new(id: 1, name: 'ball').save }.should raise_error(Exception, 'Testing rollback')
+        CustomProduct.connection.select_value("SELECT name FROM custom_products WHERE id=1").should == 'book'
+      end
+    end
+  end
+
+  describe '#destroy' do
+    it 'should delete record from database' do
+      ActiveRecord::Base.connection.insert('INSERT INTO custom_products(id) VALUES (1)')
+      product = CustomProduct.new(id: 1)
+      product.destroy
+      ActiveRecord::Base.connection.select_value('SELECT COUNT(*) FROM custom_products WHERE id=1').should be(0)
+    end
+
+    it 'should not commit delete query if error was raised during destroying' do
+      Class.new do
+        include HydraAttribute::Model::Mediator
+        observe 'CustomProduct', after_destroy: :after_destroy
+        def self.after_destroy(*) raise Exception, 'Testing rollback' end
+      end
+
+      ActiveRecord::Base.connection.insert('INSERT INTO custom_products(id) VALUES (1)')
+      product = CustomProduct.new(id: 1)
+      lambda { product.destroy }.should raise_error(Exception, 'Testing rollback')
+      ActiveRecord::Base.connection.select_value('SELECT COUNT(*) FROM custom_products WHERE id=1').should be(1)
     end
   end
 
