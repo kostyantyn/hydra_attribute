@@ -68,7 +68,14 @@ module HydraAttribute
       # @param [Symbol] event
       # @return [NilClass]
       def notify(event)
-        Mediator.notify(self.class.name, event, self)
+        if block_given?
+          Mediator.notify(self.class.name, "before_#{event}".to_sym, self)
+          result = yield
+          Mediator.notify(self.class.name, "after_#{event}".to_sym, self)
+          result
+        else
+          Mediator.notify(self.class.name, event, self)
+        end
       end
     end
   end

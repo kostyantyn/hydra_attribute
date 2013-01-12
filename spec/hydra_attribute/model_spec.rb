@@ -83,14 +83,14 @@ describe HydraAttribute::Model do
       all.should have(2).items
 
       all[0].should be_a_kind_of(CustomProduct)
-      all[0].attributes['name'].should     == 'one'
-      all[0].attributes['price'].should    == 2.5
-      all[0].attributes['quantity'].should == 5
+      all[0].name.should     == 'one'
+      all[0].price.should    == 2.5
+      all[0].quantity.should == 5
 
       all[1].should be_a_kind_of(CustomProduct)
-      all[1].attributes['name'].should     == 'two'
-      all[1].attributes['price'].should    == 3.5
-      all[1].attributes['quantity'].should == 6
+      all[1].name.should     == 'two'
+      all[1].price.should    == 3.5
+      all[1].quantity.should == 6
     end
   end
 
@@ -107,10 +107,10 @@ describe HydraAttribute::Model do
 
       model = CustomProduct.find(1)
       model.should be_a_kind_of(CustomProduct)
-      model.attributes['id'].should       == 1
-      model.attributes['name'].should     == 'book'
-      model.attributes['price'].should    == 2.2
-      model.attributes['quantity'].should == 3
+      model.id.should       == 1
+      model.name.should     == 'book'
+      model.price.should    == 2.2
+      model.quantity.should == 3
     end
   end
 
@@ -139,45 +139,45 @@ describe HydraAttribute::Model do
       it 'should select records which match condition' do
         records = CustomProduct.where(quantity: 2, price: 2.2)
         records.should have(1).item
-        records[0].attributes['id'].should       == 2
-        records[0].attributes['name'].should     == 'two'
-        records[0].attributes['price'].should    == 2.2
-        records[0].attributes['quantity'].should == 2
+        records[0].id.should       == 2
+        records[0].name.should     == 'two'
+        records[0].price.should    == 2.2
+        records[0].quantity.should == 2
       end
 
       it 'should select certain columns' do
         records = CustomProduct.where({quantity: 2}, %w[id name])
         records.should have(2).items
 
-        records[0].attributes['id'].should       == 1
-        records[0].attributes['name'].should     == 'one'
-        records[0].attributes['price'].should    == nil
-        records[0].attributes['quantity'].should == nil
+        records[0].id.should       == 1
+        records[0].name.should     == 'one'
+        records[0].price.should    == nil
+        records[0].quantity.should == nil
 
-        records[1].attributes['id'].should       == 2
-        records[1].attributes['name'].should     == 'two'
-        records[1].attributes['price'].should    == nil
-        records[1].attributes['quantity'].should == nil
+        records[1].id.should       == 2
+        records[1].name.should     == 'two'
+        records[1].price.should    == nil
+        records[1].quantity.should == nil
       end
 
       it 'should limit records' do
         records = CustomProduct.where({}, 'id', 2)
         records.should have(2).times
-        records[0].attributes['id'].should == 1
+        records[0].id.should == 1
       end
 
       it 'should skip records' do
         records = CustomProduct.where({}, 'id', nil, 1)
         records.should have(2).times
-        records[0].attributes['id'].should == 2
+        records[0].id.should == 2
       end
     end
   end
 
   describe '.create' do
     it 'should create record and return ID of this record' do
-      id     = CustomProduct.create(name: 'apple', price: 2.50, quantity: 5)
-      result = ActiveRecord::Base.connection.select_one(%[SELECT * FROM "custom_products" WHERE id=#{id}])
+      model  = CustomProduct.create(name: 'apple', price: 2.50, quantity: 5)
+      result = ActiveRecord::Base.connection.select_one(%[SELECT * FROM "custom_products" WHERE id=#{model.id}])
 
       result['name'].should     == 'apple'
       result['price'].should    == 2.50
@@ -203,7 +203,7 @@ describe HydraAttribute::Model do
   describe '#attributes' do
     it 'should return all attributes' do
       product = CustomProduct.new(name: 'a', price: 2)
-      product.attributes.should == {name: 'a', price: 2}
+      product.attributes.should == {id: nil, name: 'a', price: 2, quantity: nil}
     end
   end
 
@@ -228,7 +228,14 @@ describe HydraAttribute::Model do
   end
 
   describe '#save' do
-    it 'should create record if id does not exist' do
+    it 'should create blank record' do
+      product = CustomProduct.new
+      product.save
+      product.id.should_not be_nil
+      ActiveRecord::Base.connection.select_value("SELECT COUNT(*) FROM custom_products WHERE id=#{product.id}").should be(1)
+    end
+
+    it 'should create record with several fields' do
       product = CustomProduct.new(name: 'my name', price: 2.50, quantity: 4)
       product.save
       product.id.should_not be_nil
@@ -238,6 +245,17 @@ describe HydraAttribute::Model do
       results['name'].should     == 'my name'
       results['price'].should    == 2.50
       results['quantity'].should == 4
+    end
+
+    it 'should not commit insert query if error was raised during saving' do
+      Class.new do
+        include HydraAttribute::Model::Mediator
+        observe 'CustomProduct', after_create: :after_create
+        def self.after_create(*) raise Exception, 'Testing rollback' end
+      end
+
+      lambda { CustomProduct.new.save }.should raise_error(Exception, 'Testing rollback')
+      CustomProduct.connection.select_value('SELECT COUNT(*) FROM custom_products').should be(0)
     end
 
     it 'should update record if id exists' do
@@ -251,6 +269,19 @@ describe HydraAttribute::Model do
       results['name'].should     == 'book 2'
       results['price'].should    == 45.7
       results['quantity'].should == 10
+    end
+
+    it 'should not update record if error was raised during saving' do
+      ActiveRecord::Base.connection.insert('INSERT INTO custom_products(id, name, price, quantity) VALUES (1, "book", 35.5, 6)')
+
+      Class.new do
+        include HydraAttribute::Model::Mediator
+        observe 'CustomProduct', after_update: :after_update
+        def self.after_update(*) raise Exception, 'Testing rollback' end
+      end
+
+      lambda { CustomProduct.new(id: 1, name: 'ball').save }.should raise_error(Exception, 'Testing rollback')
+      CustomProduct.connection.select_value("SELECT name FROM custom_products WHERE id=1").should == 'book'
     end
   end
 

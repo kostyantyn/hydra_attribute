@@ -86,6 +86,15 @@ module HydraAttribute
         @column_names ||= columns.map(&:name)
       end
 
+      # Holds attributes with default values
+      #
+      # @return [Hash]
+      def attributes
+        @attributes ||= columns.each_with_object({}) do |column, attributes|
+          attributes[column.name.to_sym] = column.default
+        end
+      end
+
       # Returns arel table
       #
       # @return [Arel::Table]
@@ -123,56 +132,85 @@ module HydraAttribute
         end
       end
 
-      # Creates new record and returns its ID
+      # Creates new record
       #
       # @param [Hash] attributes
-      # @return [Integer] primary key
+      # @return [HydraAttribute::Model]
       def create(attributes = {})
-        connection.insert(compile_insert(attributes), 'SQL')
+        model = new(attributes.except(:id, 'id'))
+        model.save
+        model
       end
 
       # Updates record by ID
       #
       # @param [Integer] id
       # @param [Hash] attributes
-      # @return [NilClass]
+      # @return [HydraAttribute::Model]
       def update(id, attributes = {})
-        connection.update(compile_update(id, attributes), 'SQL')
+        model = find(id)
+        model.assign_attributes(attributes.except(:id, 'id'))
+        model.save
+        model
+      end
+
+      # Destroys model by its ID
+      #
+      # @param [Integer] id
+      # @return [TrueClass, FalseClass]
+      def destroy(id)
+        find(id).destroy
+      end
+
+      # Compiles attributes for performing +SELECT+ query
+      #
+      # @param [Hash] attributes
+      # @param [Array] fields attributes which should be selected
+      # @param [NilClass, Integer] limit
+      # @param [NilClass, Integer] offset
+      # @return [Arel::SelectManager]
+      def compile_select(attributes = {}, fields = Arel.star, limit = nil, offset = nil)
+        columns = Array(fields).map { |field| arel_table[field] }
+        arel    = select_manager.project(columns).take(limit).skip(offset)
+        arel.where(compile_where(attributes)) unless attributes.blank?
+        arel
+      end
+
+      # Compiles attributes for performing +INSERT+ query
+      #
+      # @param [Hash] attributes
+      # @return [Arel::InsertManager]
+      def compile_insert(attributes = {})
+        fields = attributes_to_columns(attributes)
+        arel_table.compile_insert(fields)
+      end
+
+      # Compiles attributes for performing +UPDATE+ query
+      #
+      # @param [String] id
+      # @param [Hash] attributes
+      # @return [Arel::UpdateManager]
+      def compile_update(id, attributes = {})
+        fields = attributes_to_columns(attributes)
+        compile_select(id: id).compile_update(fields)
+      end
+
+      # Compiles attributes for performing +DELETE+ query
+      #
+      # @param [Hash] attributes
+      # @return [Arel::DeleteManager]
+      def compile_delete(attributes = {})
+        compile_select(attributes).compile_delete
+      end
+
+      # Builds +arel+ object for select query
+      #
+      # @return [Arel::SelectManager]
+      def select_manager
+        arel_table.from(arel_table)
       end
 
       private
-        # Compiles attributes for performing +SELECT+ query
-        #
-        # @param [Hash] attributes
-        # @param [Array] fields attributes which should be selected
-        # @param [NilClass, Integer] limit
-        # @param [NilClass, Integer] offset
-        # @return [Arel::SelectManager]
-        def compile_select(attributes = {}, fields = Arel.star, limit = nil, offset = nil)
-          columns = Array(fields).map { |field| arel_table[field] }
-          arel    = select_manager.project(columns).take(limit).skip(offset)
-          arel.where(compile_where(attributes)) unless attributes.blank?
-          arel
-        end
-
-        # Compiles attributes for performing +INSERT+ query
-        #
-        # @param [Hash] attributes
-        # @return [Arel::InsertManager]
-        def compile_insert(attributes = {})
-          fields = attributes_to_columns(attributes)
-          arel_table.compile_insert(fields)
-        end
-
-        # Compiles attributes for performing +UPDATE+ query
-        #
-        # @param [String] id
-        # @param [Hash] attributes
-        # @return [Arel::UpdateManager]
-        def compile_update(id, attributes = {})
-          fields = attributes_to_columns(attributes)
-          compile_select(id: id).compile_update(fields)
-        end
 
         # Compiles data for +WHERE+ part
         #
@@ -182,13 +220,6 @@ module HydraAttribute
           attributes.map do |name, value|
             arel_table[name].eq(value)
           end.inject(:and)
-        end
-
-        # Builds +arel+ object for select query
-        #
-        # @return [Arel::SelectManager]
-        def select_manager
-          arel_table.from(arel_table)
         end
 
         # Replaces attributes' keys to +arel+ columns
@@ -206,7 +237,15 @@ module HydraAttribute
     #
     # @param [Hash] attributes
     def initialize(attributes = {})
-      @attributes = attributes
+      @destroyed  = false
+      @attributes = self.class.attributes.merge(attributes.symbolize_keys)
+    end
+
+    # Assigns attributes
+    #
+    # @return [Hash] current attributes
+    def assign_attributes(new_attributes = {})
+      attributes.merge!(new_attributes.symbolize_keys)
     end
 
     # Return all attributes
@@ -220,7 +259,14 @@ module HydraAttribute
     #
     # @return [TrueClass, FalseClass]
     def persisted?
-      id.present?
+      id.present? and not destroyed?
+    end
+
+    # Checks if model is destroyed
+    #
+    # @return [TrueClass, FalseClass]
+    def destroyed?
+      @destroyed
     end
 
     # Saves model
@@ -228,12 +274,51 @@ module HydraAttribute
     #
     # @return [TrueClass]
     def save
-      if persisted?
-        self.class.update(id, attributes.except(:id))
-      else
-        self.id = self.class.create(attributes)
+      return true if destroyed?
+
+      self.class.connection.transaction do
+        if persisted?
+          notify(:update) { update }
+        else
+          notify(:create) { create }
+        end
       end
+    end
+
+    # Destroys record from database
+    # This method runs callbacks
+    #
+    # @return [TrueClass]
+    def destroy
+      self.class.connection.transaction do
+        notify(:destroy) { delete }
+      end
+    end
+
+    # Performs +INSERT+ query
+    #
+    # @return [Integer] primary key
+    def create
+      return id if persisted? or destroyed?
+      self.id = self.class.connection.insert(self.class.compile_insert(attributes), 'SQL')
+    end
+
+    # Performs +UPDATE+ query
+    #
+    # @return [TrueClass]
+    def update
+      return true unless persisted?
+      self.class.connection.update(self.class.compile_update(id, attributes.except(:id)), 'SQL')
       true
+    end
+
+    # Deletes record from database
+    #
+    # @return [TrueClass]
+    def delete
+      return true unless persisted?
+      self.class.connection.delete(self.class.compile_delete(id: id))
+      @destroyed = true
     end
 
     # Redefines base method because attribute methods define dynamically
