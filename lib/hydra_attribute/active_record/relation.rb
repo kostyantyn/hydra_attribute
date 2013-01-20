@@ -4,6 +4,7 @@ module HydraAttribute
       extend ActiveSupport::Concern
 
       included do
+        include Calculation
         include QueryMethods
 
         # @COMPATIBILITY with 3.1.x active_record 3.1 doesn't have "exec_queries" method

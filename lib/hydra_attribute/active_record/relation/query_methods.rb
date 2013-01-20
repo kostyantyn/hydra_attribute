@@ -53,8 +53,10 @@ module HydraAttribute
           @hydra_select_values.map!(&:to_s)
           @select_values.map!{ |value| hydra_helper.prepend_table_name(value) }
 
-          # attributes "id" and "hydra_set_id" are important for hydra_attribute gem
-          if @hydra_select_values.any? or @select_values.any?
+          # attributes "id" and "hydra_set_id" are required for models which use HydraAttribute::ActiveRecord model
+          # but if calculation method is performed, obtained data from database aren't converted to models
+          # so these attributes should not be forcibly added to query
+          if !hydra_attribute_performs_calculation && (@hydra_select_values.any? or @select_values.any?)
             @select_values << hydra_helper.prepend_table_name(klass.primary_key)
             @select_values << hydra_helper.prepend_table_name('hydra_set_id')
           end

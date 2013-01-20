@@ -1,3 +1,6 @@
+**0.4.2 (January 20, 2013)**
+* Fixed bug in `count` method which added unnecessary columns to query [#2](https://github.com/kostyantyn/hydra_attribute/issues/2)
+
 **0.4.1 (October 3, 2012)**
 * Fixed bug which didn't allow to use hydra attributes for STI models
 
