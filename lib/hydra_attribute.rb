@@ -33,6 +33,7 @@ require 'hydra_attribute/active_record/association'
 require 'hydra_attribute/active_record/association_preloader'
 require 'hydra_attribute/active_record/migration'
 require 'hydra_attribute/active_record/relation'
+require 'hydra_attribute/active_record/relation/calculations'
 require 'hydra_attribute/active_record/relation/query_methods'
 require 'hydra_attribute/active_record/attribute_methods'
 
