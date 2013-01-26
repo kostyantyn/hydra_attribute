@@ -8,7 +8,7 @@ Gem::Specification.new do |gem|
   gem.description           = 'hydra_attribute is an implementation of EAV pattern for ActiveRecord models.'
   gem.homepage              = 'https://github.com/kostyantyn/hydra_attribute'
   gem.files                 = `git ls-files`.split("\n")
-  gem.test_files            = `git ls-files -- Appraisals {spec,features,gemfiles}/*`.split("\n")
+  gem.test_files            = `git ls-files -- {spec,features,gemfiles}/*`.split("\n")
   gem.name                  = "hydra_attribute"
   gem.require_paths         = %w(lib)
   gem.required_ruby_version = Gem::Requirement.new('>= 1.9.2')
@@ -19,6 +19,5 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency('rspec')
   gem.add_development_dependency('cucumber')
   gem.add_development_dependency('sqlite3')
-  gem.add_development_dependency('appraisal')
   gem.add_development_dependency('rake')
 end
