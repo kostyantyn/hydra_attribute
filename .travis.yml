@@ -5,3 +5,6 @@ rvm:
 env:
   - BUNDLE_GEMFILE=gemfiles/activerecord_3_1.gemfile
   - BUNDLE_GEMFILE=gemfiles/activerecord_3_2.gemfile
+gemfile:
+  - gemfiles/activerecord_3_1.gemfile
+  - gemfiles/activerecord_3_2.gemfile
