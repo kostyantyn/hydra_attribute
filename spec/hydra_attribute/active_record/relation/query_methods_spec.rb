@@ -1,5 +1,6 @@
 require 'spec_helper'
 
+__END__
 describe HydraAttribute::ActiveRecord::Relation::QueryMethods do
   describe '#build_arel' do
     describe 'necessary columns for hydra attribute' do

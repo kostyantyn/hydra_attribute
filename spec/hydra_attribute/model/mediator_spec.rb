@@ -31,6 +31,10 @@ describe HydraAttribute::Model::Mediator do
   end
 
   after do
+    HydraAttribute::Model::Mediator.subscriptions.delete('M1')
+    HydraAttribute::Model::Mediator.subscriptions.delete('M2')
+    HydraAttribute::Model::Mediator.subscriptions.delete('M3')
+
     Object.send(:remove_const, 'M1')
     Object.send(:remove_const, 'M2')
     Object.send(:remove_const, 'M3')

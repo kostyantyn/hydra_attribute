@@ -1,5 +1,6 @@
 require 'spec_helper'
 
+__END__
 describe HydraAttribute::HydraValue do
   describe '.arel_tables' do
     it 'should return hash which holds arel tables for entity table and backend type' do

@@ -1,5 +1,6 @@
 require 'spec_helper'
 
+__END__
 describe HydraAttribute::Memoizable do
   def anonymous(arity = 0)
     params = (1..arity).map{ |i| "a#{i}" }.join(', ')

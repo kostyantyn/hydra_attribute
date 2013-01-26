@@ -1,5 +1,6 @@
 require 'spec_helper'
 
+__END__
 describe HydraAttribute::ActiveRecord::AttributeMethods do
   describe '::ClassMethods' do
     describe '#define_hydra_attribute_method' do

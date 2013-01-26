@@ -8,8 +8,8 @@ module HydraAttribute
         #
         # @return [Hash]
         def subscriptions
-          @subscriptions ||= Hash.new do |listeners, listener|
-            listeners[listener] = Hash.new do |events, event|
+          @subscriptions ||= Hash.new do |reporters, reporter|
+            reporters[reporter] = Hash.new do |events, event|
               events[event] = []
             end
           end
@@ -37,6 +37,13 @@ module HydraAttribute
           subscriptions[reporter][event].each do |listener, callback|
             listener.send(callback, object)
           end
+        end
+
+        # Clears all subscriptions
+        #
+        # @return [NilClass]
+        def clear
+          @subscriptions = nil
         end
       end
 

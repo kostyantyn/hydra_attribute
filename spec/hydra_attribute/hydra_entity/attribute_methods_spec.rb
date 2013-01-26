@@ -1,5 +1,6 @@
 require 'spec_helper'
 
+__END__
 describe HydraAttribute::HydraEntity::AttributeMethods do
   describe '.hydra_attributes' do
     it 'should return blank array if there are not any hydra attributes for entity' do

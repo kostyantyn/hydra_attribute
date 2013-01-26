@@ -1,6 +1,20 @@
 require 'active_support/core_ext/object/with_options'
 
 module HydraAttribute
+  class HydraAttribute
+    include Model
+
+    validates :entity_type,  presence: true
+    validates :name,         presence: true, unique: { scope: :entity_type }
+    validates :backend_type, presence: true, inclusion: { in: ::HydraAttribute::SUPPORTED_BACKEND_TYPES }
+
+
+  end
+end
+
+
+__END__
+module HydraAttribute
   class HydraAttribute < ActiveRecord::Base
     self.table_name = 'hydra_attributes'
 

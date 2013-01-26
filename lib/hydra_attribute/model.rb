@@ -1,6 +1,7 @@
 require 'active_record/errors'
 require 'hydra_attribute/model/identity_map'
 require 'hydra_attribute/model/mediator'
+require 'hydra_attribute/model/validations'
 
 module HydraAttribute
   class RecordNotFound < ::ActiveRecord::RecordNotFound
@@ -12,6 +13,7 @@ module HydraAttribute
     included do
       include IdentityMap
       include Mediator
+      include Validations
     end
 
     module ClassMethods
@@ -69,7 +71,7 @@ module HydraAttribute
       #
       # @return [String]
       def table_name
-        @table_name ||= name.tableize
+        @table_name ||= name.demodulize.tableize
       end
 
       # Returns table columns
@@ -274,7 +276,8 @@ module HydraAttribute
     #
     # @return [TrueClass]
     def save
-      return true if destroyed?
+      return true  if destroyed?
+      return false unless valid?
 
       self.class.connection.transaction do
         if persisted?
