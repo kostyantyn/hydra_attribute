@@ -8,7 +8,6 @@ module HydraAttribute
     validates :name,         presence: true, unique: { scope: :entity_type }
     validates :backend_type, presence: true, inclusion: { in: ::HydraAttribute::SUPPORTED_BACKEND_TYPES }
 
-
   end
 end
 

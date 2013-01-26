@@ -1,6 +1,24 @@
 require 'spec_helper'
 
 describe HydraAttribute::HydraAttribute do
+  describe '#create' do
+    it 'should add model to the cache' do
+      HydraAttribute::HydraAttribute.model_identity_map.should be_empty
+      model = HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'price', backend_type: 'float')
+      HydraAttribute::HydraAttribute.model_identity_map[model.id].should be(model)
+    end
+  end
+
+  describe '#destroy' do
+    it 'should remove model from the cache' do
+      model = HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'price', backend_type: 'float')
+      HydraAttribute::HydraAttribute.model_identity_map[model.id].should be(model)
+
+      model.destroy
+      HydraAttribute::HydraAttribute.model_identity_map[model.id].should be_nil
+    end
+  end
+
   describe 'validations' do
     it 'should require entity_type' do
       hydra_attribute = HydraAttribute::HydraAttribute.new
