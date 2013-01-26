@@ -20,7 +20,7 @@ module HydraAttribute
 
         # Find record by ID and store it into the cache
         #
-        # @return [HydraAttribute::HydraAttribute]
+        # @return [HydraAttribute::Model]
         def find(id)
           model_cache(id) do
             all
