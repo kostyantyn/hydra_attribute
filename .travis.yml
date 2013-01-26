@@ -1,7 +1,7 @@
 language: ruby
-script: bundle exec rake
+script: bundle install && bundle exec rake
 rvm:
   - 1.9.3
-gemfile:
-  - gemfiles/activerecord_3_1.gemfile
-  - gemfiles/activerecord_3_2.gemfile
+env:
+  - BUNDLE_GEMFILE=gemfiles/activerecord_3_1.gemfile
+  - BUNDLE_GEMFILE=gemfiles/activerecord_3_2.gemfile
