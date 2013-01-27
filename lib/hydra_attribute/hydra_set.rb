@@ -1,3 +1,14 @@
+module HydraAttribute
+  class HydraSet
+    include Model
+
+    validates :entity_type, presence: true
+    validates :name,        presence: true, unique: { scope: :entity_type }
+
+  end
+end
+
+__END__
 require 'active_support/core_ext/object/with_options'
 
 module HydraAttribute

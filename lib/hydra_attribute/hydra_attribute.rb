@@ -1,5 +1,3 @@
-require 'active_support/core_ext/object/with_options'
-
 module HydraAttribute
   class HydraAttribute
     include Model
