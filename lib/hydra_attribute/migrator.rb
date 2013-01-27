@@ -85,7 +85,7 @@ module HydraAttribute
         end
         add_index :hydra_sets, [:entity_type, :name], unique: true, name: 'hydra_sets_index'
 
-        create_table :hydra_attribute_sets, id: false do |t|
+        create_table :hydra_attribute_sets do |t|
           t.integer :hydra_attribute_id, null: false
           t.integer :hydra_set_id,       null: false
         end
