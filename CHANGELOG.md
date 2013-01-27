@@ -1,3 +1,6 @@
+**0.5.0 (...)**
+* Add `id` to `hydra_attribute_sets` table
+
 **0.4.2 (January 20, 2013)**
 * Fixed bug in `count` method which added unnecessary columns to query [#2](https://github.com/kostyantyn/hydra_attribute/issues/2)
 

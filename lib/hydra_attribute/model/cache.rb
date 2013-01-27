@@ -43,10 +43,10 @@ module HydraAttribute
         self.class.model_cache(super, self)
       end
 
-      # Destroy model and remove it from the cache
+      # Delete model and remove it from the cache
       #
       # @return [TrueClass]
-      def destroy
+      def delete
         result = super
         self.class.model_identity_map.delete(id)
         if self.class.identity_map[:all]
