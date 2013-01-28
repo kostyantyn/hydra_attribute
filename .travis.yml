@@ -4,3 +4,5 @@ rvm:
 gemfile:
   - gemfiles/activerecord-3.1.gemfile
   - gemfiles/activerecord-3.2.gemfile
+env:
+  - DB=sqlite3
