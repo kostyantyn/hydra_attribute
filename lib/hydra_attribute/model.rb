@@ -9,10 +9,10 @@ module HydraAttribute
   module Model
     extend ActiveSupport::Concern
 
-    include IdentityMap
     include Mediator
     include Validations
     include Persistence
+    include IdentityMap
     include Cache
   end
 end

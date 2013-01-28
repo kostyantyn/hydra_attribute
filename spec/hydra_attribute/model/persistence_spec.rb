@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe HydraAttribute::Model do
+describe HydraAttribute::Model::Persistence do
   before(:all) do
     ::ActiveRecord::Base.connection.create_table(:custom_products) do |t|
       t.string  :name
@@ -8,7 +8,9 @@ describe HydraAttribute::Model do
       t.integer :quantity
     end
     Object.const_set('CustomProduct', Class.new)
-    CustomProduct.send(:include, HydraAttribute::Model)
+    CustomProduct.send(:include, HydraAttribute::Model::Validations) # dependency
+    CustomProduct.send(:include, HydraAttribute::Model::Mediator)    # dependency
+    CustomProduct.send(:include, HydraAttribute::Model::Persistence)
   end
 
   after(:all) do
@@ -24,7 +26,7 @@ describe HydraAttribute::Model do
         t.integer :count
       end
       Object.const_set('ExampleProduct', Class.new)
-      ExampleProduct.send(:include, HydraAttribute::Model)
+      ExampleProduct.send(:include, HydraAttribute::Model::Persistence)
     end
 
     after do
@@ -64,6 +66,27 @@ describe HydraAttribute::Model do
       arel_table.should be_a_kind_of(Arel::Table)
       arel_table.table_name.should  == 'custom_products'
       arel_table.engine.should      == CustomProduct
+    end
+  end
+
+  describe '.columns' do
+    it 'should return collection of objects which represent table columns' do
+      CustomProduct.should have(4).columns
+      CustomProduct.columns.each do |column|
+        column.should be_a_kind_of(ActiveRecord::ConnectionAdapters::Column)
+      end
+    end
+  end
+
+  describe '.column' do
+    it 'should return object which represents table column' do
+      CustomProduct.column('name').should be_a_kind_of(ActiveRecord::ConnectionAdapters::Column)
+    end
+  end
+
+  describe '.column_names' do
+    it 'should return all column names in table' do
+      CustomProduct.column_names.should == %w[id name price quantity]
     end
   end
 
@@ -224,6 +247,32 @@ describe HydraAttribute::Model do
 
       product = CustomProduct.new(id: '')
       product.should_not be_persisted
+    end
+
+    it 'should return false if record is destroyed' do
+      product = CustomProduct.create(name: 'book')
+      product.should be_persisted
+
+      product.destroy
+      product.should_not be_persisted
+    end
+  end
+
+  describe '#destroyed?' do
+    it 'should return false for new object' do
+      product = CustomProduct.new
+      product.should_not be_destroyed
+    end
+
+    it 'should return false for created object' do
+      product = CustomProduct.create(name: 'book')
+      product.should_not be_destroyed
+    end
+
+    it 'should return true if object was destroyed' do
+      product = CustomProduct.create(name: 'book')
+      product.destroy
+      product.should be_destroyed
     end
   end
 
