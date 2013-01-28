@@ -13,7 +13,8 @@ module HydraAttribute
         # @return [Array<HydraAttribute::Model>]
         def all
           cache(:all) do
-            where_not(id: model_identity_map.keys)
+            ids = model_identity_map.keys
+            ids.present? ? where_not(id: ids) : where
             model_identity_map.values
           end
         end
@@ -40,7 +41,10 @@ module HydraAttribute
       #
       # @return [Fixnum]
       def create
-        self.class.model_cache(super, self)
+        id = super
+        self.class.model_cache(id, self)
+        self.class.identity_map[:all].push(self) if self.class.identity_map[:all]
+        id
       end
 
       # Delete model and remove it from the cache
