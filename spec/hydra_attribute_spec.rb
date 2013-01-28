@@ -1,6 +1,5 @@
 require 'spec_helper'
 
-__END__
 describe HydraAttribute do
   describe '#identity_map' do
     it 'should return IdentityMap object' do
