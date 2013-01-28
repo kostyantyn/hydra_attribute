@@ -72,6 +72,14 @@ module HydraAttribute
           connection.schema_cache.columns[table_name]
         end
 
+        # Return column object
+        #
+        # @param [String]
+        # @return [ActiveRecord::ConnectionAdapters::Column]
+        def column(name)
+          connection.schema_cache.columns_hash[table_name][name]
+        end
+
         # Returns column names
         #
         # @return [Array<String>]
