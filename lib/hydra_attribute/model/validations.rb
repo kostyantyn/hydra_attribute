@@ -6,14 +6,15 @@ module HydraAttribute
 
       class UniqueValidator < ActiveModel::EachValidator
         def validate_each(record, attribute, value)
+          klass = record.class
           table = record.class.arel_table
           arel  = record.class.select_manager
 
-          where = table[attribute].lower.eq(table.lower(value.to_s))
+          where = comparison(table, attribute, value, klass.column(attribute.to_s).text?)
 
           if options[:scope]
             where = Array(options[:scope]).inject(where) do |query, field|
-              query.and(table[field].lower.eq(table.lower(record.send(field).to_s)))
+              query.and(comparison(table, field, record.send(field), klass.column(field.to_s).text?))
             end
           end
 
@@ -24,6 +25,15 @@ module HydraAttribute
             record.errors.add(attribute, :taken, value: value)
           end
         end
+
+        private
+          def comparison(table, field, value, insensitive = true)
+            if insensitive
+              table[field].lower.eq(table.lower(value))
+            else
+              table[field].eq(value)
+            end
+          end
       end
     end
   end
