@@ -5,8 +5,13 @@ ActiveSupport.on_load(:active_record) do
   self.mass_assignment_sanitizer = :strict
 end
 
-db = ENV['DB'] || 'sqlite3'
+db = ENV['DB'] || 'sqlite'
 require File.expand_path("../environments/#{db}", __FILE__)
+
+if ENV['SQL_LOGGER']
+  require 'active_support/all'
+  ActiveRecord::Base.logger = Logger.new(STDOUT)
+end
 
 Dir[File.expand_path('../fixtures/*.rb', __FILE__)].each do |file|
   load file

@@ -22,11 +22,11 @@ describe HydraAttribute::Model::Cache do
 
   describe '.all' do
     it 'should find all models and store them into the cache' do
-      q1 = %[INSERT INTO "custom_products" ("name", "price", "quantity") VALUES ('one', 2.5, 5)]
-      q2 = %[INSERT INTO "custom_products" ("name", "price", "quantity") VALUES ('two', 3.5, 6)]
+      q1 = %[INSERT INTO custom_products (name, price, quantity) VALUES ('one', 2.5, 5)]
+      q2 = %[INSERT INTO custom_products (name, price, quantity) VALUES ('two', 3.5, 6)]
 
-      ActiveRecord::Base.connection.exec_query(q1)
-      ActiveRecord::Base.connection.exec_query(q2)
+      ActiveRecord::Base.connection.execute(q1)
+      ActiveRecord::Base.connection.execute(q2)
 
       all = CustomProduct.all
       all.should have(2).records
@@ -46,8 +46,8 @@ describe HydraAttribute::Model::Cache do
 
   describe '.find' do
     it 'should load all records and find the right one from the cache' do
-      q1 = %[INSERT INTO "custom_products" ("name", "price", "quantity") VALUES ('one', 2.5, 5)]
-      q2 = %[INSERT INTO "custom_products" ("name", "price", "quantity") VALUES ('two', 3.5, 6)]
+      q1 = %[INSERT INTO custom_products (name, price, quantity) VALUES ('one', 2.5, 5)]
+      q2 = %[INSERT INTO custom_products (name, price, quantity) VALUES ('two', 3.5, 6)]
 
       id1 = ActiveRecord::Base.connection.insert(q1)
       id2 = ActiveRecord::Base.connection.insert(q2)

@@ -4,4 +4,5 @@ rvm:
 gemfile:
   - gemfiles/activerecord-3.2.gemfile
 env:
-  - DB=sqlite3
+  - DB=sqlite
+  - DB=mysql
