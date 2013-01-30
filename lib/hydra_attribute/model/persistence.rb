@@ -327,7 +327,7 @@ module HydraAttribute
       # @return [Integer] primary key
       def create
         return id if persisted? or destroyed?
-        self.id = self.class.connection.insert(self.class.compile_insert(attributes), 'SQL')
+        self.id = self.class.connection.insert(self.class.compile_insert(attributes.except(:id)), 'SQL')
       end
 
       # Performs +UPDATE+ query

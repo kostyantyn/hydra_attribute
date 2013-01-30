@@ -20,5 +20,6 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency('cucumber', '~> 1.1.0')
   gem.add_development_dependency('sqlite3')
   gem.add_development_dependency('mysql2')
+  gem.add_development_dependency('pg')
   gem.add_development_dependency('rake')
 end

@@ -311,7 +311,7 @@ describe HydraAttribute::Model::Persistence do
 
     describe 'update' do
       it 'should update record if id exists' do
-        ActiveRecord::Base.connection.insert('INSERT INTO custom_products(id, name, price, quantity) VALUES (1, "book", 35.5, 6)')
+        ActiveRecord::Base.connection.insert(%q[INSERT INTO custom_products(id, name, price, quantity) VALUES (1, 'book', 35.5, 6)])
 
         product = CustomProduct.new(id: 1, name: 'book 2', price: 45.7, quantity: 10)
         product.save
@@ -324,7 +324,7 @@ describe HydraAttribute::Model::Persistence do
       end
 
       it 'should not update record if error was raised during saving' do
-        ActiveRecord::Base.connection.insert('INSERT INTO custom_products(id, name, price, quantity) VALUES (1, "book", 35.5, 6)')
+        ActiveRecord::Base.connection.insert(%q[INSERT INTO custom_products(id, name, price, quantity) VALUES (1, 'book', 35.5, 6)])
 
         Class.new do
           include HydraAttribute::Model::Mediator
