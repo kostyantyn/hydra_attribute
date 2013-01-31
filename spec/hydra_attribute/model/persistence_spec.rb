@@ -202,9 +202,9 @@ describe HydraAttribute::Model::Persistence do
       model  = CustomProduct.create(name: 'apple', price: 2.50, quantity: 5)
       result = ActiveRecord::Base.connection.select_one(%[SELECT * FROM custom_products WHERE id=#{model.id}])
 
-      result['name'].should     == 'apple'
-      result['price'].should    == 2.50
-      result['quantity'].should == 5
+      result['name'].should          == 'apple'
+      result['price'].to_f.should    == 2.50
+      result['quantity'].to_i.should == 5
     end
   end
 
@@ -216,10 +216,10 @@ describe HydraAttribute::Model::Persistence do
       CustomProduct.update(1, name: 'book', price: 2.5)
 
       result = ActiveRecord::Base.connection.select_one(%[SELECT * FROM custom_products WHERE id=1])
-      result['id'].should       == 1
-      result['name'].should     == 'book'
-      result['price'].should    == 2.5
-      result['quantity'].should == 2
+      result['id'].to_i.should       == 1
+      result['name'].should          == 'book'
+      result['price'].to_f.should    == 2.5
+      result['quantity'].to_i.should == 2
     end
   end
 
@@ -241,11 +241,8 @@ describe HydraAttribute::Model::Persistence do
       product.should_not be_persisted
     end
 
-    it 'should return false if ID exists but it is blank' do
+    it 'should return false if ID exists but it is nil' do
       product = CustomProduct.new(id: nil)
-      product.should_not be_persisted
-
-      product = CustomProduct.new(id: '')
       product.should_not be_persisted
     end
 
@@ -282,7 +279,7 @@ describe HydraAttribute::Model::Persistence do
         product = CustomProduct.new
         product.save
         product.id.should_not be_nil
-        ActiveRecord::Base.connection.select_value("SELECT COUNT(*) FROM custom_products WHERE id=#{product.id}").should be(1)
+        ActiveRecord::Base.connection.select_value("SELECT COUNT(*) FROM custom_products WHERE id=#{product.id}").to_i.should be(1)
       end
 
       it 'should create record with several fields' do
@@ -291,10 +288,10 @@ describe HydraAttribute::Model::Persistence do
         product.id.should_not be_nil
 
         results = ActiveRecord::Base.connection.select_one("SELECT * FROM custom_products WHERE id=#{product.id}")
-        results['id'].should       == product.id
-        results['name'].should     == 'my name'
-        results['price'].should    == 2.50
-        results['quantity'].should == 4
+        results['id'].should            == product.id
+        results['name'].should          == 'my name'
+        results['price'].to_f.should    == 2.50
+        results['quantity'].to_i.should == 4
       end
 
       it 'should not commit insert query if error was raised during saving' do
@@ -305,7 +302,7 @@ describe HydraAttribute::Model::Persistence do
         end
 
         lambda { CustomProduct.new.save }.should raise_error(Exception, 'Testing rollback')
-        CustomProduct.connection.select_value('SELECT COUNT(*) FROM custom_products').should be(0)
+        CustomProduct.connection.select_value('SELECT COUNT(*) FROM custom_products').to_i.should be(0)
       end
     end
 
@@ -317,10 +314,10 @@ describe HydraAttribute::Model::Persistence do
         product.save
 
         results = ActiveRecord::Base.connection.select_one("SELECT * FROM custom_products WHERE id=#{product.id}")
-        results['id'].should       == product.id
-        results['name'].should     == 'book 2'
-        results['price'].should    == 45.7
-        results['quantity'].should == 10
+        results['id'].to_i.should       == product.id
+        results['name'].should          == 'book 2'
+        results['price'].to_f.should    == 45.7
+        results['quantity'].to_i.should == 10
       end
 
       it 'should not update record if error was raised during saving' do
@@ -343,7 +340,7 @@ describe HydraAttribute::Model::Persistence do
       ActiveRecord::Base.connection.insert('INSERT INTO custom_products(id) VALUES (1)')
       product = CustomProduct.new(id: 1)
       product.destroy
-      ActiveRecord::Base.connection.select_value('SELECT COUNT(*) FROM custom_products WHERE id=1').should be(0)
+      ActiveRecord::Base.connection.select_value('SELECT COUNT(*) FROM custom_products WHERE id=1').to_i.should be(0)
     end
 
     it 'should not commit delete query if error was raised during destroying' do
@@ -356,7 +353,7 @@ describe HydraAttribute::Model::Persistence do
       ActiveRecord::Base.connection.insert('INSERT INTO custom_products(id) VALUES (1)')
       product = CustomProduct.new(id: 1)
       lambda { product.destroy }.should raise_error(Exception, 'Testing rollback')
-      ActiveRecord::Base.connection.select_value('SELECT COUNT(*) FROM custom_products WHERE id=1').should be(1)
+      ActiveRecord::Base.connection.select_value('SELECT COUNT(*) FROM custom_products WHERE id=1').to_i.should be(1)
     end
   end
 

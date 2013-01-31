@@ -57,8 +57,8 @@ describe HydraAttribute::Model::Cache do
       record.name.should == 'one'
 
       CustomProduct.identity_map[:all].should have(2).records
-      CustomProduct.identity_map[:all][0].id.should be(id1)
-      CustomProduct.identity_map[:all][1].id.should be(id2)
+      CustomProduct.identity_map[:all][0].id.should be(id1.to_i)
+      CustomProduct.identity_map[:all][1].id.should be(id2.to_i)
     end
 
     it 'should raise an error if cannot find the record' do

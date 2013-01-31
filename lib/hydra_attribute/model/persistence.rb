@@ -69,7 +69,23 @@ module HydraAttribute
         #
         # @return [Array<ActiveRecord::ConnectionAdapters::Column>]
         def columns
-          connection.schema_cache.columns[table_name]
+          @columns ||= connection.schema_cache.columns[table_name]
+        end
+
+        # Returns hash of column objects with their names as a keys
+        # Keys are string
+        #
+        # @return [Hash]
+        def columns_hash
+          @columns_hash ||= connection.schema_cache.columns_hash[table_name]
+        end
+
+        # Returns hash of column objects with their names as a keys
+        # Keys are symbols
+        #
+        # @return [Hash]
+        def symbolized_columns_hash
+          @symbolized_columns_hash ||= columns_hash.symbolize_keys
         end
 
         # Return column object
@@ -77,7 +93,7 @@ module HydraAttribute
         # @param [String]
         # @return [ActiveRecord::ConnectionAdapters::Column]
         def column(name)
-          connection.schema_cache.columns_hash[table_name][name]
+          columns_hash[name]
         end
 
         # Returns column names
@@ -264,14 +280,18 @@ module HydraAttribute
       # @param [Hash] attributes
       def initialize(attributes = {})
         @destroyed  = false
-        @attributes = self.class.attributes.merge(attributes.symbolize_keys)
+        @attributes = self.class.attributes.clone
+
+        assign_attributes(attributes)
       end
 
       # Assigns attributes
       #
       # @return [Hash] current attributes
       def assign_attributes(new_attributes = {})
-        attributes.merge!(new_attributes.symbolize_keys)
+        new_attributes.symbolize_keys.each do |name, value|
+          @attributes[name] = self.class.symbolized_columns_hash[name].type_cast(value)
+        end
       end
 
       # Return all attributes

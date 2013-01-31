@@ -23,9 +23,9 @@ module HydraAttribute
         #
         # @return [HydraAttribute::Model]
         def find(id)
-          model_cache(id) do
+          model_cache(id.to_i) do
             all
-            model_cache(id) { raise RecordNotFound, "Couldn't find #{name} with id=#{id}" }
+            model_identity_map.fetch(id.to_i) { raise RecordNotFound, "Couldn't find #{name} with id=#{id}" }
           end
         end
       end
