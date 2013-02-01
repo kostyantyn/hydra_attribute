@@ -250,7 +250,8 @@ module HydraAttribute
         # @return [Arel::Nodes::And, Arel::Nodes::Equality]
         def compile_where(attributes = {})
           attributes.map do |name, value|
-            arel_table[name].eq(value)
+            method = value.is_a?(Array) ? :in : :eq
+            arel_table[name].send(method, value)
           end.inject(:and)
         end
 
@@ -260,7 +261,8 @@ module HydraAttribute
         # @return [Arel::Nodes::And, Arel::Nodes::Equality]
         def compile_where_not(attributes = {})
           attributes.map do |name, value|
-            arel_table[name].not_eq(value)
+            method = value.is_a?(Array) ? :not_in : :not_eq
+            arel_table[name].send(method, value)
           end.inject(:and)
         end
 

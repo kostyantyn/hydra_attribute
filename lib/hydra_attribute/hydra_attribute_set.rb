@@ -14,8 +14,8 @@ module HydraAttribute
       # @param [Fixnum] hydra_set_id
       # @return [Array<HydraAttribute::HydraSet>]
       def hydra_attribute_sets_by_hydra_set_id(hydra_set_id)
-        hydra_set_cache(hydra_set_id) do
-          all.select { |model| model.hydra_set_id == hydra_set_id }
+        hydra_set_cache(hydra_set_id.to_i) do
+          all.select { |model| model.hydra_set_id == hydra_set_id.to_i }
         end
       end
 
@@ -25,19 +25,9 @@ module HydraAttribute
       # @param [Fixnum] hydra_attribute_id
       # @return [Array<HydraAttribute::HydraSet>]
       def hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute_id)
-        hydra_attribute_cache(hydra_attribute_id) do
-          all.select { |model| model.hydra_attribute_id == hydra_attribute_id }
+        hydra_attribute_cache(hydra_attribute_id.to_i) do
+          all.select { |model| model.hydra_attribute_id == hydra_attribute_id.to_i }
         end
-      end
-    end
-
-    # Initialize relation object
-    # Cache it if it's a persisted object
-    def initialize(attributes = {})
-      super(attributes)
-      if persisted?
-        self.class.hydra_attribute_cache(hydra_attribute_id, self)
-        self.class.hyra_set_cache(hydra_set_id, self)
       end
     end
 
@@ -47,8 +37,15 @@ module HydraAttribute
     # @return [Fixnum] ID
     def create
       id = super
-      self.class.hydra_attribute_cache(hydra_attribute_id, self)
-      self.class.hydra_set_cache(hydra_set_id, self)
+
+      if self.class.hydra_attribute_identity_map[hydra_attribute_id]
+        self.class.hydra_attribute_identity_map[hydra_attribute_id].push(self)
+      end
+
+      if self.class.hydra_set_identity_map[hydra_set_id]
+        self.class.hydra_set_identity_map[hydra_set_id].push(self)
+      end
+
       id
     end
 
@@ -58,8 +55,14 @@ module HydraAttribute
     # @return [TrueClass]
     def delete
       result = super
-      self.class.hydra_attribute_identity_map.delete(hydra_attribute_id)
-      self.class.hydra_set_identity_map.delete(hydra_set_id)
+      if self.class.hydra_attribute_identity_map[hydra_attribute_id]
+        self.class.hydra_attribute_identity_map[hydra_attribute_id].delete(self)
+      end
+
+      if self.class.hydra_set_identity_map[hydra_set_id]
+        self.class.hydra_set_identity_map[hydra_set_id].delete(self)
+      end
+
       result
     end
 
