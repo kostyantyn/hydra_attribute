@@ -70,14 +70,14 @@ module HydraAttribute
     #
     # @return [HydraAttribute::HydraAttribute, NilClass]
     def hydra_attribute
-      HydraAttribute::HydraAttribute.find(hydra_attribute_id) if persisted?
+      ::HydraAttribute::HydraAttribute.find(hydra_attribute_id) if persisted?
     end
 
     # Returns hydra set for this relation
     #
     # @return [HydraAttribute::HydraSet, NilClass]
     def hydra_set
-      HydraAttribute::HydraSet.find(hydra_set_id) if persisted?
+      ::HydraAttribute::HydraSet.find(hydra_set_id) if persisted?
     end
   end
 end

@@ -288,7 +288,7 @@ describe HydraAttribute::Model::Persistence do
         product.id.should_not be_nil
 
         results = ActiveRecord::Base.connection.select_one("SELECT * FROM custom_products WHERE id=#{product.id}")
-        results['id'].should            == product.id
+        results['id'].to_i.should       == product.id
         results['name'].should          == 'my name'
         results['price'].to_f.should    == 2.50
         results['quantity'].to_i.should == 4

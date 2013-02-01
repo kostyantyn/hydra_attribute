@@ -165,6 +165,32 @@ describe HydraAttribute::HydraAttributeSet do
     end
   end
 
+  describe '#hydra_set' do
+    it 'should return HydraSet model if this model is persisted' do
+      hydra_set = HydraAttribute::HydraSet.create(name: 'default', entity_type: 'Product')
+
+      hydra_attribute_set = HydraAttribute::HydraAttributeSet.create(hydra_set_id: hydra_set.id, hydra_attribute_id: 2)
+      hydra_attribute_set.hydra_set.should be(hydra_set)
+    end
+
+    it 'should return nil if this model is not persisted' do
+      HydraAttribute::HydraAttributeSet.new.hydra_set.should be_nil
+    end
+  end
+
+  describe '#hydra_attribute' do
+    it 'should return HydraAttribute model if this model is persisted' do
+      hydra_attribute = HydraAttribute::HydraAttribute.create(name: 'title', entity_type: 'Product', backend_type: 'string')
+
+      hydra_attribute_set = HydraAttribute::HydraAttributeSet.create(hydra_set_id: 2, hydra_attribute_id: hydra_attribute.id)
+      hydra_attribute_set.hydra_attribute.should be(hydra_attribute)
+    end
+
+    it 'should return nil if this model is not persisted' do
+      HydraAttribute::HydraAttributeSet.new.hydra_attribute.should be_nil
+    end
+  end
+
   describe 'validations' do
     it 'should require hydra_set_id' do
       hydra_attribute_set = HydraAttribute::HydraAttributeSet.new
