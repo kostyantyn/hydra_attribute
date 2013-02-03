@@ -4,6 +4,9 @@ module HydraAttribute
 
     nested_cache_keys :hydra_attribute, :hydra_set
 
+    observe 'HydraAttribute::HydraAttribute', after_destroy: :hydra_attribute_destroyed
+    observe 'HydraAttribute::HydraSet',       after_destroy: :hydra_set_destroyed
+
     validates :hydra_set_id,       presence: true
     validates :hydra_attribute_id, presence: true, unique: { scope: :hydra_set_id }
 
@@ -28,6 +31,16 @@ module HydraAttribute
         hydra_attribute_cache(hydra_attribute_id.to_i) do
           all.select { |model| model.hydra_attribute_id == hydra_attribute_id.to_i }
         end
+      end
+
+      # Remove hydra attribute from the cache
+      def hydra_attribute_destroyed(hydra_attribute) #:nodoc:
+        hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute.id).each(&:destroy)
+      end
+
+      # Remove hydra set from the cache
+      def hydra_set_destroyed(hydra_set) #:nodoc:
+        hydra_attribute_sets_by_hydra_set_id(hydra_set.id).each(&:destroy)
       end
     end
 

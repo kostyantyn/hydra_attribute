@@ -191,6 +191,76 @@ describe HydraAttribute::HydraAttributeSet do
     end
   end
 
+  describe 'callbacks' do
+    describe 'hydra_set destroyed' do
+      let!(:hydra_set)           { HydraAttribute::HydraSet.create(name: 'default', entity_type: 'Product') }
+      let!(:hydra_attribute)     { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'title', backend_type: 'string') }
+      let!(:hydra_attribute_set) { HydraAttribute::HydraAttributeSet.create(hydra_set_id: hydra_set.id, hydra_attribute_id: hydra_attribute.id) }
+
+      it 'should destroy hydra_attribute_set relation from database' do
+        hydra_set.destroy
+        ::ActiveRecord::Base.connection.select_value(%[SELECT COUNT(*) FROM hydra_attribute_sets WHERE id=#{hydra_attribute_set.id}]).to_i.should be(0)
+      end
+
+      it 'should remove hydra_attribute_set relation from cache' do
+        hydra_set.destroy
+        lambda do
+          HydraAttribute::HydraAttributeSet.find(hydra_attribute_set.id)
+        end.should raise_error(HydraAttribute::RecordNotFound, "Couldn't find HydraAttribute::HydraAttributeSet with id=#{hydra_attribute_set.id}")
+      end
+
+      it 'should remove hydra_set cache' do
+        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(hydra_set.id).should include(hydra_attribute_set)
+        hydra_set.destroy
+        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(hydra_set.id).should be_blank
+      end
+
+      it 'should remove hydra_set from hydra_attribute cache' do
+        hydra_set2           = HydraAttribute::HydraSet.create(name: 'second', entity_type: 'Product')
+        hydra_attribute_set2 = HydraAttribute::HydraAttributeSet.create(hydra_set_id: hydra_set2.id, hydra_attribute_id: hydra_attribute.id)
+
+        hydra_set.destroy
+        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute.id)
+        hydra_attribute_sets.should_not include(hydra_attribute_set)
+        hydra_attribute_sets.should     include(hydra_attribute_set2)
+      end
+    end
+
+    describe 'hydra_attribute destroyed' do
+      let!(:hydra_set)           { HydraAttribute::HydraSet.create(name: 'default', entity_type: 'Product') }
+      let!(:hydra_attribute)     { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'title', backend_type: 'string') }
+      let!(:hydra_attribute_set) { HydraAttribute::HydraAttributeSet.create(hydra_set_id: hydra_set.id, hydra_attribute_id: hydra_attribute.id) }
+
+      it 'should destroy hydra_attribute_set relation from database' do
+        hydra_attribute.destroy
+        ::ActiveRecord::Base.connection.select_value(%[SELECT COUNT(*) FROM hydra_attribute_sets WHERE id=#{hydra_attribute_set.id}]).to_i.should be(0)
+      end
+
+      it 'should remove hydra_attribute_set relation from cache' do
+        hydra_set.destroy
+        lambda do
+          HydraAttribute::HydraAttributeSet.find(hydra_attribute_set.id)
+        end.should raise_error(HydraAttribute::RecordNotFound, "Couldn't find HydraAttribute::HydraAttributeSet with id=#{hydra_attribute_set.id}")
+      end
+
+      it 'should remove hydra_attribute cache' do
+        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute.id).should include(hydra_attribute_set)
+        hydra_attribute.destroy
+        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute.id).should be_blank
+      end
+
+      it 'should remove hydra_attribute from hydra_set cache' do
+        hydra_attribute2     = HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'code', backend_type: 'string')
+        hydra_attribute_set2 = HydraAttribute::HydraAttributeSet.create(hydra_set_id: hydra_set.id, hydra_attribute_id: hydra_attribute2.id)
+
+        hydra_attribute.destroy
+        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(hydra_set.id)
+        hydra_attribute_sets.should_not include(hydra_attribute_set)
+        hydra_attribute_sets.should     include(hydra_attribute_set2)
+      end
+    end
+  end
+
   describe 'validations' do
     it 'should require hydra_set_id' do
       hydra_attribute_set = HydraAttribute::HydraAttributeSet.new

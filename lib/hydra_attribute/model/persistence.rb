@@ -344,32 +344,6 @@ module HydraAttribute
         end
       end
 
-      # Performs +INSERT+ query
-      #
-      # @return [Integer] primary key
-      def create
-        return id if persisted? or destroyed?
-        self.id = self.class.connection.insert(self.class.compile_insert(attributes.except(:id)), 'SQL').to_i
-      end
-
-      # Performs +UPDATE+ query
-      #
-      # @return [TrueClass]
-      def update
-        return true unless persisted?
-        self.class.connection.update(self.class.compile_update(id, attributes.except(:id)), 'SQL')
-        true
-      end
-
-      # Deletes record from database
-      #
-      # @return [TrueClass]
-      def delete
-        return true unless persisted?
-        self.class.connection.delete(self.class.compile_delete(id: id))
-        @destroyed = true
-      end
-
       # Redefines base method because attribute methods define dynamically
       #
       # @param [Symbol] method
@@ -381,24 +355,50 @@ module HydraAttribute
       end
 
       private
-      # Redefine method for auto generation attribute methods
-      #
-      # @param [Symbol] symbol
-      # @params[Array] args
-      # @yield
-      # @return [Object]
-      def method_missing(symbol, *args, &block)
-        if self.class.generated_attribute_methods?
-          super
-        else
-          self.class.define_attribute_methods
-          if respond_to?(symbol)
-            send(symbol, *args, &block)
-          else
+        # Performs +INSERT+ query
+        #
+        # @return [Integer] primary key
+        def create
+          return id if persisted? or destroyed?
+          self.id = self.class.connection.insert(self.class.compile_insert(attributes.except(:id)), 'SQL').to_i
+        end
+
+        # Performs +UPDATE+ query
+        #
+        # @return [TrueClass]
+        def update
+          return true unless persisted?
+          self.class.connection.update(self.class.compile_update(id, attributes.except(:id)), 'SQL')
+          true
+        end
+
+        # Deletes record from database
+        #
+        # @return [TrueClass]
+        def delete
+          return true unless persisted?
+          self.class.connection.delete(self.class.compile_delete(id: id))
+          @destroyed = true
+        end
+
+        # Redefine method for auto generation attribute methods
+        #
+        # @param [Symbol] symbol
+        # @params[Array] args
+        # @yield
+        # @return [Object]
+        def method_missing(symbol, *args, &block)
+          if self.class.generated_attribute_methods?
             super
+          else
+            self.class.define_attribute_methods
+            if respond_to?(symbol)
+              send(symbol, *args, &block)
+            else
+              super
+            end
           end
         end
-      end
 
     end
   end
