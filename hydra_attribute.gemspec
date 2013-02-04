@@ -9,7 +9,7 @@ Gem::Specification.new do |gem|
   gem.homepage              = 'https://github.com/kostyantyn/hydra_attribute'
   gem.files                 = `git ls-files`.split("\n")
   gem.test_files            = `git ls-files -- {spec,features,gemfiles}/*`.split("\n")
-  gem.name                  = "hydra_attribute"
+  gem.name                  = 'hydra_attribute'
   gem.require_paths         = %w(lib)
   gem.required_ruby_version = Gem::Requirement.new('>= 1.9.2')
   gem.version               = HydraAttribute::VERSION
