@@ -10,7 +10,7 @@ module HydraAttribute
     #
     # @return [Array<HydraAttribute::HydraSet>]
     def hydra_sets
-      if persisted?
+      if id?
         ::HydraAttribute::HydraAttributeSet.hydra_sets_by_hydra_attribute_id(id)
       else
         []
