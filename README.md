@@ -82,7 +82,7 @@ Creating method accepts the following options:
 * **name**. The **required** parameter. Any string is allowed.   
 * **backend_type**. The **required** parameter. One of the following strings is allowed: `string`, `text`, `integer`, `float`, `boolean` and `datetime`.
 * **default_value**. The **optional** parameter. Any value is allowed. `nil` is default.
-* **white_list**. The **optional** parameter. Should be `true` or `flase`. `false` is default. If `white_list: true` is passed, this attribute will be added to white list and will be allowed for mass-assignment. This parameter is in black list for creation by default so if you want to pass it, you have to pass the role `as: :admin` too.
+* **white_list**. The **optional** parameter. Should be `true` or `false`. `false` is default. If `white_list: true` is passed, this attribute will be added to white list and will be allowed for mass-assignment. This parameter is in black list for creation by default so if you want to pass it, you have to pass the role `as: :admin` too.
 
   ```ruby
     Product.hydra_attributes.create({name: 'title', backend_type: 'string', white_list: true}, as: :admin)
