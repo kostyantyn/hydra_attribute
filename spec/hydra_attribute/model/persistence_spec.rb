@@ -399,5 +399,11 @@ describe HydraAttribute::Model::Persistence do
       product.price.should == 3
       product.count.should == 4
     end
+
+    it 'should type cast value before set it' do
+      product = ExampleProduct.new
+      product.count = '1'
+      product.count.should be(1)
+    end
   end
 end

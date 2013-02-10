@@ -41,13 +41,13 @@ module HydraAttribute
         # @return [NilClass]
         def define_attribute_method(column_name)
           class_eval <<-EOS, __FILE__, __LINE__ + 1
-            def #{column_name}                    # def name
-              attributes[:#{column_name}]         #   attributes[:name]
-            end                                   # end
+            def #{column_name}                                                      # def name
+              attributes[:#{column_name}]                                           #   attributes[:name]
+            end                                                                     # end
 
-            def #{column_name}=(value)            # def name=(value)
-              attributes[:#{column_name}] = value #   attributes[:name] = value
-            end                                   # end
+            def #{column_name}=(value)                                               # def name=(value)
+              attributes[:#{column_name}] = type_cast_value(:#{column_name}, value)  #   attributes[:name] = type_cast_value(:name, value)
+            end                                                                      # end
           EOS
         end
 
@@ -291,7 +291,7 @@ module HydraAttribute
       # @return [Hash] current attributes
       def assign_attributes(new_attributes = {})
         new_attributes.symbolize_keys.each do |name, value|
-          @attributes[name] = self.class.symbolized_columns_hash[name].type_cast(value)
+          @attributes[name] = type_cast_value(name, value)
         end
       end
 
@@ -378,6 +378,15 @@ module HydraAttribute
           return true unless persisted?
           self.class.connection.delete(self.class.compile_delete(id: id))
           @destroyed = true
+        end
+
+        # Type casts value based on its database type
+        #
+        # @param [Symbol] name
+        # @param [Object] value
+        # @return [Object] type casted value
+        def type_cast_value(name, value)
+          self.class.symbolized_columns_hash[name].type_cast(value)
         end
 
         # Redefine method for auto generation attribute methods
