@@ -212,6 +212,41 @@ describe HydraAttribute::Model::Persistence do
     end
   end
 
+  describe '.where_not' do
+    describe 'table is blank' do
+      it 'should return blank array' do
+        CustomProduct.where_not.should be_blank
+      end
+    end
+
+    describe 'table has records' do
+      before(:each) do
+        q1 = %q[INSERT INTO custom_products (id, name, price, quantity) VALUES (1, 'one', 1.1, 2)]
+        q2 = %q[INSERT INTO custom_products (id, name, price, quantity) VALUES (2, 'two', 2.2, 2)]
+        q3 = %q[INSERT INTO custom_products (id, name, price, quantity) VALUES (3, 'three', 3.3, 4)]
+
+        ActiveRecord::Base.connection.execute(q1)
+        ActiveRecord::Base.connection.execute(q2)
+        ActiveRecord::Base.connection.execute(q3)
+      end
+
+      it 'should return models which does not match condition' do
+        records = CustomProduct.where_not(id: 1)
+        records.should have(2).items
+
+        records[0].id.should == 2
+        records[1].id.should == 3
+      end
+
+      it 'should accept array of values in query' do
+        records = CustomProduct.where_not(id: [1, 3])
+        records.should have(1).items
+
+        records[0].id.should == 2
+      end
+    end
+  end
+
   describe '.create' do
     it 'should create record and return ID of this record' do
       model  = CustomProduct.create(name: 'apple', price: 2.50, quantity: 5)
