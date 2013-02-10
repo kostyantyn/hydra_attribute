@@ -110,7 +110,7 @@ describe HydraAttribute::HydraAttributeSet do
     end
   end
 
-  describe '.hydra_sets_by_hydra_set_id' do
+  describe '.hydra_sets_by_hydra_attribute_id' do
     it 'should return hydra_set models for the following hydra_attribute_id' do
       s1 = ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name) VALUES('Product', 'one')])
       s2 = ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name) VALUES('Product', 'two')])

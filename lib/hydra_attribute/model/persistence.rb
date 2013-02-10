@@ -41,13 +41,13 @@ module HydraAttribute
         # @return [NilClass]
         def define_attribute_method(column_name)
           class_eval <<-EOS, __FILE__, __LINE__ + 1
-          def #{column_name}                    # def name
-            attributes[:#{column_name}]         #   attributes[:name]
-          end                                   # end
+            def #{column_name}                    # def name
+              attributes[:#{column_name}]         #   attributes[:name]
+            end                                   # end
 
-          def #{column_name}=(value)            # def name=(value)
-            attributes[:#{column_name}] = value #   attributes[:name] = value
-          end                                   # end
+            def #{column_name}=(value)            # def name=(value)
+              attributes[:#{column_name}] = value #   attributes[:name] = value
+            end                                   # end
           EOS
         end
 
@@ -243,38 +243,37 @@ module HydraAttribute
         end
 
         private
-
-        # Compiles data for +WHERE+ part
-        #
-        # @param [Hash] attributes
-        # @return [Arel::Nodes::And, Arel::Nodes::Equality]
-        def compile_where(attributes = {})
-          attributes.map do |name, value|
-            method = value.is_a?(Array) ? :in : :eq
-            arel_table[name].send(method, value)
-          end.inject(:and)
-        end
-
-        # Compiles negative data for +WHERE+ part
-        #
-        # @param [Hash] attributes
-        # @return [Arel::Nodes::And, Arel::Nodes::Equality]
-        def compile_where_not(attributes = {})
-          attributes.map do |name, value|
-            method = value.is_a?(Array) ? :not_in : :not_eq
-            arel_table[name].send(method, value)
-          end.inject(:and)
-        end
-
-        # Replaces attributes' keys to +arel+ columns
-        #
-        # @param [Hash] attributes
-        # @return [Hash]
-        def attributes_to_columns(attributes = {})
-          attributes.each_with_object({}) do |(name, value), fields|
-            fields[arel_table[name]] = value
+          # Compiles data for +WHERE+ part
+          #
+          # @param [Hash] attributes
+          # @return [Arel::Nodes::And, Arel::Nodes::Equality]
+          def compile_where(attributes = {})
+            attributes.map do |name, value|
+              method = value.is_a?(Array) ? :in : :eq
+              arel_table[name].send(method, value)
+            end.inject(:and)
           end
-        end
+
+          # Compiles negative data for +WHERE+ part
+          #
+          # @param [Hash] attributes
+          # @return [Arel::Nodes::And, Arel::Nodes::Equality]
+          def compile_where_not(attributes = {})
+            attributes.map do |name, value|
+              method = value.is_a?(Array) ? :not_in : :not_eq
+              arel_table[name].send(method, value)
+            end.inject(:and)
+          end
+
+          # Replaces attributes' keys to +arel+ columns
+          #
+          # @param [Hash] attributes
+          # @return [Hash]
+          def attributes_to_columns(attributes = {})
+            attributes.each_with_object({}) do |(name, value), fields|
+              fields[arel_table[name]] = value
+            end
+          end
       end
 
       # Model initializer
