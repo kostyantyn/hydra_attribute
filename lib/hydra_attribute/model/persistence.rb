@@ -48,6 +48,10 @@ module HydraAttribute
             def #{column_name}=(value)                                               # def name=(value)
               attributes[:#{column_name}] = type_cast_value(:#{column_name}, value)  #   attributes[:name] = type_cast_value(:name, value)
             end                                                                      # end
+
+            def #{column_name}?                                                      # name?
+              attributes[:#{column_name}].present?                                   #  attributes[:name].present?
+            end                                                                      # end
           EOS
         end
 

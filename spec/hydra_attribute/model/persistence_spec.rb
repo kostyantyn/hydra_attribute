@@ -376,10 +376,13 @@ describe HydraAttribute::Model::Persistence do
     it 'should respond to attribute methods' do
       ExampleProduct.new.should respond_to(:title)
       ExampleProduct.new.should respond_to(:title=)
+      ExampleProduct.new.should respond_to(:title?)
       ExampleProduct.new.should respond_to(:price)
       ExampleProduct.new.should respond_to(:price=)
+      ExampleProduct.new.should respond_to(:price?)
       ExampleProduct.new.should respond_to(:count)
       ExampleProduct.new.should respond_to(:count=)
+      ExampleProduct.new.should respond_to(:count?)
     end
 
     it 'should get values from attributes' do
@@ -404,6 +407,17 @@ describe HydraAttribute::Model::Persistence do
       product = ExampleProduct.new
       product.count = '1'
       product.count.should be(1)
+    end
+
+    it 'should validate values' do
+      product = ExampleProduct.new
+      product.title?.should be_false
+
+      product.title = ''
+      product.title?.should be_false
+
+      product.title = 'a'
+      product.title?.should be_true
     end
   end
 end
