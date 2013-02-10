@@ -41,9 +41,9 @@ module HydraAttribute
         # @return [NilClass]
         def define_attribute_method(column_name)
           class_eval <<-EOS, __FILE__, __LINE__ + 1
-            def #{column_name}                                                      # def name
-              attributes[:#{column_name}]                                           #   attributes[:name]
-            end                                                                     # end
+            def #{column_name}                                                       # def name
+              attributes[:#{column_name}]                                            #   attributes[:name]
+            end                                                                      # end
 
             def #{column_name}=(value)                                               # def name=(value)
               attributes[:#{column_name}] = type_cast_value(:#{column_name}, value)  #   attributes[:name] = type_cast_value(:name, value)
