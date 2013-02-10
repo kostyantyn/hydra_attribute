@@ -168,6 +168,21 @@ describe HydraAttribute::Model::Persistence do
         records[0].quantity.should == 2
       end
 
+      it 'should select records by collection of values' do
+        records = CustomProduct.where(id: [1, 2])
+        records.should have(2).items
+
+        records[0].id.should       == 1
+        records[0].name.should     == 'one'
+        records[0].price.should    == 1.1
+        records[0].quantity.should == 2
+
+        records[1].id.should       == 2
+        records[1].name.should     == 'two'
+        records[1].price.should    == 2.2
+        records[1].quantity.should == 2
+      end
+
       it 'should select certain columns' do
         records = CustomProduct.where({quantity: 2}, %w[id name])
         records.should have(2).items
