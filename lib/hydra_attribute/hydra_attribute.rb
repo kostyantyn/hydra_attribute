@@ -11,7 +11,7 @@ module HydraAttribute
     # @return [Array<HydraAttribute::HydraSet>]
     def hydra_sets
       if id?
-        ::HydraAttribute::HydraAttributeSet.hydra_sets_by_hydra_attribute_id(id)
+        HydraAttributeSet.hydra_sets_by_hydra_attribute_id(id)
       else
         []
       end

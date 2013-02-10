@@ -1,6 +1,37 @@
 require 'spec_helper'
 
 describe HydraAttribute::HydraAttribute do
+  describe '#hydra_sets' do
+    it 'should return blank array if model has not ID' do
+      HydraAttribute::HydraAttribute.new.hydra_sets.should be_blank
+    end
+
+    it 'should return blank array if model has not any hydra_sets' do
+      hydra_attribute = HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'title', backend_type: 'string')
+      hydra_attribute.hydra_sets.should be_blank
+    end
+
+    it 'should return array of hydra_sets for the current hydra_attribute' do
+      hydra_attribute1 = HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'attr1', backend_type: 'string')
+      hydra_attribute2 = HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'attr2', backend_type: 'string')
+      hydra_set1       = HydraAttribute::HydraSet.create(entity_type: 'Product', name: 'default1')
+      hydra_set2       = HydraAttribute::HydraSet.create(entity_type: 'Product', name: 'default2')
+      hydra_set3       = HydraAttribute::HydraSet.create(entity_type: 'Product', name: 'default3')
+
+
+      HydraAttribute::HydraAttributeSet.create(hydra_set_id: hydra_set1.id, hydra_attribute_id: hydra_attribute1.id)
+      HydraAttribute::HydraAttributeSet.create(hydra_set_id: hydra_set2.id, hydra_attribute_id: hydra_attribute1.id)
+      HydraAttribute::HydraAttributeSet.create(hydra_set_id: hydra_set3.id, hydra_attribute_id: hydra_attribute2.id)
+
+      hydra_attribute1.should have(2).hydra_sets
+      hydra_attribute2.should have(1).hydra_sets
+
+      hydra_attribute1.hydra_sets.should include(hydra_set1)
+      hydra_attribute1.hydra_sets.should include(hydra_set2)
+      hydra_attribute2.hydra_sets.should include(hydra_set3)
+    end
+  end
+
   describe 'validations' do
     it 'should require entity_type' do
       hydra_attribute = HydraAttribute::HydraAttribute.new
