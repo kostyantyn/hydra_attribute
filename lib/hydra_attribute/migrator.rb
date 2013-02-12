@@ -60,7 +60,7 @@ module HydraAttribute
         change_table name, options do |t|
           t.integer :hydra_set_id, null: true
         end
-        add_index name, :hydra_set_id, uniqie: false, name: "#{name}_hydra_set_id_index"
+        add_index name, :hydra_set_id, unique: false, name: "#{name}_hydra_set_id_index"
       end
 
       def create_attribute
