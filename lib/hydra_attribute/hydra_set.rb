@@ -1,6 +1,6 @@
 module HydraAttribute
   class HydraSet
-    include Model
+    include ::HydraAttribute::Model
 
     validates :entity_type, presence: true
     validates :name,        presence: true, unique: { scope: :entity_type }

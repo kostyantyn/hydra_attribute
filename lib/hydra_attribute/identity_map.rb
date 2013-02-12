@@ -1,3 +1,4 @@
+# TODO isn't thread safe
 module HydraAttribute
   class IdentityMap < Hash
 

@@ -1,6 +1,6 @@
 module HydraAttribute
   class HydraAttributeSet
-    include Model
+    include ::HydraAttribute::Model
 
     nested_cache_keys :hydra_attribute, :hydra_set
     nested_cache_keys :hydra_attributes_by_hydra_set_id

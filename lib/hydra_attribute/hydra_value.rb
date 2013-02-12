@@ -1,8 +1,3 @@
-# This is a lightweight value model
-# It acts as <tt>ActiveRecord::Base</tt> model and represents one record from <tt>hydra_value_*</tt> table
-#
-# Table schema:
-# | id | entity_id | hydra_attribute_id | value | created_at | updated_at |
 module HydraAttribute
   class HydraValue
 
@@ -22,12 +17,15 @@ module HydraAttribute
       end
     end
 
+    include ::HydraAttribute::Model::IdentityMap
     include ActiveModel::AttributeMethods
     include ActiveModel::Dirty
 
-    attr_reader :entity, :attributes
+    attr_reader :entity
 
     define_attribute_method :value
+
+    nested_cache_keys :column
 
     # Initialize hydra value object
     #
@@ -37,9 +35,11 @@ module HydraAttribute
     # @option attributes [Symbol] :hydra_attribute_id this field is required
     # @option attributes [Symbol] :value
     def initialize(entity, attributes = {})
+      raise HydraAttributeIdIsMissedError unless attributes.has_key?(:hydra_attribute_id)
+
       @entity     = entity
       @attributes = attributes
-      raise HydraAttributeIdIsMissedError unless attributes.has_key?(:hydra_attribute_id)
+      @value      = column.type_cast(attributes[:value]) if attributes.has_key?(:value)
     end
 
     class << self
@@ -53,27 +53,38 @@ module HydraAttribute
           end
         end
       end
+
+      # Returns database adapter
+      #
+      # @return [ActiveRecord::ConnectionAdapters::AbstractAdapter]
+      def connection
+        @connection ||= ::ActiveRecord::Base.connection
+      end
+
+      # Returns virtual value column
+      #
+      # @param [Fixnum] hydra_attribute_id
+      # @return [ActiveRecord::ConnectionAdapters::Column]
+      def column(hydra_attribute_id)
+        column_cache(hydra_attribute_id.to_i) do
+          hydra_attribute = ::HydraAttribute::HydraAttribute.find(hydra_attribute_id)
+          ::ActiveRecord::ConnectionAdapters::Column.new(hydra_attribute.name, hydra_attribute.default_value, hydra_attribute.backend_type)
+        end
+      end
     end
 
-    # Returns primary key
+    # Returns virtual value column
     #
-    # @return [Integer]
+    # @return [ActiveRecord::ConnectionAdapters::Column]
+    def column
+      self.class.column(hydra_attribute.id)
+    end
+
+    # Returns model ID
+    #
+    # @return [Fixnum]
     def id
-      attributes[:id]
-    end
-
-    # Set primary key
-    #
-    # @return [Integer]
-    def id=(id)
-      attributes[:id] = id
-    end
-
-    # Returns hydra attribute ID
-    #
-    # @return [Integer]
-    def hydra_attribute_id
-      attributes[:hydra_attribute_id]
+      @attributes[:id]
     end
 
     # Current type casted attribute value
@@ -89,7 +100,7 @@ module HydraAttribute
     # @return [NilClass]
     def value=(new_value)
       value_will_change! unless value == new_value
-      attributes[:value] = new_value
+      @attributes[:value] = new_value
       @value = column.type_cast(new_value)
     end
 
@@ -97,7 +108,7 @@ module HydraAttribute
     #
     # @return [Object]
     def value_before_type_cast
-      attributes[:value]
+      @attributes[:value]
     end
 
     # Checks if value not blank and not zero for number types
@@ -117,28 +128,14 @@ module HydraAttribute
     #
     # @return [HydraAttribute::HydraAttribute]
     def hydra_attribute
-      entity.class.hydra_attribute(hydra_attribute_id)
-    end
-
-    # Returns attribute name
-    #
-    # @return [String]
-    def name
-      hydra_attribute.name
-    end
-
-    # Returns attribute backend type
-    #
-    # @return [String] one of the <tt>HydraAttribute::SUPPORTED_BACKEND_TYPES</tt> backend types
-    def backend_type
-      hydra_attribute.backend_type
+      @hydra_attribute ||= ::HydraAttribute::HydraAttribute.find(@attributes[:hydra_attribute_id])
     end
 
     # Checks if model is persisted
     #
     # @return [TrueClass, FalseClass]
     def persisted?
-      id.present?
+      @attributes[:id].present?
     end
 
     # Saves model
@@ -159,32 +156,18 @@ module HydraAttribute
       true
     end
 
-    # Returns database connection adapter
-    #
-    # @return [ActiveRecord::ConnectionAdapters::AbstractAdapter]
-    def connection
-      entity.connection
-    end
-
-    # Initializes virtual value column
-    #
-    # @return [ActiveRecord::ConnectionAdapters::Column]
-    def column
-      @column ||= ::ActiveRecord::ConnectionAdapters::Column.new(name, attributes[:value], backend_type)
-    end
-
     private
       # Creates arel insert manager
       #
       # @return [Arel::InsertManager]
       def arel_insert
-        table  = self.class.arel_tables[entity.class.table_name][backend_type]
+        table  = self.class.arel_tables[entity.class.table_name][hydra_attribute.backend_type]
         fields = {}
         fields[table[:entity_id]]          = entity.id
-        fields[table[:hydra_attribute_id]] = hydra_attribute_id
+        fields[table[:hydra_attribute_id]] = hydra_attribute.id
         fields[table[:value]]              = value
-        fields[table[:created_at]]         = Time.now.utc
-        fields[table[:updated_at]]         = Time.now.utc
+        fields[table[:created_at]]         = Time.now
+        fields[table[:updated_at]]         = Time.now
         table.compile_insert(fields)
       end
 
@@ -192,26 +175,23 @@ module HydraAttribute
       #
       # @return [Arel::UpdateManager]
       def arel_update
-        table  = self.class.arel_tables[entity.class.table_name][backend_type]
-        arel   = table.from(table)
-        fields = {}
-        fields[table[:value]]      = value
-        fields[table[:updated_at]] = Time.now.utc
-        arel.where(table[:id].eq(id)).compile_update(fields)
+        table = self.class.arel_tables[entity.class.table_name][hydra_attribute.backend_type]
+        arel  = table.from(table)
+        arel.where(table[:id].eq(id)).compile_update(table[:value] => value, table[:updated_at] => Time.now)
       end
 
       # Performs sql insert query
       #
       # @return [Integer] primary key
       def create
-        self.id = connection.insert(arel_insert, 'SQL')
+        @attributes[:id] = self.class.connection.insert(arel_insert, 'SQL')
       end
 
       # Performs sql update query
       #
       # @return [NilClass]
       def update
-        connection.update(arel_update, 'SQL')
+        self.class.connection.update(arel_update, 'SQL')
       end
   end
 end
