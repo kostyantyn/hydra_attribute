@@ -248,16 +248,16 @@ describe HydraAttribute::HydraValue do
         hydra_value = HydraAttribute::HydraValue.new(product, hydra_attribute_id: hydra_attribute.id)
 
         conn  = product.connection
-        count = lambda { conn.select_value('SELECT COUNT(*) FROM hydra_float_products') }
+        count = lambda { conn.select_value('SELECT COUNT(*) FROM hydra_float_products').to_i }
         lambda do
           hydra_value.value = 2.50
           hydra_value.save
           hydra_value.should be_persisted
 
           result = conn.select_one("SELECT * FROM hydra_float_products WHERE id=#{hydra_value.id}")
-          result['hydra_attribute_id'].should == hydra_attribute.id
-          result['entity_id'].should          == product.id
-          result['value'].should              == 2.50
+          result['hydra_attribute_id'].to_i.should == hydra_attribute.id
+          result['entity_id'].to_i.should          == product.id
+          result['value'].to_f.should              == 2.50
         end.should change(&count).by(1)
       end
     end
@@ -269,15 +269,15 @@ describe HydraAttribute::HydraValue do
         hydra_value.save
 
         conn  = product.connection
-        count = lambda { conn.select_value('SELECT COUNT(*) FROM hydra_float_products') }
+        count = lambda { conn.select_value('SELECT COUNT(*) FROM hydra_float_products').to_i }
         lambda do
           hydra_value.value = 5.50
           hydra_value.save
 
           result = conn.select_one("SELECT * FROM hydra_float_products WHERE id=#{hydra_value.id}")
-          result['hydra_attribute_id'].should == hydra_attribute.id
-          result['entity_id'].should          == product.id
-          result['value'].should              == 5.50
+          result['hydra_attribute_id'].to_i.should == hydra_attribute.id
+          result['entity_id'].to_i.should          == product.id
+          result['value'].to_f.should              == 5.50
         end.should_not change(&count)
       end
     end
