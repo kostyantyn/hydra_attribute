@@ -1,7 +1,7 @@
 require 'spec_helper'
 
-describe HydraAttribute::Model::Cache do
-  before(:all) do
+describe HydraAttribute::Model::Cacheable do
+  before do
     ::ActiveRecord::Base.connection.create_table(:custom_products) do |t|
       t.string  :name
       t.float   :price
@@ -9,21 +9,20 @@ describe HydraAttribute::Model::Cache do
     end
     Object.const_set('CustomProduct', Class.new)
     CustomProduct.send(:include, HydraAttribute::Model::Validations) # dependency
-    CustomProduct.send(:include, HydraAttribute::Model::Mediator)    # dependency
     CustomProduct.send(:include, HydraAttribute::Model::Persistence) # dependency
     CustomProduct.send(:include, HydraAttribute::Model::IdentityMap) # dependency
-    CustomProduct.send(:include, HydraAttribute::Model::Cache)
+    CustomProduct.send(:include, HydraAttribute::Model::Cacheable)
   end
 
-  after(:all) do
+  after do
     ::ActiveRecord::Base.connection.drop_table(:custom_products)
     Object.send(:remove_const, 'CustomProduct')
   end
 
   describe '.all' do
     it 'should find all models and store them into the cache' do
-      q1 = %[INSERT INTO custom_products (name, price, quantity) VALUES ('one', 2.5, 5)]
-      q2 = %[INSERT INTO custom_products (name, price, quantity) VALUES ('two', 3.5, 6)]
+      q1 = %q[INSERT INTO custom_products (name, price, quantity) VALUES ('one', 2.5, 5)]
+      q2 = %q[INSERT INTO custom_products (name, price, quantity) VALUES ('two', 3.5, 6)]
 
       ActiveRecord::Base.connection.execute(q1)
       ActiveRecord::Base.connection.execute(q2)
@@ -36,18 +35,12 @@ describe HydraAttribute::Model::Cache do
 
       CustomProduct.identity_map[:all].should == all
     end
-
-    it 'should hit database once' do
-      connection = ActiveRecord::Base.connection
-      CustomProduct.should_receive(:connection).once.and_return(connection)
-      2.times { CustomProduct.all }
-    end
   end
 
   describe '.find' do
-    it 'should load all records and find the right one from the cache' do
-      q1 = %[INSERT INTO custom_products (name, price, quantity) VALUES ('one', 2.5, 5)]
-      q2 = %[INSERT INTO custom_products (name, price, quantity) VALUES ('two', 3.5, 6)]
+    it 'should load all records store them to the cache' do
+      q1 = %q[INSERT INTO custom_products (name, price, quantity) VALUES ('one', 2.5, 5)]
+      q2 = %q[INSERT INTO custom_products (name, price, quantity) VALUES ('two', 3.5, 6)]
 
       id1 = ActiveRecord::Base.connection.insert(q1)
       id2 = ActiveRecord::Base.connection.insert(q2)
@@ -59,6 +52,9 @@ describe HydraAttribute::Model::Cache do
       CustomProduct.identity_map[:all].should have(2).records
       CustomProduct.identity_map[:all][0].id.should be(id1.to_i)
       CustomProduct.identity_map[:all][1].id.should be(id2.to_i)
+
+      CustomProduct.nested_identity_map(:model)[id1.to_i].id.should be(id1.to_i)
+      CustomProduct.nested_identity_map(:model)[id2.to_i].id.should be(id2.to_i)
     end
 
     it 'should raise an error if cannot find the record' do
@@ -72,13 +68,13 @@ describe HydraAttribute::Model::Cache do
     it 'should store model into the cache if it has an ID' do
       product1 = CustomProduct.new(id: 1)
       product2 = CustomProduct.new(id: 2)
-      CustomProduct.model_identity_map[1].should be(product1)
-      CustomProduct.model_identity_map[2].should be(product2)
+      CustomProduct.nested_identity_map(:model)[1].should be(product1)
+      CustomProduct.nested_identity_map(:model)[2].should be(product2)
     end
 
     it 'should not store model into the cache if it has not an ID' do
       CustomProduct.new
-      CustomProduct.model_identity_map.should be_empty
+      CustomProduct.nested_identity_map(:model).should be_empty
     end
 
     it 'should not add model to the :all cache key' do
@@ -87,11 +83,11 @@ describe HydraAttribute::Model::Cache do
     end
   end
 
-  describe '#save' do
+  describe '#create' do
     it 'should add model to the cache if it was a new model' do
       product = CustomProduct.new
       product.save
-      CustomProduct.model_identity_map[product.id].should be(product)
+      CustomProduct.nested_identity_map(:model)[product.id].should be(product)
     end
 
     it 'should not add model to the :all cache key if all models were not loaded before' do
@@ -104,23 +100,6 @@ describe HydraAttribute::Model::Cache do
       product = CustomProduct.new
       product.save
       CustomProduct.identity_map[:all].should include(product)
-    end
-  end
-
-  describe '#destroy' do
-    it 'should remove model from the cache' do
-      product = CustomProduct.new
-      product.save
-      product.destroy
-      CustomProduct.model_identity_map[product.id].should be_nil
-    end
-
-    it 'should remove model from the :all cache' do
-      CustomProduct.all
-      product = CustomProduct.new
-      product.save
-      product.destroy
-      CustomProduct.identity_map[:all].should_not include(product)
     end
   end
 end

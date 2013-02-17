@@ -329,11 +329,7 @@ module HydraAttribute
         return false unless valid?
 
         self.class.connection.transaction do
-          if persisted?
-            notify(:update) { update }
-          else
-            notify(:create) { create }
-          end
+          persisted? ? update : create
         end
       end
 
@@ -343,7 +339,7 @@ module HydraAttribute
       # @return [TrueClass]
       def destroy
         self.class.connection.transaction do
-          notify(:destroy) { delete }
+          delete
         end
       end
 
@@ -370,8 +366,7 @@ module HydraAttribute
         #
         # @return [TrueClass]
         def update
-          return true unless persisted?
-          self.class.connection.update(self.class.compile_update(id, attributes.except(:id)), 'SQL')
+          self.class.connection.update(self.class.compile_update(id, attributes.except(:id)), 'SQL') if persisted?
           true
         end
 

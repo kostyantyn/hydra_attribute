@@ -9,7 +9,6 @@ describe HydraAttribute::Model::Persistence do
     end
     Object.const_set('CustomProduct', Class.new)
     CustomProduct.send(:include, HydraAttribute::Model::Validations) # dependency
-    CustomProduct.send(:include, HydraAttribute::Model::Mediator)    # dependency
     CustomProduct.send(:include, HydraAttribute::Model::Persistence)
   end
 
@@ -345,6 +344,9 @@ describe HydraAttribute::Model::Persistence do
       end
 
       it 'should not commit insert query if error was raised during saving' do
+        CustomProduct.send(:include, HydraAttribute::Model::Mediator)
+        CustomProduct.send(:include, HydraAttribute::Model::Notifiable)
+
         Class.new do
           include HydraAttribute::Model::Mediator
           observe 'CustomProduct', after_create: :after_create
@@ -394,6 +396,9 @@ describe HydraAttribute::Model::Persistence do
     end
 
     it 'should not commit delete query if error was raised during destroying' do
+      CustomProduct.send(:include, HydraAttribute::Model::Mediator)
+      CustomProduct.send(:include, HydraAttribute::Model::Notifiable)
+
       Class.new do
         include HydraAttribute::Model::Mediator
         observe 'CustomProduct', after_destroy: :after_destroy

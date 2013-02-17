@@ -36,46 +36,4 @@ describe HydraAttribute::Model::IdentityMap do
       ExampleClass.identity_map.cache(:b) { 3 }.should be(2)
     end
   end
-
-  describe '.nested_cache_keys' do
-    it 'should generate nested identity map storage' do
-      ExampleClass.nested_cache_keys(:one, :two)
-
-      ExampleClass.one_identity_map.should be_a_kind_of(HydraAttribute::IdentityMap)
-      ExampleClass.two_identity_map.should be_a_kind_of(HydraAttribute::IdentityMap)
-    end
-
-    it 'should generate different identity map storage' do
-      ExampleClass.nested_cache_keys(:one, :two)
-
-      im1 = ExampleClass.one_identity_map
-      im2 = ExampleClass.two_identity_map
-
-      im1.should_not be(im2)
-    end
-
-    it 'should store generated identity map storage into existed identity map for class' do
-      ExampleClass.nested_cache_keys(:one, :two)
-
-      im1 = ExampleClass.one_identity_map
-      im2 = ExampleClass.two_identity_map
-
-      ExampleClass.identity_map[:one].should be(im1)
-      ExampleClass.identity_map[:two].should be(im2)
-    end
-
-    it 'should generate proxy cache method for identity map' do
-      ExampleClass.nested_cache_keys(:one, :two)
-
-      ExampleClass.one_cache(:a, 1)
-      ExampleClass.two_cache(:a, 2)
-      ExampleClass.one_cache(:b) { 3 }
-      ExampleClass.two_cache(:b) { 4 }
-
-      ExampleClass.one_identity_map[:a].should be(1)
-      ExampleClass.two_identity_map[:a].should be(2)
-      ExampleClass.one_identity_map[:b].should be(3)
-      ExampleClass.two_identity_map[:b].should be(4)
-    end
-  end
 end

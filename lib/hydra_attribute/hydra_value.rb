@@ -25,7 +25,7 @@ module HydraAttribute
 
     define_attribute_method :value
 
-    nested_cache_keys :column
+    register_nested_cache :column
 
     # Initialize hydra value object
     #
@@ -66,7 +66,7 @@ module HydraAttribute
       # @param [Fixnum] hydra_attribute_id
       # @return [ActiveRecord::ConnectionAdapters::Column]
       def column(hydra_attribute_id)
-        column_cache(hydra_attribute_id.to_i) do
+        nested_identity_map(:column).cache(hydra_attribute_id.to_i) do
           hydra_attribute = ::HydraAttribute::HydraAttribute.find(hydra_attribute_id)
           ::ActiveRecord::ConnectionAdapters::Column.new(hydra_attribute.name, hydra_attribute.default_value, hydra_attribute.backend_type)
         end
@@ -77,7 +77,7 @@ module HydraAttribute
     #
     # @return [ActiveRecord::ConnectionAdapters::Column]
     def column
-      self.class.column(hydra_attribute.id)
+      self.class.column(@attributes[:hydra_attribute_id])
     end
 
     # Returns model ID

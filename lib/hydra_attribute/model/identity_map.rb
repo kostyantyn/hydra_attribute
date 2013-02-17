@@ -20,6 +20,14 @@ module HydraAttribute
           ::HydraAttribute.cache(identity_map_cache_key) { ::HydraAttribute::IdentityMap.new }
         end
 
+        # Returns identity map object which is inserted into the default one
+        #
+        # @param [Symbol] cache_key
+        # @return [HydraAttribute::IdentityMap]
+        def nested_identity_map(cache_key)
+          identity_map.cache(cache_key) { ::HydraAttribute::IdentityMap.new }
+        end
+
         # Proxy method to +identity_map+
         #
         # @param [String, Symbol] key
@@ -30,23 +38,21 @@ module HydraAttribute
           identity_map.cache(key, value, &block)
         end
 
-        # Generates nested cache keys
+        # Registers nested cache
         #
         # @param [Array<Symbol>] cache_keys
         # @return [NilClass]
-        def nested_cache_keys(*cache_keys)
+        def register_nested_cache(*cache_keys)
           cache_keys.each do |cache_key|
-            instance_eval <<-EOS, __FILE__, __LINE__ + 1
-              def #{cache_key}_identity_map                                             # def name_identity_map
-                identity_map.cache(:#{cache_key}) { ::HydraAttribute::IdentityMap.new } #   identity_map(:name) { ::HydraAttribute::identityMap.new }
-              end                                                                       # end
-
-              def #{cache_key}_cache(key, value = nil, &block)                          # def name_cache(key, value = nil, &block)
-                #{cache_key}_identity_map.cache(key, value, &block)                     #   name_identity_map.cache(key, value, &block)
-              end                                                                       # end
-            EOS
+            nested_cache_keys << cache_key
           end
         end
+
+        private
+          # Store all nested cache keys
+          def nested_cache_keys
+            @nested_cache_keys ||= []
+          end
       end
     end
   end
