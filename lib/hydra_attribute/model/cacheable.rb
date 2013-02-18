@@ -28,7 +28,7 @@ module HydraAttribute
         #
         # @return [HydraAttribute::Cacheable]
         def find(id)
-          model = get_from_nested_cache_or_load_all_models(:model, id)
+          model = get_from_nested_cache_or_load_all_models(:model, id.to_i)
           raise RecordNotFound, "Couldn't find #{name} with id=#{id}" unless model
           model
         end
