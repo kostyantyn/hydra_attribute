@@ -42,6 +42,14 @@ describe HydraAttribute::HydraAttributeSet do
         HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute_id1).should have(4).models
         HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute_id1).should include(hydra_attribute_set)
       end
+
+      it 'should not return model which was removed' do
+        id = ::ActiveRecord::Base.connection.select_value(%[SELECT id FROM hydra_attribute_sets WHERE hydra_attribute_id=#{hydra_attribute_id1} LIMIT 1])
+        HydraAttribute::HydraAttributeSet.find(id).destroy
+
+        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute_id1)
+        hydra_attribute_sets.should have(1).item
+      end
     end
 
     describe 'hydra_attribute_sets table is blank' do
@@ -104,6 +112,14 @@ describe HydraAttribute::HydraAttributeSet do
         hydra_attribute_set = HydraAttribute::HydraAttributeSet.create(hydra_attribute_id: hydra_attribute_id, hydra_set_id: hydra_set_id1)
         HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(hydra_set_id1).should have(4).models
         HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(hydra_set_id1).should include(hydra_attribute_set)
+      end
+
+      it 'should not return model which was removed' do
+        id = ::ActiveRecord::Base.connection.select_value(%[SELECT id FROM hydra_attribute_sets WHERE hydra_set_id=#{hydra_set_id1} LIMIT 1])
+        HydraAttribute::HydraAttributeSet.find(id).destroy
+
+        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(hydra_set_id1)
+        hydra_attribute_sets.should have(1).item
       end
     end
 
@@ -169,6 +185,15 @@ describe HydraAttribute::HydraAttributeSet do
         hydra_attributes = HydraAttribute::HydraAttributeSet.hydra_attributes_by_hydra_set_id(hydra_set_id1)
         hydra_attributes.should have(4).models
         hydra_attributes.map(&:name).should =~ %w[name code title quantity]
+      end
+
+      it 'should not return model which was removed' do
+        id = ::ActiveRecord::Base.connection.select_value(%[SELECT id FROM hydra_attribute_sets WHERE hydra_attribute_id=#{hydra_attribute_id1} AND hydra_set_id=#{hydra_set_id1}])
+        HydraAttribute::HydraAttributeSet.find(id).destroy
+
+        hydra_attributes = HydraAttribute::HydraAttributeSet.hydra_attributes_by_hydra_set_id(hydra_set_id1)
+        hydra_attributes.should have(1).item
+        hydra_attributes[0].name.should == 'code'
       end
     end
 
@@ -238,6 +263,15 @@ describe HydraAttribute::HydraAttributeSet do
         hydra_sets.should have(4).models
         hydra_sets.map(&:name).should =~ %w[one two three four]
       end
+
+      it 'should not return model which was removed' do
+        id = ::ActiveRecord::Base.connection.select_value(%[SELECT id FROM hydra_attribute_sets WHERE hydra_attribute_id=#{hydra_attribute_id1} AND hydra_set_id=#{hydra_set_id1}])
+        HydraAttribute::HydraAttributeSet.find(id).destroy
+
+        hydra_sets = HydraAttribute::HydraAttributeSet.hydra_sets_by_hydra_attribute_id(hydra_attribute_id1)
+        hydra_sets.should have(1).item
+        hydra_sets[0].name.should == 'two'
+      end
     end
 
     describe 'hydra_attribute_sets table is blank' do
@@ -292,6 +326,14 @@ describe HydraAttribute::HydraAttributeSet do
         HydraAttribute::HydraAttributeSet.create(hydra_set_id: hydra_set_id2, hydra_attribute_id: hydra_attribute_id4)
         HydraAttribute::HydraAttributeSet.hydra_attribute_ids_by_hydra_set_id(hydra_set_id2).should =~ [hydra_attribute_id1, hydra_attribute_id2, hydra_attribute_id3, hydra_attribute_id4]
       end
+
+      it 'should not return hydra_attribute_id if hydra_attribute_set was removed' do
+        id = ::ActiveRecord::Base.connection.select_value(%[SELECT id FROM hydra_attribute_sets WHERE hydra_attribute_id=#{hydra_attribute_id2} AND hydra_set_id=#{hydra_set_id2}])
+        HydraAttribute::HydraAttributeSet.find(id).destroy
+
+        hydra_attribute_ids = HydraAttribute::HydraAttributeSet.hydra_attribute_ids_by_hydra_set_id(hydra_set_id2)
+        hydra_attribute_ids.should == [hydra_attribute_id1]
+      end
     end
 
     describe 'hydra_attribute_sets table is blank' do
@@ -341,6 +383,14 @@ describe HydraAttribute::HydraAttributeSet do
         HydraAttribute::HydraAttributeSet.create(hydra_set_id: hydra_set_id4, hydra_attribute_id: hydra_attribute_id1)
         HydraAttribute::HydraAttributeSet.hydra_set_ids_by_hydra_attribute_id(hydra_attribute_id1).should =~ [hydra_set_id1, hydra_set_id2, hydra_set_id3, hydra_set_id4]
       end
+
+      it 'should not return hydra_set_id if hydra_attribute_set was removed' do
+        id = ::ActiveRecord::Base.connection.select_value(%[SELECT id FROM hydra_attribute_sets WHERE hydra_attribute_id=#{hydra_attribute_id1} AND hydra_set_id=#{hydra_set_id1}])
+        HydraAttribute::HydraAttributeSet.find(id).destroy
+
+        hydra_set_ids = HydraAttribute::HydraAttributeSet.hydra_set_ids_by_hydra_attribute_id(hydra_attribute_id1)
+        hydra_set_ids.should == [hydra_set_id2]
+      end
     end
 
     describe 'hydra_attribute_sets table is blank' do
@@ -385,6 +435,13 @@ describe HydraAttribute::HydraAttributeSet do
     it 'should return false if hydra_attribute_id is not assigned to hydra_set_id' do
       HydraAttribute::HydraAttributeSet.should_not have_hydra_attribute_id_in_hydra_set_id(0, 0)
     end
+
+    it 'should return false if hydra_attribute_set was destroyed in runtime' do
+      id = ::ActiveRecord::Base.connection.select_value(%[SELECT id FROM hydra_attribute_sets WHERE hydra_attribute_id=#{hydra_attribute_id} AND hydra_set_id=#{hydra_set_id}])
+      HydraAttribute::HydraAttributeSet.find(id).destroy
+
+      HydraAttribute::HydraAttributeSet.should_not have_hydra_attribute_id_in_hydra_set_id(hydra_attribute_id, hydra_set_id)
+    end
   end
 
   describe '.has_hydra_set_id_in_hydra_attribute_id?' do
@@ -409,6 +466,13 @@ describe HydraAttribute::HydraAttributeSet do
 
     it 'should return false if hydra_set_id is not assigned to hydra_attribute_id' do
       HydraAttribute::HydraAttributeSet.should_not have_hydra_set_id_in_hydra_attribute_id(0, 0)
+    end
+
+    it 'should return false if hydra_attribute_set was destroyed in runtime' do
+      id = ::ActiveRecord::Base.connection.select_value(%[SELECT id FROM hydra_attribute_sets WHERE hydra_attribute_id=#{hydra_attribute_id} AND hydra_set_id=#{hydra_set_id}])
+      HydraAttribute::HydraAttributeSet.find(id).destroy
+
+      HydraAttribute::HydraAttributeSet.should_not have_hydra_set_id_in_hydra_attribute_id(hydra_set_id, hydra_attribute_id)
     end
   end
 
