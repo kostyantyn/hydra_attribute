@@ -5,6 +5,7 @@ require 'hydra_attribute/model/mediator'
 require 'hydra_attribute/model/notifiable'
 require 'hydra_attribute/model/identity_map'
 require 'hydra_attribute/model/cacheable'
+require 'hydra_attribute/model/dirty'
 
 module HydraAttribute
   module Model
@@ -16,5 +17,6 @@ module HydraAttribute
     include Notifiable
     include IdentityMap
     include Cacheable
+    include Dirty
   end
 end

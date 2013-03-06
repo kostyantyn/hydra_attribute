@@ -1,6 +1,46 @@
 require 'spec_helper'
 
 describe HydraAttribute::HydraAttribute do
+  describe '.hydra_attributes_by_entity_type' do
+    describe 'hydra_attributes table has several records' do
+      let!(:attr_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'attr1', 'string')]) }
+      let!(:attr_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'attr2', 'integer')]) }
+      let!(:attr_id3) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Category', 'attr3', 'string')]) }
+
+      it 'should return hydra_attributes which have the following entity_type' do
+        HydraAttribute::HydraAttribute.hydra_attributes_by_entity_type('Product').map(&:name).should =~ %w[attr1 attr2]
+        HydraAttribute::HydraAttribute.hydra_attributes_by_entity_type('Category').map(&:name).should =~ %w[attr3]
+      end
+
+      it 'should not return hydra_attribute which was removed in runtime' do
+        HydraAttribute::HydraAttribute.find(attr_id1).destroy
+        HydraAttribute::HydraAttribute.hydra_attributes_by_entity_type('Product').map(&:name).should =~ %w[attr2]
+        HydraAttribute::HydraAttribute.hydra_attributes_by_entity_type('Category').map(&:name).should =~ %w[attr3]
+      end
+
+      it 'should not return hydra_attribute which entity_type was changed in runtime' do
+        hydra_attribute = HydraAttribute::HydraAttribute.find(attr_id1)
+        hydra_attribute.entity_type = 'Category'
+        hydra_attribute.save
+
+        HydraAttribute::HydraAttribute.hydra_attributes_by_entity_type('Product').map(&:name).should =~ %w[attr2]
+        HydraAttribute::HydraAttribute.hydra_attributes_by_entity_type('Category').map(&:name).should =~ %w[attr1 attr3]
+      end
+    end
+
+    describe 'hydra_attributes table is blank' do
+      it 'should return blank collection if hydra_attributes table is blank' do
+        HydraAttribute::HydraAttribute.hydra_attributes_by_entity_type('Product').should == []
+      end
+
+      it 'should return hydra_attribute which was created in runtime' do
+        HydraAttribute::HydraAttribute.hydra_attributes_by_entity_type('Product').should == []
+        hydra_attribute = HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'attr1', backend_type: 'string')
+        HydraAttribute::HydraAttribute.hydra_attributes_by_entity_type('Product').should == [hydra_attribute]
+      end
+    end
+  end
+
   describe '#hydra_sets' do
     it 'should return blank array if model has not ID' do
       HydraAttribute::HydraAttribute.new.hydra_sets.should be_blank

@@ -1,5 +1,21 @@
 module HydraAttribute
   class HydraSet
+
+    # This error is raised when called method for attribute which doesn't exist in current hydra set
+    #
+    # @example
+    #   Product.hydra_attributes.create(name: 'price', backend_type: 'float')
+    #   Product.hydra_attributes.create(name: 'title', backend_type: 'string')
+    #
+    #   hydra_set = Product.hydra_sets.create(name: 'Default')
+    #   hydra_set.hydra_attributes = [Product.hydra_attribute('title')]
+    #
+    #   product = Product.new(hydra_set_id: hydra_set.id)
+    #   product.title = 'Toy' # ok
+    #   product.price = 2.50  # raise HydraAttribute::HydraSet::MissingAttributeInHydraSetError
+    class MissingAttributeInHydraSetError < NoMethodError
+    end
+
     include ::HydraAttribute::Model
 
     validates :entity_type, presence: true
@@ -14,6 +30,10 @@ module HydraAttribute
       else
         []
       end
+    end
+
+    def has_hydra_attribute_id?(hydra_attribute_id)
+      HydraAttributeSet.has_hydra_attribute_id_in_hydra_set_id?(hydra_attribute_id, id)
     end
 
   end

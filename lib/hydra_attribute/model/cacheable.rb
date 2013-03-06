@@ -50,10 +50,16 @@ module HydraAttribute
         # @param [HydraAttribute::Model::Cacheable]
         # @return [NilClass]
         def add_to_cache(model)
-          ([:all] + nested_cache_keys).each do |nested_cache_key|
-            method = "add_to_#{nested_cache_key}_cache"
-            send(method, model) if respond_to?(method, true)
-          end
+          notify_cache_callbacks('add_to', model)
+        end
+
+        # Update model in all registered caches
+        # This method should not be used outside the model
+        #
+        # @param [HydraAttribute::Model::Cacheable]
+        # @return [NilClass]
+        def update_cache(model)
+          notify_cache_callbacks('update', model)
         end
 
         # Delete model from all cache objects
@@ -62,10 +68,7 @@ module HydraAttribute
         # @param [HydraAttribute::Model::Cacheable]
         # @return [NilClass]
         def delete_from_cache(model)
-          ([:all] + nested_cache_keys).each do |nested_cache_key|
-            method = "delete_from_#{nested_cache_key}_cache"
-            send(method, model) if respond_to?(method, true)
-          end
+          notify_cache_callbacks('delete_from', model)
         end
 
         private
@@ -102,6 +105,29 @@ module HydraAttribute
           def delete_from_model_cache(model)
             nested_identity_map(:model).delete(model.id)
           end
+
+          # Notify cache callbacks about updates
+          #
+          # @param [String] method_prefix
+          # @param [HydraAttribute::Model::Cacheable] model
+          # @return [NilClass]
+          def notify_cache_callbacks(method_prefix, model)
+            ([:all] + nested_cache_keys).each do |nested_cache_key|
+              method = "#{method_prefix}_#{nested_cache_key}_cache"
+              send(method, model) if respond_to?(method, true)
+            end
+          end
+
+          def add_value_to_nested_cache(cache_key, options = {})
+            return unless identity_map.has_key?(:all)
+            nested_identity_map(cache_key)[options[:key]] ||= []
+            nested_identity_map(cache_key)[options[:key]] << options[:value]
+          end
+
+          def delete_value_from_nested_cache(cache_key, options = {})
+            return unless nested_identity_map(cache_key)[options[:key]]
+            nested_identity_map(cache_key)[options[:key]].delete(options[:value])
+          end
       end
 
       # Initialize a model
@@ -119,6 +145,15 @@ module HydraAttribute
           id = super
           self.class.add_to_cache(self)
           id
+        end
+
+        # Update the model and its cache
+        #
+        # @return [TrueClass, FalseClass]
+        def update
+          result = super
+          self.class.update_cache(self)
+          result
         end
 
         # Delete model and remove it from the cache

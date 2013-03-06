@@ -27,7 +27,7 @@ module HydraAttribute
       # @param [Fixnum] hydra_attribute_id
       # @return [Array<HydraAttribute::HydraSet>]
       def hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute_id)
-        get_from_nested_cache_or_load_all_models(:hydra_attribute_sets_by_hydra_attribute_id, hydra_attribute_id.to_i)
+        get_from_nested_cache_or_load_all_models(:hydra_attribute_sets_by_hydra_attribute_id, hydra_attribute_id.to_i) || []
       end
 
       # Finds all +HydraAttribute::HydraAttributeSet+ models which have the following +hydra_set_id+
@@ -36,7 +36,7 @@ module HydraAttribute
       # @param [Fixnum] hydra_set_id
       # @return [Array<HydraAttribute::HydraSet>]
       def hydra_attribute_sets_by_hydra_set_id(hydra_set_id)
-        get_from_nested_cache_or_load_all_models(:hydra_attribute_sets_by_hydra_set_id, hydra_set_id.to_i)
+        get_from_nested_cache_or_load_all_models(:hydra_attribute_sets_by_hydra_set_id, hydra_set_id.to_i) || []
       end
 
       # Finds all +HydraAttribute::HydraAttribute+ models for the following +hydra_set_id+
@@ -45,7 +45,7 @@ module HydraAttribute
       # @param [Fixnum] hydra_set_id
       # @return [Array<HydraAttribute::HydraAttribute>]
       def hydra_attributes_by_hydra_set_id(hydra_set_id)
-        get_from_nested_cache_or_load_all_models(:hydra_attributes_by_hydra_set_id, hydra_set_id.to_i)
+        get_from_nested_cache_or_load_all_models(:hydra_attributes_by_hydra_set_id, hydra_set_id.to_i) || []
       end
 
       # Finds all +HydraAttribute::HydraSet+ models for the following +hydra_attribute_id+
@@ -54,7 +54,7 @@ module HydraAttribute
       # @param [Fixnum] hydra_attribute_id
       # @return [Array<HydraAttribute::HydraSet>]
       def hydra_sets_by_hydra_attribute_id(hydra_attribute_id)
-        get_from_nested_cache_or_load_all_models(:hydra_sets_by_hydra_attribute_id, hydra_attribute_id.to_i)
+        get_from_nested_cache_or_load_all_models(:hydra_sets_by_hydra_attribute_id, hydra_attribute_id.to_i) || []
       end
 
       # Finds all +hydra_attribute_id+ which are connected to +hydra_set+id+
@@ -63,7 +63,7 @@ module HydraAttribute
       # @param [Fixnum] hydra_set_id
       # @return [Array<Fixnum>] collection of +hydra_attribute_id+
       def hydra_attribute_ids_by_hydra_set_id(hydra_set_id)
-        get_from_nested_cache_or_load_all_models(:hydra_attribute_ids_by_hydra_set_id, hydra_set_id.to_i)
+        get_from_nested_cache_or_load_all_models(:hydra_attribute_ids_by_hydra_set_id, hydra_set_id.to_i) || []
       end
 
       # Finds all +hydra_set_id+ which are connected to +hydra_attribute_id+
@@ -72,7 +72,7 @@ module HydraAttribute
       # @param [Fixnum] hydra_attribute_id
       # @return [Array<Fixnum>] collection of +hydra_set_id+
       def hydra_set_ids_by_hydra_attribute_id(hydra_attribute_id)
-        get_from_nested_cache_or_load_all_models(:hydra_set_ids_by_hydra_attribute_id, hydra_attribute_id.to_i)
+        get_from_nested_cache_or_load_all_models(:hydra_set_ids_by_hydra_attribute_id, hydra_attribute_id.to_i) || []
       end
 
       def has_hydra_attribute_id_in_hydra_set_id?(hydra_attribute_id, hydra_set_id)
@@ -97,79 +97,54 @@ module HydraAttribute
 
       private
         def add_to_hydra_attribute_sets_by_hydra_attribute_id_cache(hydra_attribute_set)
-          return if hydra_attribute_set.destroyed?
-          return unless identity_map.has_key?(:all)
-          nested_identity_map(:hydra_attribute_sets_by_hydra_attribute_id)[hydra_attribute_set.hydra_attribute_id] ||= []
-          nested_identity_map(:hydra_attribute_sets_by_hydra_attribute_id)[hydra_attribute_set.hydra_attribute_id] << hydra_attribute_set
+          add_value_to_nested_cache(:hydra_attribute_sets_by_hydra_attribute_id, key: hydra_attribute_set.hydra_attribute_id, value: hydra_attribute_set)
         end
 
         def delete_from_hydra_attribute_sets_by_hydra_attribute_id_cache(hydra_attribute_set)
-          return unless nested_identity_map(:hydra_attribute_sets_by_hydra_attribute_id)[hydra_attribute_set.hydra_attribute_id]
-          nested_identity_map(:hydra_attribute_sets_by_hydra_attribute_id)[hydra_attribute_set.hydra_attribute_id].delete(hydra_attribute_set)
+          delete_value_from_nested_cache(:hydra_attribute_sets_by_hydra_attribute_id, key: hydra_attribute_set.hydra_attribute_id, value: hydra_attribute_set)
         end
 
         def add_to_hydra_attribute_sets_by_hydra_set_id_cache(hydra_attribute_set)
-          return if hydra_attribute_set.destroyed?
-          return unless identity_map.has_key?(:all)
-          nested_identity_map(:hydra_attribute_sets_by_hydra_set_id)[hydra_attribute_set.hydra_set_id] ||= []
-          nested_identity_map(:hydra_attribute_sets_by_hydra_set_id)[hydra_attribute_set.hydra_set_id] << hydra_attribute_set
+          add_value_to_nested_cache(:hydra_attribute_sets_by_hydra_set_id, key: hydra_attribute_set.hydra_set_id, value: hydra_attribute_set)
         end
 
         def delete_from_hydra_attribute_sets_by_hydra_set_id_cache(hydra_attribute_set)
-          return unless nested_identity_map(:hydra_attribute_sets_by_hydra_set_id)[hydra_attribute_set.hydra_set_id]
-          nested_identity_map(:hydra_attribute_sets_by_hydra_set_id)[hydra_attribute_set.hydra_set_id].delete(hydra_attribute_set)
+          delete_value_from_nested_cache(:hydra_attribute_sets_by_hydra_set_id, key: hydra_attribute_set.hydra_set_id, value: hydra_attribute_set)
         end
 
         def add_to_hydra_attributes_by_hydra_set_id_cache(hydra_attribute_set)
-          return if hydra_attribute_set.destroyed?
-          return unless identity_map.has_key?(:all)
-          nested_identity_map(:hydra_attributes_by_hydra_set_id)[hydra_attribute_set.hydra_set_id] ||= []
-          nested_identity_map(:hydra_attributes_by_hydra_set_id)[hydra_attribute_set.hydra_set_id] << hydra_attribute_set.hydra_attribute
+          add_value_to_nested_cache(:hydra_attributes_by_hydra_set_id, key: hydra_attribute_set.hydra_set_id, value: hydra_attribute_set.hydra_attribute)
         end
 
         def delete_from_hydra_attributes_by_hydra_set_id_cache(hydra_attribute_set)
-          return unless nested_identity_map(:hydra_attributes_by_hydra_set_id)[hydra_attribute_set.hydra_set_id]
-          nested_identity_map(:hydra_attributes_by_hydra_set_id)[hydra_attribute_set.hydra_set_id].delete(hydra_attribute_set.hydra_attribute)
+          delete_value_from_nested_cache(:hydra_attributes_by_hydra_set_id, key: hydra_attribute_set.hydra_set_id, value: hydra_attribute_set.hydra_attribute)
         end
 
         def add_to_hydra_sets_by_hydra_attribute_id_cache(hydra_attribute_set)
-          return if hydra_attribute_set.destroyed?
-          return unless identity_map.has_key?(:all)
-          nested_identity_map(:hydra_sets_by_hydra_attribute_id)[hydra_attribute_set.hydra_attribute_id] ||= []
-          nested_identity_map(:hydra_sets_by_hydra_attribute_id)[hydra_attribute_set.hydra_attribute_id] << hydra_attribute_set.hydra_set
+          add_value_to_nested_cache(:hydra_sets_by_hydra_attribute_id, key: hydra_attribute_set.hydra_attribute_id, value: hydra_attribute_set.hydra_set)
         end
 
         def delete_from_hydra_sets_by_hydra_attribute_id_cache(hydra_attribute_set)
-          return unless nested_identity_map(:hydra_sets_by_hydra_attribute_id)[hydra_attribute_set.hydra_attribute_id]
-          nested_identity_map(:hydra_sets_by_hydra_attribute_id)[hydra_attribute_set.hydra_attribute_id].delete(hydra_attribute_set.hydra_set)
+          delete_value_from_nested_cache(:hydra_sets_by_hydra_attribute_id, key: hydra_attribute_set.hydra_attribute_id, value: hydra_attribute_set.hydra_set)
         end
 
         def add_to_hydra_attribute_ids_by_hydra_set_id_cache(hydra_attribute_set)
-          return if hydra_attribute_set.destroyed?
-          return unless identity_map.has_key?(:all)
-          nested_identity_map(:hydra_attribute_ids_by_hydra_set_id)[hydra_attribute_set.hydra_set_id] ||= []
-          nested_identity_map(:hydra_attribute_ids_by_hydra_set_id)[hydra_attribute_set.hydra_set_id] << hydra_attribute_set.hydra_attribute_id
+          add_value_to_nested_cache(:hydra_attribute_ids_by_hydra_set_id, key: hydra_attribute_set.hydra_set_id, value: hydra_attribute_set.hydra_attribute_id)
         end
 
         def delete_from_hydra_attribute_ids_by_hydra_set_id_cache(hydra_attribute_set)
-          return unless nested_identity_map(:hydra_attribute_ids_by_hydra_set_id)[hydra_attribute_set.hydra_set_id]
-          nested_identity_map(:hydra_attribute_ids_by_hydra_set_id)[hydra_attribute_set.hydra_set_id].delete(hydra_attribute_set.hydra_attribute_id)
+          delete_value_from_nested_cache(:hydra_attribute_ids_by_hydra_set_id, key: hydra_attribute_set.hydra_set_id, value: hydra_attribute_set.hydra_attribute_id)
         end
 
         def add_to_hydra_set_ids_by_hydra_attribute_id_cache(hydra_attribute_set)
-          return if hydra_attribute_set.destroyed?
-          return unless identity_map.has_key?(:all)
-          nested_identity_map(:hydra_set_ids_by_hydra_attribute_id)[hydra_attribute_set.hydra_attribute_id] ||= []
-          nested_identity_map(:hydra_set_ids_by_hydra_attribute_id)[hydra_attribute_set.hydra_attribute_id] << hydra_attribute_set.hydra_set_id
+          add_value_to_nested_cache(:hydra_set_ids_by_hydra_attribute_id, key: hydra_attribute_set.hydra_attribute_id, value: hydra_attribute_set.hydra_set_id)
         end
 
         def delete_from_hydra_set_ids_by_hydra_attribute_id_cache(hydra_attribute_set)
-          return unless nested_identity_map(:hydra_set_ids_by_hydra_attribute_id)[hydra_attribute_set.hydra_attribute_id]
-          nested_identity_map(:hydra_set_ids_by_hydra_attribute_id)[hydra_attribute_set.hydra_attribute_id].delete(hydra_attribute_set.hydra_set_id)
+          delete_value_from_nested_cache(:hydra_set_ids_by_hydra_attribute_id, key: hydra_attribute_set.hydra_attribute_id, value: hydra_attribute_set.hydra_set_id)
         end
 
         def add_to_hydra_attribute_ids_by_hydra_set_id_as_hash_cache(hydra_attribute_set)
-          return if hydra_attribute_set.destroyed?
           return unless identity_map.has_key?(:all)
           nested_identity_map(:hydra_attribute_ids_by_hydra_set_id_as_hash)[hydra_attribute_set.hydra_set_id] ||= {}
           nested_identity_map(:hydra_attribute_ids_by_hydra_set_id_as_hash)[hydra_attribute_set.hydra_set_id][hydra_attribute_set.hydra_attribute_id] = nil
@@ -181,7 +156,6 @@ module HydraAttribute
         end
 
         def add_to_hydra_set_ids_by_hydra_attribute_id_as_hash_cache(hydra_attribute_set)
-          return if hydra_attribute_set.destroyed?
           return unless identity_map.has_key?(:all)
           nested_identity_map(:hydra_set_ids_by_hydra_attribute_id_as_hash)[hydra_attribute_set.hydra_attribute_id] ||= {}
           nested_identity_map(:hydra_set_ids_by_hydra_attribute_id_as_hash)[hydra_attribute_set.hydra_attribute_id][hydra_attribute_set.hydra_set_id] = nil

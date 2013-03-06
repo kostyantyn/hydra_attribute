@@ -54,7 +54,7 @@ describe HydraAttribute::HydraAttributeSet do
 
     describe 'hydra_attribute_sets table is blank' do
       it 'should return blank collection' do
-        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(1).should be_blank
+        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(1).should == []
       end
 
       it 'should return model which was created in runtime and has a correct hydra_set_id' do
@@ -125,7 +125,7 @@ describe HydraAttribute::HydraAttributeSet do
 
     describe 'hydra_attribute_sets table is blank' do
       it 'should return blank collection' do
-        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(1).should be_blank
+        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(1).should == []
       end
 
       it 'should return model which was created in runtime and has a correct hydra_set_id' do
@@ -199,7 +199,7 @@ describe HydraAttribute::HydraAttributeSet do
 
     describe 'hydra_attribute_sets table is blank' do
       it 'should return blank collection' do
-        HydraAttribute::HydraAttributeSet.hydra_attributes_by_hydra_set_id(1).should be_blank
+        HydraAttribute::HydraAttributeSet.hydra_attributes_by_hydra_set_id(1).should == []
       end
 
       it 'should return hydra_attribute models which were created in runtime and are assigned to the correct hydra_set_id' do
@@ -276,7 +276,7 @@ describe HydraAttribute::HydraAttributeSet do
 
     describe 'hydra_attribute_sets table is blank' do
       it 'should return blank collection' do
-        HydraAttribute::HydraAttributeSet.hydra_sets_by_hydra_attribute_id(1).should be_blank
+        HydraAttribute::HydraAttributeSet.hydra_sets_by_hydra_attribute_id(1).should == []
       end
 
       it 'should return hydra_set models which were created in runtime and are assigned to the correct hydra_attribute_id' do
@@ -338,7 +338,7 @@ describe HydraAttribute::HydraAttributeSet do
 
     describe 'hydra_attribute_sets table is blank' do
       it 'should return blank collection' do
-        HydraAttribute::HydraAttributeSet.hydra_attribute_ids_by_hydra_set_id(1).should be_blank
+        HydraAttribute::HydraAttributeSet.hydra_attribute_ids_by_hydra_set_id(1).should == []
       end
 
       it 'should return hydra_attribute_ids which were created in runtime and are assigned to the correct hydra_set_id' do
@@ -395,7 +395,7 @@ describe HydraAttribute::HydraAttributeSet do
 
     describe 'hydra_attribute_sets table is blank' do
       it 'should return blank collection' do
-        HydraAttribute::HydraAttributeSet.hydra_set_ids_by_hydra_attribute_id(1).should be_blank
+        HydraAttribute::HydraAttributeSet.hydra_set_ids_by_hydra_attribute_id(1).should == []
       end
 
       it 'should return hydra_set_ids which were created in runtime and are assigned to the correct hydra_attribute_id' do
@@ -478,9 +478,10 @@ describe HydraAttribute::HydraAttributeSet do
 
   describe '#hydra_set' do
     it 'should return HydraSet model if this model is persisted' do
-      hydra_set = HydraAttribute::HydraSet.create(name: 'default', entity_type: 'Product')
+      hydra_set       = HydraAttribute::HydraSet.create(entity_type: 'Product', name: 'default')
+      hydra_attribute = HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'attr', backend_type: 'string')
 
-      hydra_attribute_set = HydraAttribute::HydraAttributeSet.create(hydra_set_id: hydra_set.id, hydra_attribute_id: 2)
+      hydra_attribute_set = HydraAttribute::HydraAttributeSet.create(hydra_set_id: hydra_set.id, hydra_attribute_id: hydra_attribute.id)
       hydra_attribute_set.hydra_set.should be(hydra_set)
     end
 
@@ -491,9 +492,10 @@ describe HydraAttribute::HydraAttributeSet do
 
   describe '#hydra_attribute' do
     it 'should return HydraAttribute model if this model is persisted' do
+      hydra_set       = HydraAttribute::HydraSet.create(entity_type: 'Product', name: 'default')
       hydra_attribute = HydraAttribute::HydraAttribute.create(name: 'title', entity_type: 'Product', backend_type: 'string')
 
-      hydra_attribute_set = HydraAttribute::HydraAttributeSet.create(hydra_set_id: 2, hydra_attribute_id: hydra_attribute.id)
+      hydra_attribute_set = HydraAttribute::HydraAttributeSet.create(hydra_set_id: hydra_set.id, hydra_attribute_id: hydra_attribute.id)
       hydra_attribute_set.hydra_attribute.should be(hydra_attribute)
     end
 
@@ -594,8 +596,11 @@ describe HydraAttribute::HydraAttributeSet do
     end
 
     it 'should have unique hydra_set_id with hydra_attribute_id' do
-      HydraAttribute::HydraAttributeSet.create(hydra_set_id: 1, hydra_attribute_id: 2).should be_persisted
-      HydraAttribute::HydraAttributeSet.create(hydra_set_id: 1, hydra_attribute_id: 2).should_not be_persisted
+      hydra_set       = HydraAttribute::HydraSet.create(entity_type: 'Product', name: 'default')
+      hydra_attribute = HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'attr', backend_type: 'string')
+
+      HydraAttribute::HydraAttributeSet.create(hydra_set_id: hydra_set.id, hydra_attribute_id: hydra_attribute.id).should be_persisted
+      HydraAttribute::HydraAttributeSet.create(hydra_set_id: hydra_set.id, hydra_attribute_id: hydra_attribute.id).should_not be_persisted
     end
   end
 end
