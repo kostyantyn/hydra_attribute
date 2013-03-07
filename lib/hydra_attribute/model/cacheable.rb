@@ -72,45 +72,7 @@ module HydraAttribute
         end
 
         private
-          # Add model to the :all cache storage
-          #
-          # @param [HydraAttribute::Model::Cacheable]
-          # @return [NilClass]
-          def add_to_all_cache(model)
-            return unless identity_map[:all]
-            identity_map[:all].push(model)
-          end
-
-          # Delete from :all cache storage
-          #
-          # @param [HydraAttribute::Model::Cacheable]
-          # @return [NilClass]
-          def delete_from_all_cache(model)
-            return unless identity_map[:all]
-            identity_map[:all].delete(model)
-          end
-
-          # Add model to the cache
-          #
-          # @param [HydraAttribute::Model::Cacheable] model
-          # @return [NilClass]
-          def add_to_model_cache(model)
-            nested_identity_map(:model)[model.id] = model
-          end
-
-          # Delete model from the cache
-          #
-          # @param [HydraAttribute::Model::Cacheable] model
-          # @return [NilClass]
-          def delete_from_model_cache(model)
-            nested_identity_map(:model).delete(model.id)
-          end
-
-          # Notify cache callbacks about updates
-          #
-          # @param [String] method_prefix
-          # @param [HydraAttribute::Model::Cacheable] model
-          # @return [NilClass]
+          # helper method
           def notify_cache_callbacks(method_prefix, model)
             ([:all] + nested_cache_keys).each do |nested_cache_key|
               method = "#{method_prefix}_#{nested_cache_key}_cache"
@@ -118,15 +80,39 @@ module HydraAttribute
             end
           end
 
+          # helper method
           def add_value_to_nested_cache(cache_key, options = {})
             return unless identity_map.has_key?(:all)
             nested_identity_map(cache_key)[options[:key]] ||= []
             nested_identity_map(cache_key)[options[:key]] << options[:value]
           end
 
+          # helper method
           def delete_value_from_nested_cache(cache_key, options = {})
             return unless nested_identity_map(cache_key)[options[:key]]
             nested_identity_map(cache_key)[options[:key]].delete(options[:value])
+          end
+
+          # cache callback
+          def add_to_all_cache(model)
+            return unless identity_map[:all]
+            identity_map[:all].push(model)
+          end
+
+          # cache callback
+          def delete_from_all_cache(model)
+            return unless identity_map[:all]
+            identity_map[:all].delete(model)
+          end
+
+          # cache callback
+          def add_to_model_cache(model)
+            nested_identity_map(:model)[model.id] = model
+          end
+
+          # cache callback
+          def delete_from_model_cache(model)
+            nested_identity_map(:model).delete(model.id)
           end
       end
 
