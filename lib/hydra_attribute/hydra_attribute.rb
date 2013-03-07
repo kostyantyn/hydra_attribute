@@ -31,7 +31,7 @@ module HydraAttribute
       # @param [String]
       # @return [Array<Fixnum>]
       def hydra_attribute_ids_by_entity_type(entity_type)
-        get_from_nested_cache_or_load_all_models(:hydra_attribute_ids_by_entity_type, entity_type.to_s)
+        get_from_nested_cache_or_load_all_models(:hydra_attribute_ids_by_entity_type, entity_type.to_s) || []
       end
 
       # Finds all attribute names by +entity_type+
@@ -40,7 +40,7 @@ module HydraAttribute
       # @param [String]
       # @return [Array<String>]
       def hydra_attribute_names_by_entity_type(entity_type)
-        get_from_nested_cache_or_load_all_models(:hydra_attribute_names_by_entity_type, entity_type.to_s)
+        get_from_nested_cache_or_load_all_models(:hydra_attribute_names_by_entity_type, entity_type.to_s) || []
       end
 
       def attribute_proxy_class(entity_class)
@@ -69,12 +69,22 @@ module HydraAttribute
           add_value_to_nested_cache(:hydra_attribute_ids_by_entity_type, key: hydra_attribute.entity_type, value: hydra_attribute.id)
         end
 
+        def update_hydra_attribute_ids_by_entity_type_cache(hydra_attribute)
+          delete_value_from_nested_cache(:hydra_attribute_ids_by_entity_type, key: hydra_attribute.entity_type_was, value: hydra_attribute.id)
+          add_value_to_nested_cache(:hydra_attribute_ids_by_entity_type, key: hydra_attribute.entity_type, value: hydra_attribute.id)
+        end
+
         def delete_from_hydra_attribute_ids_by_entity_type_cache(hydra_attribute)
           delete_value_from_nested_cache(:hydra_attribute_ids_by_entity_type, key: hydra_attribute.entity_type, value: hydra_attribute.id)
         end
 
         def add_to_hydra_attribute_names_by_entity_type_cache(hydra_attribute)
           add_value_to_nested_cache(:hydra_attribute_names_by_entity_type, key: hydra_attribute.entity_type,value: hydra_attribute.name)
+        end
+
+        def update_hydra_attribute_names_by_entity_type_cache(hydra_attribute)
+          delete_value_from_nested_cache(:hydra_attribute_names_by_entity_type, key: hydra_attribute.entity_type_was, value: hydra_attribute.name)
+          add_value_to_nested_cache(:hydra_attribute_names_by_entity_type, key: hydra_attribute.entity_type, value: hydra_attribute.name)
         end
 
         def delete_from_hydra_attribute_names_by_entity_type_cache(hydra_attribute)
