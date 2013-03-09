@@ -168,21 +168,16 @@ module HydraAttribute
         end
 
         def add_to_hydra_attribute_ids_by_hydra_set_id_as_hash_cache(hydra_attribute_set)
-          return unless identity_map.has_key?(:all)
-          nested_identity_map(:hydra_attribute_ids_by_hydra_set_id_as_hash)[hydra_attribute_set.hydra_set_id] ||= {}
-          nested_identity_map(:hydra_attribute_ids_by_hydra_set_id_as_hash)[hydra_attribute_set.hydra_set_id][hydra_attribute_set.hydra_attribute_id] = nil
+          add_value_to_nested_hash_cache(:hydra_attribute_ids_by_hydra_set_id_as_hash, key: hydra_attribute_set.hydra_set_id, value: hydra_attribute_set.hydra_attribute_id)
         end
 
         def update_hydra_attribute_ids_by_hydra_set_id_as_hash_cache(hydra_attribute_set)
-          if nested_identity_map(:hydra_attribute_ids_by_hydra_set_id_as_hash)[hydra_attribute_set.hydra_set_id_was]
-            nested_identity_map(:hydra_attribute_ids_by_hydra_set_id_as_hash)[hydra_attribute_set.hydra_set_id_was].delete(hydra_attribute_set.hydra_attribute_id_was)
-          end
+          delete_value_from_nested_hash_cache(:hydra_attribute_ids_by_hydra_set_id_as_hash, key: hydra_attribute_set.hydra_set_id_was, value: hydra_attribute_set.hydra_attribute_id_was)
           add_to_hydra_attribute_ids_by_hydra_set_id_as_hash_cache(hydra_attribute_set)
         end
 
         def delete_from_hydra_attribute_ids_by_hydra_set_id_as_hash_cache(hydra_attribute_set)
-          return unless nested_identity_map(:hydra_attribute_ids_by_hydra_set_id_as_hash)[hydra_attribute_set.hydra_set_id]
-          nested_identity_map(:hydra_attribute_ids_by_hydra_set_id_as_hash)[hydra_attribute_set.hydra_set_id].delete(hydra_attribute_set.hydra_attribute_id)
+          delete_value_from_nested_hash_cache(:hydra_attribute_ids_by_hydra_set_id_as_hash, key: hydra_attribute_set.hydra_set_id, value: hydra_attribute_set.hydra_attribute_id)
         end
     end
 

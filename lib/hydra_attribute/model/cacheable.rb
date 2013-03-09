@@ -93,6 +93,19 @@ module HydraAttribute
             nested_identity_map(cache_key)[options[:key]].delete(options[:value])
           end
 
+          # helper method
+          def add_value_to_nested_hash_cache(cache_key, options = {})
+            return unless identity_map.has_key?(:all)
+            nested_identity_map(cache_key)[options[:key]] ||= {}
+            nested_identity_map(cache_key)[options[:key]][options[:value]] = nil
+          end
+
+          # helper method
+          def delete_value_from_nested_hash_cache(cache_key, options = {})
+            return unless nested_identity_map(cache_key)[options[:key]]
+            nested_identity_map(cache_key)[options[:key]].delete(options[:value])
+          end
+
           # cache callback
           def add_to_all_cache(model)
             return unless identity_map[:all]
