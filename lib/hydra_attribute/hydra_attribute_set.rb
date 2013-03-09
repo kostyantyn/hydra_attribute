@@ -147,7 +147,7 @@ module HydraAttribute
 
         def update_hydra_attribute_ids_by_hydra_set_id_cache(hydra_attribute_set)
           add_to_hydra_attribute_ids_by_hydra_set_id_cache(hydra_attribute_set)
-          delete_value_from_nested_cache(:hydra_attribute_ids_by_hydra_set_id, key: hydra_attribute_set.hydra_set_id_was, value: hydra_attribute_set.hydra_attribute_id)
+          delete_value_from_nested_cache(:hydra_attribute_ids_by_hydra_set_id, key: hydra_attribute_set.hydra_set_id_was, value: hydra_attribute_set.hydra_attribute_id_was)
         end
 
         def delete_from_hydra_attribute_ids_by_hydra_set_id_cache(hydra_attribute_set)
@@ -159,7 +159,7 @@ module HydraAttribute
         end
 
         def update_hydra_set_ids_by_hydra_attribute_id_cache(hydra_attribute_set)
-          delete_value_from_nested_cache(:hydra_set_ids_by_hydra_attribute_id, key: hydra_attribute_set.hydra_attribute_id_was, value: hydra_attribute_set.hydra_set_id)
+          delete_value_from_nested_cache(:hydra_set_ids_by_hydra_attribute_id, key: hydra_attribute_set.hydra_attribute_id_was, value: hydra_attribute_set.hydra_set_id_was)
           add_to_hydra_set_ids_by_hydra_attribute_id_cache(hydra_attribute_set)
         end
 

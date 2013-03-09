@@ -79,11 +79,11 @@ module HydraAttribute
         end
 
         def add_to_hydra_attribute_names_by_entity_type_cache(hydra_attribute)
-          add_value_to_nested_cache(:hydra_attribute_names_by_entity_type, key: hydra_attribute.entity_type,value: hydra_attribute.name)
+          add_value_to_nested_cache(:hydra_attribute_names_by_entity_type, key: hydra_attribute.entity_type, value: hydra_attribute.name)
         end
 
         def update_hydra_attribute_names_by_entity_type_cache(hydra_attribute)
-          delete_value_from_nested_cache(:hydra_attribute_names_by_entity_type, key: hydra_attribute.entity_type_was, value: hydra_attribute.name)
+          delete_value_from_nested_cache(:hydra_attribute_names_by_entity_type, key: hydra_attribute.entity_type_was, value: hydra_attribute.name_was)
           add_value_to_nested_cache(:hydra_attribute_names_by_entity_type, key: hydra_attribute.entity_type, value: hydra_attribute.name)
         end
 

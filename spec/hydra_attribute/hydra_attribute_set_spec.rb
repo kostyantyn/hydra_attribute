@@ -49,7 +49,7 @@ describe HydraAttribute::HydraAttributeSet do
         hydra_attribute_sets.should have(1).item
       end
 
-      it 'should not return model if hydra_attribute_id was changed in runtime' do
+      it 'should not return model if hydra_attribute_id was updated in runtime' do
         hydra_attribute_set = HydraAttribute::HydraAttributeSet.find(id1)
         hydra_attribute_set.hydra_attribute_id = hydra_attribute_id2
         hydra_attribute_set.save
@@ -130,7 +130,7 @@ describe HydraAttribute::HydraAttributeSet do
         hydra_attribute_sets.should have(1).item
       end
 
-      it 'should not return model which was updated in runtime' do
+      it 'should not return model if hydra_set_id was updated in runtime' do
         hydra_attribute_set = HydraAttribute::HydraAttributeSet.find(id1)
         hydra_attribute_set.hydra_set_id = hydra_set_id2
         hydra_attribute_set.save
@@ -212,7 +212,7 @@ describe HydraAttribute::HydraAttributeSet do
         hydra_attributes[0].name.should == 'code'
       end
 
-      it 'should not return model which hydra_set_id was changed in runtime' do
+      it 'should not return model if hydra_set_id was changed in runtime' do
         hydra_attribute_set = HydraAttribute::HydraAttributeSet.find(id1)
         hydra_attribute_set.hydra_set_id = hydra_set_id2
         hydra_attribute_set.save
@@ -297,7 +297,7 @@ describe HydraAttribute::HydraAttributeSet do
         hydra_sets[0].name.should == 'two'
       end
 
-      it 'should not return model which hydra_attribute_id was updated in runtime' do
+      it 'should not return model if hydra_attribute_id was updated in runtime' do
         hydra_attribute_set = HydraAttribute::HydraAttributeSet.find(id1)
         hydra_attribute_set.hydra_attribute_id = hydra_attribute_id2
         hydra_attribute_set.save
@@ -375,6 +375,15 @@ describe HydraAttribute::HydraAttributeSet do
         HydraAttribute::HydraAttributeSet.hydra_attribute_ids_by_hydra_set_id(hydra_set_id1).should =~ [hydra_attribute_id1, hydra_attribute_id2]
         HydraAttribute::HydraAttributeSet.hydra_attribute_ids_by_hydra_set_id(hydra_set_id2).should =~ [hydra_attribute_id1]
       end
+
+      it 'should not return hydra_attribute_id if hydra_attribute_id was updated in runtime' do
+        hydra_attribute_set = HydraAttribute::HydraAttributeSet.find(id1)
+        hydra_attribute_set.hydra_attribute_id = hydra_attribute_id2
+        hydra_attribute_set.save
+
+        HydraAttribute::HydraAttributeSet.hydra_attribute_ids_by_hydra_set_id(hydra_set_id1).should =~ [hydra_attribute_id2]
+        HydraAttribute::HydraAttributeSet.hydra_attribute_ids_by_hydra_set_id(hydra_set_id2).should =~ [hydra_attribute_id1, hydra_attribute_id2]
+      end
     end
 
     describe 'hydra_attribute_sets table is blank' do
@@ -436,6 +445,15 @@ describe HydraAttribute::HydraAttributeSet do
 
         HydraAttribute::HydraAttributeSet.hydra_set_ids_by_hydra_attribute_id(hydra_attribute_id1).should =~ [hydra_set_id2]
         HydraAttribute::HydraAttributeSet.hydra_set_ids_by_hydra_attribute_id(hydra_attribute_id2).should =~ [hydra_set_id1, hydra_set_id2]
+      end
+
+      it 'should not return hydra_set_id if hydra_set_id was updated in runtime' do
+        hydra_attribute_set = HydraAttribute::HydraAttributeSet.find(id3)
+        hydra_attribute_set.hydra_set_id = hydra_set_id1
+        hydra_attribute_set.save
+
+        HydraAttribute::HydraAttributeSet.hydra_set_ids_by_hydra_attribute_id(hydra_attribute_id1).should =~ [hydra_set_id1, hydra_set_id2]
+        HydraAttribute::HydraAttributeSet.hydra_set_ids_by_hydra_attribute_id(hydra_attribute_id2).should =~ [hydra_set_id1]
       end
     end
 

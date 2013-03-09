@@ -108,6 +108,15 @@ describe HydraAttribute::HydraAttribute do
         HydraAttribute::HydraAttribute.hydra_attribute_names_by_entity_type('Product').should  =~ %w[attr2]
         HydraAttribute::HydraAttribute.hydra_attribute_names_by_entity_type('Category').should =~ %w[attr1 attr3]
       end
+
+      it 'should return updated attribute name' do
+        hydra_attribute = HydraAttribute::HydraAttribute.find(attr_id1)
+        hydra_attribute.name = 'new_attr'
+        hydra_attribute.save
+
+        HydraAttribute::HydraAttribute.hydra_attribute_names_by_entity_type('Product').should  =~ %w[new_attr attr2]
+        HydraAttribute::HydraAttribute.hydra_attribute_names_by_entity_type('Category').should =~ %w[attr3]
+      end
     end
 
     describe 'hydra_attributes table is blank' do
