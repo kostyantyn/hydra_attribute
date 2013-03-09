@@ -33,6 +33,45 @@ module HydraAttribute
           model
         end
 
+        # Defines singleton method
+        #
+        # @example
+        #   ClassName.define_cached_singleton_method :method_name, cache_key: :method_key, cache_value: :method_value, cache_key_cast: :to_i
+        #   ClassName.method_method
+        #
+        # @param [Symbol] method_name
+        # @param [Hash] options
+        # @return [NilClass]
+        def define_cached_singleton_method(method_name, options = {})
+          register_nested_cache(method_name)
+
+          cache_key       = options[:cache_key]            ? ".#{options[:cache_key]}"      : ''
+          cache_value     = options[:cache_value] != :self ? ".#{options[:cache_value]}"    : ''
+          cache_key_was   = options[:cache_key]            ? "#{cache_key}_was"             : ''
+          cache_value_was = options[:cache_value] != :self ? "#{cache_value}_was"           : ''
+          type_cast_key   = options[:cache_key_cast]       ? ".#{options[:cache_key_cast]}" : ''
+
+          instance_eval <<-OES, __FILE__, __LINE__ + 1
+            def #{method_name}(param)
+              get_from_nested_cache_or_load_all_models(:#{method_name}, param#{type_cast_key}) || []
+            end
+
+            private
+              def add_to_#{method_name}_cache(model)
+                add_value_to_nested_cache(:#{method_name}, key: model#{cache_key}, value: model#{cache_value})
+              end
+
+              def update_#{method_name}_cache(model)
+                delete_value_from_nested_cache(:#{method_name}, key: model#{cache_key_was}, value: model#{cache_value_was})
+                add_to_#{method_name}_cache(model)
+              end
+
+              def delete_from_#{method_name}_cache(model)
+                delete_value_from_nested_cache(:#{method_name}, key: model#{cache_key}, value: model#{cache_value})
+              end
+          OES
+        end
+
         # Gets data from cache or load all models and repeats the operation
         #
         # @param [Symbol] nested_cache_key
