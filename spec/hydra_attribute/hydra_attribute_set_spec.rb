@@ -9,11 +9,9 @@ describe HydraAttribute::HydraAttributeSet do
       let(:hydra_set_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name) VALUES('Product', 'one')]).to_i }
       let(:hydra_set_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name) VALUES('Product', 'two')]).to_i }
 
-      before do
-        ::ActiveRecord::Base.connection.insert(%[INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id1}, #{hydra_set_id1})])
-        ::ActiveRecord::Base.connection.insert(%[INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id1}, #{hydra_set_id2})])
-        ::ActiveRecord::Base.connection.insert(%[INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id2}, #{hydra_set_id2})])
-      end
+      let!(:id1) { ::ActiveRecord::Base.connection.insert(%[INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id1}, #{hydra_set_id1})]).to_i }
+      let!(:id2) { ::ActiveRecord::Base.connection.insert(%[INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id1}, #{hydra_set_id2})]).to_i }
+      let!(:id3) { ::ActiveRecord::Base.connection.insert(%[INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id2}, #{hydra_set_id2})]).to_i }
 
       it 'should return models which have a correct hydra_attribute_id' do
         hydra_attribute_sets = HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute_id1)
@@ -26,7 +24,7 @@ describe HydraAttribute::HydraAttributeSet do
         hydra_attribute_sets.map(&:hydra_set_id).should == [hydra_set_id2]
 
         hydra_attribute_sets = HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(0)
-        hydra_attribute_sets.should be_blank
+        hydra_attribute_sets.should == []
       end
 
       it 'should return model which was created in runtime and has a correct hydra_attribute_id' do
@@ -49,6 +47,18 @@ describe HydraAttribute::HydraAttributeSet do
 
         hydra_attribute_sets = HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute_id1)
         hydra_attribute_sets.should have(1).item
+      end
+
+      it 'should not return model if hydra_attribute_id was changed in runtime' do
+        hydra_attribute_set = HydraAttribute::HydraAttributeSet.find(id1)
+        hydra_attribute_set.hydra_attribute_id = hydra_attribute_id2
+        hydra_attribute_set.save
+
+        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute_id1)
+        hydra_attribute_sets.map(&:hydra_set_id).should =~ [hydra_set_id2]
+
+        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute_id2)
+        hydra_attribute_sets.map(&:hydra_set_id).should =~ [hydra_set_id1, hydra_set_id2]
       end
     end
 
@@ -83,11 +93,9 @@ describe HydraAttribute::HydraAttributeSet do
       let(:hydra_set_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name) VALUES('Product', 'one')]).to_i }
       let(:hydra_set_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name) VALUES('Product', 'two')]).to_i }
 
-      before do
-        ::ActiveRecord::Base.connection.insert(%[INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id1}, #{hydra_set_id1})])
-        ::ActiveRecord::Base.connection.insert(%[INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id2}, #{hydra_set_id1})])
-        ::ActiveRecord::Base.connection.insert(%[INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id2}, #{hydra_set_id2})])
-      end
+      let!(:id1) { ::ActiveRecord::Base.connection.insert(%[INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id1}, #{hydra_set_id1})]).to_i }
+      let!(:id2) { ::ActiveRecord::Base.connection.insert(%[INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id2}, #{hydra_set_id1})]).to_i }
+      let!(:id3) { ::ActiveRecord::Base.connection.insert(%[INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id2}, #{hydra_set_id2})]).to_i }
 
       it 'should return models which have a correct hydra_set_id' do
         hydra_attribute_sets = HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(hydra_set_id1)
@@ -99,7 +107,7 @@ describe HydraAttribute::HydraAttributeSet do
         hydra_attribute_sets.map(&:hydra_attribute_id).should == [hydra_attribute_id2]
 
         hydra_attribute_sets = HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(0)
-        hydra_attribute_sets.should be_blank
+        hydra_attribute_sets.should == []
       end
 
       it 'should return model which was created in runtime and has a correct hydra_set_id' do
@@ -120,6 +128,18 @@ describe HydraAttribute::HydraAttributeSet do
 
         hydra_attribute_sets = HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(hydra_set_id1)
         hydra_attribute_sets.should have(1).item
+      end
+
+      it 'should not return model which was updated in runtime' do
+        hydra_attribute_set = HydraAttribute::HydraAttributeSet.find(id1)
+        hydra_attribute_set.hydra_set_id = hydra_set_id2
+        hydra_attribute_set.save
+
+        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(hydra_set_id1)
+        hydra_attribute_sets.map(&:hydra_attribute_id).should =~ [hydra_attribute_id2]
+
+        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(hydra_set_id2)
+        hydra_attribute_sets.map(&:hydra_attribute_id).should =~ [hydra_attribute_id1, hydra_attribute_id2]
       end
     end
 
@@ -152,11 +172,9 @@ describe HydraAttribute::HydraAttributeSet do
       let(:hydra_attribute_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'name', 'string')]).to_i }
       let(:hydra_attribute_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'code', 'string')]).to_i }
 
-      before do
-        ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id1}, #{hydra_set_id1})")
-        ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id2}, #{hydra_set_id1})")
-        ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id2}, #{hydra_set_id2})")
-      end
+      let!(:id1) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id1}, #{hydra_set_id1})").to_i }
+      let!(:id2) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id2}, #{hydra_set_id1})").to_i }
+      let!(:id3) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id2}, #{hydra_set_id2})").to_i }
 
       it 'should return hydra_attribute models which assigned to the correct hydra_set_id' do
         hydra_attributes = HydraAttribute::HydraAttributeSet.hydra_attributes_by_hydra_set_id(hydra_set_id1)
@@ -168,7 +186,7 @@ describe HydraAttribute::HydraAttributeSet do
         hydra_attributes.map(&:name).should =~ %w[code]
 
         hydra_attributes = HydraAttribute::HydraAttributeSet.hydra_attributes_by_hydra_set_id(0)
-        hydra_attributes.should be_blank
+        hydra_attributes.should == []
       end
 
       it 'should return hydra_attribute models which were created in runtime and are assigned to the correct hydra_set_id' do
@@ -187,13 +205,23 @@ describe HydraAttribute::HydraAttributeSet do
         hydra_attributes.map(&:name).should =~ %w[name code title quantity]
       end
 
-      it 'should not return model which was removed' do
-        id = ::ActiveRecord::Base.connection.select_value(%[SELECT id FROM hydra_attribute_sets WHERE hydra_attribute_id=#{hydra_attribute_id1} AND hydra_set_id=#{hydra_set_id1}])
-        HydraAttribute::HydraAttributeSet.find(id).destroy
-
+      it 'should not return model which was removed in runtime' do
+        HydraAttribute::HydraAttributeSet.find(id1).destroy
         hydra_attributes = HydraAttribute::HydraAttributeSet.hydra_attributes_by_hydra_set_id(hydra_set_id1)
         hydra_attributes.should have(1).item
         hydra_attributes[0].name.should == 'code'
+      end
+
+      it 'should not return model which hydra_set_id was changed in runtime' do
+        hydra_attribute_set = HydraAttribute::HydraAttributeSet.find(id1)
+        hydra_attribute_set.hydra_set_id = hydra_set_id2
+        hydra_attribute_set.save
+
+        hydra_attributes = HydraAttribute::HydraAttributeSet.hydra_attributes_by_hydra_set_id(hydra_set_id1)
+        hydra_attributes.map(&:name).should =~ %w[code]
+
+        hydra_attributes = HydraAttribute::HydraAttributeSet.hydra_attributes_by_hydra_set_id(hydra_set_id2)
+        hydra_attributes.map(&:name).should =~ %w[name code]
       end
     end
 
@@ -229,11 +257,9 @@ describe HydraAttribute::HydraAttributeSet do
       let(:hydra_attribute_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'name', 'string')]).to_i }
       let(:hydra_attribute_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'code', 'string')]).to_i }
 
-      before do
-        ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id1}, #{hydra_set_id1})")
-        ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id1}, #{hydra_set_id2})")
-        ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id2}, #{hydra_set_id2})")
-      end
+      let!(:id1) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id1}, #{hydra_set_id1})").to_i }
+      let!(:id2) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id1}, #{hydra_set_id2})").to_i }
+      let!(:id3) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id2}, #{hydra_set_id2})").to_i }
 
       it 'should return hydra_set models which assigned to the correct hydra_attribute_id' do
         hydra_sets = HydraAttribute::HydraAttributeSet.hydra_sets_by_hydra_attribute_id(hydra_attribute_id1)
@@ -245,7 +271,7 @@ describe HydraAttribute::HydraAttributeSet do
         hydra_sets.map(&:name).should =~ %w[two]
 
         hydra_sets = HydraAttribute::HydraAttributeSet.hydra_sets_by_hydra_attribute_id(0)
-        hydra_sets.should be_blank
+        hydra_sets.should == []
       end
 
       it 'should return hydra_set models which were created in runtime and are assigned to the correct hydra_attribute_id' do
@@ -264,13 +290,23 @@ describe HydraAttribute::HydraAttributeSet do
         hydra_sets.map(&:name).should =~ %w[one two three four]
       end
 
-      it 'should not return model which was removed' do
-        id = ::ActiveRecord::Base.connection.select_value(%[SELECT id FROM hydra_attribute_sets WHERE hydra_attribute_id=#{hydra_attribute_id1} AND hydra_set_id=#{hydra_set_id1}])
-        HydraAttribute::HydraAttributeSet.find(id).destroy
-
+      it 'should not return model which was removed in runtime' do
+        HydraAttribute::HydraAttributeSet.find(id1).destroy
         hydra_sets = HydraAttribute::HydraAttributeSet.hydra_sets_by_hydra_attribute_id(hydra_attribute_id1)
         hydra_sets.should have(1).item
         hydra_sets[0].name.should == 'two'
+      end
+
+      it 'should not return model which hydra_attribute_id was updated in runtime' do
+        hydra_attribute_set = HydraAttribute::HydraAttributeSet.find(id1)
+        hydra_attribute_set.hydra_attribute_id = hydra_attribute_id2
+        hydra_attribute_set.save
+
+        hydra_sets = HydraAttribute::HydraAttributeSet.hydra_sets_by_hydra_attribute_id(hydra_attribute_id1)
+        hydra_sets.map(&:name).should =~ %w[two]
+
+        hydra_sets = HydraAttribute::HydraAttributeSet.hydra_sets_by_hydra_attribute_id(hydra_attribute_id2)
+        hydra_sets.map(&:name).should =~ %w[one two]
       end
     end
 
@@ -306,11 +342,9 @@ describe HydraAttribute::HydraAttributeSet do
       let(:hydra_attribute_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'name', 'string')]).to_i }
       let(:hydra_attribute_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'code', 'string')]).to_i }
 
-      before do
-        ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id1}, #{hydra_set_id1})")
-        ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id1}, #{hydra_set_id2})")
-        ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id2}, #{hydra_set_id2})")
-      end
+      let!(:id1) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id1}, #{hydra_set_id1})").to_i }
+      let!(:id2) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id1}, #{hydra_set_id2})").to_i }
+      let!(:id3) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id2}, #{hydra_set_id2})").to_i }
 
       it 'should return collection of hydra_attribute_id which are assigned to the correct hydra_set_id' do
         HydraAttribute::HydraAttributeSet.hydra_attribute_ids_by_hydra_set_id(hydra_set_id1).should =~ [hydra_attribute_id1]
@@ -328,11 +362,18 @@ describe HydraAttribute::HydraAttributeSet do
       end
 
       it 'should not return hydra_attribute_id if hydra_attribute_set was removed' do
-        id = ::ActiveRecord::Base.connection.select_value(%[SELECT id FROM hydra_attribute_sets WHERE hydra_attribute_id=#{hydra_attribute_id2} AND hydra_set_id=#{hydra_set_id2}])
-        HydraAttribute::HydraAttributeSet.find(id).destroy
-
+        HydraAttribute::HydraAttributeSet.find(id3).destroy
         hydra_attribute_ids = HydraAttribute::HydraAttributeSet.hydra_attribute_ids_by_hydra_set_id(hydra_set_id2)
         hydra_attribute_ids.should == [hydra_attribute_id1]
+      end
+
+      it 'should not return hydra_attribute_id if hydra_set_id was updated in runtime' do
+        hydra_attribute_set = HydraAttribute::HydraAttributeSet.find(id3)
+        hydra_attribute_set.hydra_set_id = hydra_set_id1
+        hydra_attribute_set.save
+
+        HydraAttribute::HydraAttributeSet.hydra_attribute_ids_by_hydra_set_id(hydra_set_id1).should =~ [hydra_attribute_id1, hydra_attribute_id2]
+        HydraAttribute::HydraAttributeSet.hydra_attribute_ids_by_hydra_set_id(hydra_set_id2).should =~ [hydra_attribute_id1]
       end
     end
 
@@ -363,11 +404,9 @@ describe HydraAttribute::HydraAttributeSet do
       let(:hydra_attribute_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'name', 'string')]).to_i }
       let(:hydra_attribute_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'code', 'string')]).to_i }
 
-      before do
-        ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id1}, #{hydra_set_id1})")
-        ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id1}, #{hydra_set_id2})")
-        ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id2}, #{hydra_set_id2})")
-      end
+      let!(:id1) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id1}, #{hydra_set_id1})").to_i }
+      let!(:id2) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id1}, #{hydra_set_id2})").to_i }
+      let!(:id3) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id2}, #{hydra_set_id2})").to_i }
 
       it 'should return collection of hydra_set_id which are assigned to the correct hydra_attribute_id' do
         HydraAttribute::HydraAttributeSet.hydra_set_ids_by_hydra_attribute_id(hydra_attribute_id1).should =~ [hydra_set_id1, hydra_set_id2]
@@ -385,11 +424,18 @@ describe HydraAttribute::HydraAttributeSet do
       end
 
       it 'should not return hydra_set_id if hydra_attribute_set was removed' do
-        id = ::ActiveRecord::Base.connection.select_value(%[SELECT id FROM hydra_attribute_sets WHERE hydra_attribute_id=#{hydra_attribute_id1} AND hydra_set_id=#{hydra_set_id1}])
-        HydraAttribute::HydraAttributeSet.find(id).destroy
-
+        HydraAttribute::HydraAttributeSet.find(id1).destroy
         hydra_set_ids = HydraAttribute::HydraAttributeSet.hydra_set_ids_by_hydra_attribute_id(hydra_attribute_id1)
         hydra_set_ids.should == [hydra_set_id2]
+      end
+
+      it 'should not return hydra_set_id if hydra_attribute_id was updated in runtime' do
+        hydra_attribute_set = HydraAttribute::HydraAttributeSet.find(id1)
+        hydra_attribute_set.hydra_attribute_id = hydra_attribute_id2
+        hydra_attribute_set.save
+
+        HydraAttribute::HydraAttributeSet.hydra_set_ids_by_hydra_attribute_id(hydra_attribute_id1).should =~ [hydra_set_id2]
+        HydraAttribute::HydraAttributeSet.hydra_set_ids_by_hydra_attribute_id(hydra_attribute_id2).should =~ [hydra_set_id1, hydra_set_id2]
       end
     end
 
@@ -413,12 +459,9 @@ describe HydraAttribute::HydraAttributeSet do
   end
 
   describe '.has_hydra_attribute_id_in_hydra_set_id?' do
-    let(:hydra_attribute_id) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'attr', 'string')]).to_i }
-    let(:hydra_set_id)       { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name) VALUES('Product', 'set')]).to_i }
-
-    before do
-      ::ActiveRecord::Base.connection.insert(%[INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id}, #{hydra_set_id})])
-    end
+    let(:hydra_attribute_id)      { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'attr', 'string')]).to_i }
+    let(:hydra_set_id)            { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name) VALUES('Product', 'set')]).to_i }
+    let!(:hydra_attribute_set_id) { ::ActiveRecord::Base.connection.insert(%[INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id}, #{hydra_set_id})]).to_i }
 
     it 'should return true if hydra_attribute_id is assigned to hydra_set_id' do
       HydraAttribute::HydraAttributeSet.should have_hydra_attribute_id_in_hydra_set_id(hydra_attribute_id, hydra_set_id)
@@ -437,42 +480,26 @@ describe HydraAttribute::HydraAttributeSet do
     end
 
     it 'should return false if hydra_attribute_set was destroyed in runtime' do
-      id = ::ActiveRecord::Base.connection.select_value(%[SELECT id FROM hydra_attribute_sets WHERE hydra_attribute_id=#{hydra_attribute_id} AND hydra_set_id=#{hydra_set_id}])
-      HydraAttribute::HydraAttributeSet.find(id).destroy
+      HydraAttribute::HydraAttributeSet.find(hydra_attribute_set_id).destroy
+      HydraAttribute::HydraAttributeSet.should_not have_hydra_attribute_id_in_hydra_set_id(hydra_attribute_id, hydra_set_id)
+    end
+
+    it 'should return false if hydra_attribute_set was updated in runtime' do
+      hydra_attribute_id2 = ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'attr2', 'string')]).to_i
+      hydra_attribute_set = HydraAttribute::HydraAttributeSet.find(hydra_attribute_set_id)
+      hydra_attribute_set.hydra_attribute_id = hydra_attribute_id2
+      hydra_attribute_set.save
 
       HydraAttribute::HydraAttributeSet.should_not have_hydra_attribute_id_in_hydra_set_id(hydra_attribute_id, hydra_set_id)
     end
-  end
 
-  describe '.has_hydra_set_id_in_hydra_attribute_id?' do
-    let(:hydra_attribute_id) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'attr', 'string')]) }
-    let(:hydra_set_id)       { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name) VALUES('Product', 'set')]) }
+    it 'should return false if hydra_set_id was updated in runtime' do
+      hydra_set_id2       = ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name) VALUES('Product', 'set2')]).to_i
+      hydra_attribute_set = HydraAttribute::HydraAttributeSet.find(hydra_attribute_set_id)
+      hydra_attribute_set.hydra_set_id = hydra_set_id2
+      hydra_attribute_set.save
 
-    before do
-      ::ActiveRecord::Base.connection.insert(%[INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id}, #{hydra_set_id})])
-    end
-
-    it 'should return true if hydra_set_id is assigned to hydra_attribute_id' do
-      HydraAttribute::HydraAttributeSet.should have_hydra_set_id_in_hydra_attribute_id(hydra_set_id, hydra_attribute_id)
-    end
-
-    it 'should return true if hydra_set_id is assigned to hydra_attribute_id in runtime' do
-      hydra_attribute = HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'attr1', backend_type: 'string')
-      hydra_set       = HydraAttribute::HydraSet.create(entity_type: 'Product', name: 'set1')
-
-      HydraAttribute::HydraAttributeSet.create(hydra_attribute_id: hydra_attribute.id, hydra_set_id: hydra_set.id)
-      HydraAttribute::HydraAttributeSet.should have_hydra_set_id_in_hydra_attribute_id(hydra_set.id, hydra_attribute.id)
-    end
-
-    it 'should return false if hydra_set_id is not assigned to hydra_attribute_id' do
-      HydraAttribute::HydraAttributeSet.should_not have_hydra_set_id_in_hydra_attribute_id(0, 0)
-    end
-
-    it 'should return false if hydra_attribute_set was destroyed in runtime' do
-      id = ::ActiveRecord::Base.connection.select_value(%[SELECT id FROM hydra_attribute_sets WHERE hydra_attribute_id=#{hydra_attribute_id} AND hydra_set_id=#{hydra_set_id}])
-      HydraAttribute::HydraAttributeSet.find(id).destroy
-
-      HydraAttribute::HydraAttributeSet.should_not have_hydra_set_id_in_hydra_attribute_id(hydra_set_id, hydra_attribute_id)
+      HydraAttribute::HydraAttributeSet.should_not have_hydra_attribute_id_in_hydra_set_id(hydra_attribute_id, hydra_set_id)
     end
   end
 
@@ -525,7 +552,7 @@ describe HydraAttribute::HydraAttributeSet do
       it 'should delete hydra_set cache' do
         HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(hydra_set.id).should include(hydra_attribute_set)
         hydra_set.destroy
-        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(hydra_set.id).should be_blank
+        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(hydra_set.id).should == []
       end
 
       it 'should delete hydra_set from hydra_attribute cache' do
@@ -559,7 +586,7 @@ describe HydraAttribute::HydraAttributeSet do
       it 'should delete hydra_attribute cache' do
         HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute.id).should include(hydra_attribute_set)
         hydra_attribute.destroy
-        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute.id).should be_blank
+        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute.id).should == []
       end
 
       it 'should delete hydra_attribute from hydra_set cache' do
