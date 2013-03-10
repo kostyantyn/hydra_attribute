@@ -11,9 +11,9 @@ module HydraAttribute
     validates :name,         presence: true, unique: { scope: :entity_type }
     validates :backend_type, presence: true, inclusion: { in: ::HydraAttribute::SUPPORTED_BACKEND_TYPES }
 
-    define_cached_singleton_method :hydra_attributes_by_entity_type,      cache_key: :entity_type, cache_value: :self, cache_key_cast: :to_s
-    define_cached_singleton_method :hydra_attribute_ids_by_entity_type,   cache_key: :entity_type, cache_value: :id,   cache_key_cast: :to_s
-    define_cached_singleton_method :hydra_attribute_names_by_entity_type, cache_key: :entity_type, cache_value: :name, cache_key_cast: :to_s
+    define_cached_singleton_method :all_by_entity_type,   cache_key: :entity_type, cache_value: :self, cache_key_cast: :to_s
+    define_cached_singleton_method :ids_by_entity_type,   cache_key: :entity_type, cache_value: :id,   cache_key_cast: :to_s
+    define_cached_singleton_method :names_by_entity_type, cache_key: :entity_type, cache_value: :name, cache_key_cast: :to_s
 
     class << self
       def attribute_proxy_class(entity_class)

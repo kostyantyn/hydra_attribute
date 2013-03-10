@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe HydraAttribute::HydraAttributeSet do
-  describe '.hydra_attribute_sets_by_hydra_attribute_id' do
+  describe '.all_by_hydra_attribute_id' do
     describe 'hydra_attribute_sets table has several records' do
       let(:hydra_attribute_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'name', 'string')]).to_i }
       let(:hydra_attribute_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'code', 'string')]).to_i }
@@ -14,16 +14,16 @@ describe HydraAttribute::HydraAttributeSet do
       let!(:id3) { ::ActiveRecord::Base.connection.insert(%[INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id2}, #{hydra_set_id2})]).to_i }
 
       it 'should return models which have a correct hydra_attribute_id' do
-        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute_id1)
+        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.all_by_hydra_attribute_id(hydra_attribute_id1)
 
         hydra_attribute_sets.should have(2).models
         hydra_attribute_sets.map(&:hydra_set_id).should =~ [hydra_set_id1, hydra_set_id2]
 
-        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute_id2)
+        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.all_by_hydra_attribute_id(hydra_attribute_id2)
         hydra_attribute_sets.should have(1).model
         hydra_attribute_sets.map(&:hydra_set_id).should == [hydra_set_id2]
 
-        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(0)
+        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.all_by_hydra_attribute_id(0)
         hydra_attribute_sets.should == []
       end
 
@@ -31,21 +31,21 @@ describe HydraAttribute::HydraAttributeSet do
         hydra_set_id        = HydraAttribute::HydraSet.create(entity_type: 'Product', name: 'set3').id
         hydra_attribute_set = HydraAttribute::HydraAttributeSet.create(hydra_attribute_id: hydra_attribute_id1, hydra_set_id: hydra_set_id)
 
-        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute_id1).should have(3).models
-        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute_id1).should include(hydra_attribute_set)
+        HydraAttribute::HydraAttributeSet.all_by_hydra_attribute_id(hydra_attribute_id1).should have(3).models
+        HydraAttribute::HydraAttributeSet.all_by_hydra_attribute_id(hydra_attribute_id1).should include(hydra_attribute_set)
 
         hydra_set_id        = HydraAttribute::HydraSet.create(entity_type: 'Product', name: 'set4').id
         hydra_attribute_set = HydraAttribute::HydraAttributeSet.create(hydra_attribute_id: hydra_attribute_id1, hydra_set_id: hydra_set_id)
 
-        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute_id1).should have(4).models
-        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute_id1).should include(hydra_attribute_set)
+        HydraAttribute::HydraAttributeSet.all_by_hydra_attribute_id(hydra_attribute_id1).should have(4).models
+        HydraAttribute::HydraAttributeSet.all_by_hydra_attribute_id(hydra_attribute_id1).should include(hydra_attribute_set)
       end
 
       it 'should not return model which was removed' do
         id = ::ActiveRecord::Base.connection.select_value(%[SELECT id FROM hydra_attribute_sets WHERE hydra_attribute_id=#{hydra_attribute_id1} LIMIT 1])
         HydraAttribute::HydraAttributeSet.find(id).destroy
 
-        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute_id1)
+        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.all_by_hydra_attribute_id(hydra_attribute_id1)
         hydra_attribute_sets.should have(1).item
       end
 
@@ -54,17 +54,17 @@ describe HydraAttribute::HydraAttributeSet do
         hydra_attribute_set.hydra_attribute_id = hydra_attribute_id2
         hydra_attribute_set.save
 
-        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute_id1)
+        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.all_by_hydra_attribute_id(hydra_attribute_id1)
         hydra_attribute_sets.map(&:hydra_set_id).should =~ [hydra_set_id2]
 
-        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute_id2)
+        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.all_by_hydra_attribute_id(hydra_attribute_id2)
         hydra_attribute_sets.map(&:hydra_set_id).should =~ [hydra_set_id1, hydra_set_id2]
       end
     end
 
     describe 'hydra_attribute_sets table is blank' do
       it 'should return blank collection' do
-        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(1).should == []
+        HydraAttribute::HydraAttributeSet.all_by_hydra_attribute_id(1).should == []
       end
 
       it 'should return model which was created in runtime and has a correct hydra_set_id' do
@@ -73,19 +73,19 @@ describe HydraAttribute::HydraAttributeSet do
         hydra_attribute_set = HydraAttribute::HydraAttributeSet.create(hydra_attribute_id: hydra_attribute_id, hydra_set_id: hydra_set_id)
 
 
-        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute_id).should have(1).model
-        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute_id).should include(hydra_attribute_set)
+        HydraAttribute::HydraAttributeSet.all_by_hydra_attribute_id(hydra_attribute_id).should have(1).model
+        HydraAttribute::HydraAttributeSet.all_by_hydra_attribute_id(hydra_attribute_id).should include(hydra_attribute_set)
 
         hydra_set_id        = HydraAttribute::HydraSet.create(entity_type: 'Product', name: 'set2').id
         hydra_attribute_set = HydraAttribute::HydraAttributeSet.create(hydra_attribute_id: hydra_attribute_id, hydra_set_id: hydra_set_id)
 
-        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute_id).should have(2).models
-        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute_id).should include(hydra_attribute_set)
+        HydraAttribute::HydraAttributeSet.all_by_hydra_attribute_id(hydra_attribute_id).should have(2).models
+        HydraAttribute::HydraAttributeSet.all_by_hydra_attribute_id(hydra_attribute_id).should include(hydra_attribute_set)
       end
     end
   end
 
-  describe '.hydra_attribute_sets_by_hydra_set_id' do
+  describe '.all_by_hydra_set_id' do
     describe 'hydra_attribute_sets table has several records' do
       let(:hydra_attribute_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'name', 'string')]).to_i }
       let(:hydra_attribute_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'code', 'string')]).to_i }
@@ -98,35 +98,35 @@ describe HydraAttribute::HydraAttributeSet do
       let!(:id3) { ::ActiveRecord::Base.connection.insert(%[INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id2}, #{hydra_set_id2})]).to_i }
 
       it 'should return models which have a correct hydra_set_id' do
-        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(hydra_set_id1)
+        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.all_by_hydra_set_id(hydra_set_id1)
         hydra_attribute_sets.should have(2).models
         hydra_attribute_sets.map(&:hydra_attribute_id).should == [hydra_attribute_id1, hydra_attribute_id2]
 
-        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(hydra_set_id2)
+        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.all_by_hydra_set_id(hydra_set_id2)
         hydra_attribute_sets.should have(1).model
         hydra_attribute_sets.map(&:hydra_attribute_id).should == [hydra_attribute_id2]
 
-        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(0)
+        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.all_by_hydra_set_id(0)
         hydra_attribute_sets.should == []
       end
 
       it 'should return model which was created in runtime and has a correct hydra_set_id' do
         hydra_attribute_id  = HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'a3', backend_type: 'string').id
         hydra_attribute_set = HydraAttribute::HydraAttributeSet.create(hydra_attribute_id: hydra_attribute_id, hydra_set_id: hydra_set_id1)
-        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(hydra_set_id1).should have(3).models
-        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(hydra_set_id1).should include(hydra_attribute_set)
+        HydraAttribute::HydraAttributeSet.all_by_hydra_set_id(hydra_set_id1).should have(3).models
+        HydraAttribute::HydraAttributeSet.all_by_hydra_set_id(hydra_set_id1).should include(hydra_attribute_set)
 
         hydra_attribute_id  = HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'a4', backend_type: 'string').id
         hydra_attribute_set = HydraAttribute::HydraAttributeSet.create(hydra_attribute_id: hydra_attribute_id, hydra_set_id: hydra_set_id1)
-        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(hydra_set_id1).should have(4).models
-        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(hydra_set_id1).should include(hydra_attribute_set)
+        HydraAttribute::HydraAttributeSet.all_by_hydra_set_id(hydra_set_id1).should have(4).models
+        HydraAttribute::HydraAttributeSet.all_by_hydra_set_id(hydra_set_id1).should include(hydra_attribute_set)
       end
 
       it 'should not return model which was removed' do
         id = ::ActiveRecord::Base.connection.select_value(%[SELECT id FROM hydra_attribute_sets WHERE hydra_set_id=#{hydra_set_id1} LIMIT 1])
         HydraAttribute::HydraAttributeSet.find(id).destroy
 
-        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(hydra_set_id1)
+        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.all_by_hydra_set_id(hydra_set_id1)
         hydra_attribute_sets.should have(1).item
       end
 
@@ -135,17 +135,17 @@ describe HydraAttribute::HydraAttributeSet do
         hydra_attribute_set.hydra_set_id = hydra_set_id2
         hydra_attribute_set.save
 
-        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(hydra_set_id1)
+        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.all_by_hydra_set_id(hydra_set_id1)
         hydra_attribute_sets.map(&:hydra_attribute_id).should =~ [hydra_attribute_id2]
 
-        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(hydra_set_id2)
+        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.all_by_hydra_set_id(hydra_set_id2)
         hydra_attribute_sets.map(&:hydra_attribute_id).should =~ [hydra_attribute_id1, hydra_attribute_id2]
       end
     end
 
     describe 'hydra_attribute_sets table is blank' do
       it 'should return blank collection' do
-        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(1).should == []
+        HydraAttribute::HydraAttributeSet.all_by_hydra_set_id(1).should == []
       end
 
       it 'should return model which was created in runtime and has a correct hydra_set_id' do
@@ -153,13 +153,13 @@ describe HydraAttribute::HydraAttributeSet do
         hydra_attribute_id  = HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'a1', backend_type: 'string').id
 
         hydra_attribute_set = HydraAttribute::HydraAttributeSet.create(hydra_attribute_id: hydra_attribute_id, hydra_set_id: hydra_set_id)
-        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(hydra_set_id).should have(1).model
-        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(hydra_set_id).should include(hydra_attribute_set)
+        HydraAttribute::HydraAttributeSet.all_by_hydra_set_id(hydra_set_id).should have(1).model
+        HydraAttribute::HydraAttributeSet.all_by_hydra_set_id(hydra_set_id).should include(hydra_attribute_set)
 
         hydra_attribute_id  = HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'a2', backend_type: 'string').id
         hydra_attribute_set = HydraAttribute::HydraAttributeSet.create(hydra_attribute_id: hydra_attribute_id, hydra_set_id: hydra_set_id)
-        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(hydra_set_id).should have(2).models
-        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(hydra_set_id).should include(hydra_attribute_set)
+        HydraAttribute::HydraAttributeSet.all_by_hydra_set_id(hydra_set_id).should have(2).models
+        HydraAttribute::HydraAttributeSet.all_by_hydra_set_id(hydra_set_id).should include(hydra_attribute_set)
       end
     end
   end
@@ -568,9 +568,9 @@ describe HydraAttribute::HydraAttributeSet do
       end
 
       it 'should delete hydra_set cache' do
-        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(hydra_set.id).should include(hydra_attribute_set)
+        HydraAttribute::HydraAttributeSet.all_by_hydra_set_id(hydra_set.id).should include(hydra_attribute_set)
         hydra_set.destroy
-        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(hydra_set.id).should == []
+        HydraAttribute::HydraAttributeSet.all_by_hydra_set_id(hydra_set.id).should == []
       end
 
       it 'should delete hydra_set from hydra_attribute cache' do
@@ -578,7 +578,7 @@ describe HydraAttribute::HydraAttributeSet do
         hydra_attribute_set2 = HydraAttribute::HydraAttributeSet.create(hydra_set_id: hydra_set2.id, hydra_attribute_id: hydra_attribute.id)
 
         hydra_set.destroy
-        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute.id)
+        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.all_by_hydra_attribute_id(hydra_attribute.id)
         hydra_attribute_sets.should_not include(hydra_attribute_set)
         hydra_attribute_sets.should     include(hydra_attribute_set2)
       end
@@ -602,9 +602,9 @@ describe HydraAttribute::HydraAttributeSet do
       end
 
       it 'should delete hydra_attribute cache' do
-        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute.id).should include(hydra_attribute_set)
+        HydraAttribute::HydraAttributeSet.all_by_hydra_attribute_id(hydra_attribute.id).should include(hydra_attribute_set)
         hydra_attribute.destroy
-        HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute.id).should == []
+        HydraAttribute::HydraAttributeSet.all_by_hydra_attribute_id(hydra_attribute.id).should == []
       end
 
       it 'should delete hydra_attribute from hydra_set cache' do
@@ -612,7 +612,7 @@ describe HydraAttribute::HydraAttributeSet do
         hydra_attribute_set2 = HydraAttribute::HydraAttributeSet.create(hydra_set_id: hydra_set.id, hydra_attribute_id: hydra_attribute2.id)
 
         hydra_attribute.destroy
-        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.hydra_attribute_sets_by_hydra_set_id(hydra_set.id)
+        hydra_attribute_sets = HydraAttribute::HydraAttributeSet.all_by_hydra_set_id(hydra_set.id)
         hydra_attribute_sets.should_not include(hydra_attribute_set)
         hydra_attribute_sets.should     include(hydra_attribute_set2)
       end

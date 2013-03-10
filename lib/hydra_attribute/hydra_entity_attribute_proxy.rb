@@ -14,7 +14,7 @@ module HydraAttribute
       #
       # @return [TrueClass]
       def generate_methods
-        ::HydraAttribute::HydraAttribute.hydra_attributes_by_entity_type(entity_class.model_name).each do |hydra_attribute|
+        ::HydraAttribute::HydraAttribute.all_by_entity_type(entity_class.model_name).each do |hydra_attribute|
           generate_method(hydra_attribute)
         end
         @method_generated = true

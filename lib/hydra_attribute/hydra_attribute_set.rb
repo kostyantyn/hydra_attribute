@@ -2,12 +2,12 @@ module HydraAttribute
   class HydraAttributeSet
     include ::HydraAttribute::Model
 
-    define_cached_singleton_method :hydra_attribute_sets_by_hydra_attribute_id, cache_key: :hydra_attribute_id, cache_value: :self,               cache_key_cast: :to_i
-    define_cached_singleton_method :hydra_attribute_sets_by_hydra_set_id,       cache_key: :hydra_set_id,       cache_value: :self,               cache_key_cast: :to_i
-    define_cached_singleton_method :hydra_attributes_by_hydra_set_id,           cache_key: :hydra_set_id,       cache_value: :hydra_attribute,    cache_key_cast: :to_i
-    define_cached_singleton_method :hydra_sets_by_hydra_attribute_id,           cache_key: :hydra_attribute_id, cache_value: :hydra_set,          cache_key_cast: :to_i
-    define_cached_singleton_method :hydra_attribute_ids_by_hydra_set_id,        cache_key: :hydra_set_id,       cache_value: :hydra_attribute_id, cache_key_cast: :to_i
-    define_cached_singleton_method :hydra_set_ids_by_hydra_attribute_id,        cache_key: :hydra_attribute_id, cache_value: :hydra_set_id,       cache_key_cast: :to_i
+    define_cached_singleton_method :all_by_hydra_attribute_id,           cache_key: :hydra_attribute_id, cache_value: :self,               cache_key_cast: :to_i
+    define_cached_singleton_method :all_by_hydra_set_id,                 cache_key: :hydra_set_id,       cache_value: :self,               cache_key_cast: :to_i
+    define_cached_singleton_method :hydra_attributes_by_hydra_set_id,    cache_key: :hydra_set_id,       cache_value: :hydra_attribute,    cache_key_cast: :to_i
+    define_cached_singleton_method :hydra_sets_by_hydra_attribute_id,    cache_key: :hydra_attribute_id, cache_value: :hydra_set,          cache_key_cast: :to_i
+    define_cached_singleton_method :hydra_attribute_ids_by_hydra_set_id, cache_key: :hydra_set_id,       cache_value: :hydra_attribute_id, cache_key_cast: :to_i
+    define_cached_singleton_method :hydra_set_ids_by_hydra_attribute_id, cache_key: :hydra_attribute_id, cache_value: :hydra_set_id,       cache_key_cast: :to_i
 
     register_nested_cache :hydra_attribute_ids_by_hydra_set_id_as_hash
 
@@ -25,12 +25,12 @@ module HydraAttribute
 
       # Remove hydra attribute from the cache
       def hydra_attribute_destroyed(hydra_attribute) #:nodoc:
-        hydra_attribute_sets_by_hydra_attribute_id(hydra_attribute.id).each(&:destroy)
+        all_by_hydra_attribute_id(hydra_attribute.id).each(&:destroy)
       end
 
       # Remove hydra set from the cache
       def hydra_set_destroyed(hydra_set) #:nodoc:
-        hydra_attribute_sets_by_hydra_set_id(hydra_set.id).each(&:destroy)
+        all_by_hydra_set_id(hydra_set.id).each(&:destroy)
       end
 
       private

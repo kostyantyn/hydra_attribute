@@ -13,7 +13,7 @@ module HydraAttribute
     # @param [Fixnum] hydra_attribute_id
     # @return [HydraAttribute::HydraValue]
     def hydra_value_by_hydra_attribute_id(hydra_attribute_id)
-      unless ::HydraAttribute::HydraAttribute.hydra_attribute_ids_by_entity_type(entity.class.model_name).include?(hydra_attribute_id)
+      unless ::HydraAttribute::HydraAttribute.ids_by_entity_type(entity.class.model_name).include?(hydra_attribute_id)
         raise HydraAttribute::UnknownHydraAttributeIdError, %(Cannot find HydraAttribute::HydraAttribute by ID "#{hydra_attribute_id}")
       end
 
