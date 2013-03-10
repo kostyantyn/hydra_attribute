@@ -15,16 +15,6 @@ module HydraAttribute
     define_cached_singleton_method :ids_by_entity_type,   cache_key: :entity_type, cache_value: :id,   cache_key_cast: :to_s
     define_cached_singleton_method :names_by_entity_type, cache_key: :entity_type, cache_value: :name, cache_key_cast: :to_s
 
-    class << self
-      def attribute_proxy_class(entity_class)
-        ::HydraAttribute.identity_map[entity_class.model_name] ||= begin
-          klass = Class.new(HydraEntityAttributeProxy)
-          klass.entity_class = entity_class
-          klass
-        end
-      end
-    end
-
     # Returns collection of hydra sets for this hydra attribute
     #
     # @return [Array<HydraAttribute::HydraSet>]

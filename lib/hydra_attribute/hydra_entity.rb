@@ -17,7 +17,7 @@ module HydraAttribute
     end
 
     def hydra_attribute_proxy
-      @hydra_attribute_proxy ||= HydraAttribute.attribute_proxy_class(self.class).new(self)
+      @hydra_attribute_proxy ||= HydraEntityAttributeProxy.new(self)
     end
 
     # Return +HydraSet+ object if it exists
@@ -28,16 +28,14 @@ module HydraAttribute
     end
 
     def respond_to?(method, include_private = false)
-      hydra_attribute_proxy.respond_to?(method, include_private) || super
+      hydra_attribute_proxy.has_proxy_method?(method) || super
     end
 
     private
       def method_missing(method, *args, &block)
-        if hydra_attribute_proxy.respond_to?(method)
-          hydra_attribute_proxy.send(method, *args, &block)
-        else
-          super
-        end
+        hydra_attribute_proxy.delegate(method, *args, &block)
+      rescue
+        super
       end
   end
 end
