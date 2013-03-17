@@ -4,20 +4,16 @@ module HydraAttribute
 
     # Returns association between hydra attributes and their values
     #
-    # @return [HydraAttribute::HydraAttributeValueAssociation]
-    def hydra_attribute_value_association
-      @hydra_attribute_value_association ||= HydraAttributeValueAssociation.new(self)
+    # @return [HydraAttribute::HydraEntityAttributeAssociation]
+    def hydra_attribute_association
+      @hydra_attribute_association ||= HydraEntityAttributeAssociation.new(self)
     end
 
     # Sets association object which connects hydra attributes with their values
     #
-    # @param [HydraAttribute::HydraAttributeValueAssociation]
-    def hydra_attribute_value_association=(association)
-      @hydra_attribute_value_association = association
-    end
-
-    def hydra_attribute_proxy
-      @hydra_attribute_proxy ||= HydraEntityAttributeProxy.new(self)
+    # @param [HydraAttribute::HydraEntityAttributeAssociation]
+    def hydra_attribute_association=(association)
+      @hydra_attribute_association = association
     end
 
     # Return +HydraSet+ object if it exists
@@ -28,12 +24,12 @@ module HydraAttribute
     end
 
     def respond_to?(method, include_private = false)
-      hydra_attribute_proxy.has_proxy_method?(method) || super
+      hydra_attribute_association.has_proxy_method?(method) || super
     end
 
     private
       def method_missing(method, *args, &block)
-        hydra_attribute_proxy.delegate(method, *args, &block)
+        hydra_attribute_association.delegate(method, *args, &block)
       rescue
         super
       end

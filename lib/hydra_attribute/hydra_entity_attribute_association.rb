@@ -1,6 +1,9 @@
 module HydraAttribute
-  class HydraEntityAttributeProxy
+  class HydraEntityAttributeAssociation
     class WrongProxyMethodError < ArgumentError
+      def initialize(method)
+        super("Unknown :#{method} method")
+      end
     end
 
     include ::HydraAttribute::Model::Mediator
@@ -8,7 +11,10 @@ module HydraAttribute
 
     observe 'HydraAttribute::HydraAttribute', after_create: :hydra_attribute_created, after_update: :hydra_attribute_updated, after_destroy: :hydra_attribute_destroyed
 
+    attr_reader :entity
+
     class << self
+      # Generate hydra attribute methods
       def generate_methods
         ::HydraAttribute::HydraAttribute.all.each do |hydra_attribute|
           add_to_cache(hydra_attribute.entity_type, hydra_attribute.name, hydra_attribute.id)
@@ -16,20 +22,24 @@ module HydraAttribute
         identity_map[:___methods_generated___] = true
       end
 
+      # Checks if methods were generated
       def methods_generated?
         identity_map[:___methods_generated___] ||= false
       end
 
+      # Callback
       def hydra_attribute_created(hydra_attribute) # :nodoc:
         return unless methods_generated?
         add_to_cache(hydra_attribute.entity_type, hydra_attribute.name, hydra_attribute.id)
       end
 
+      # Callback
       def hydra_attribute_updated(hydra_attribute) # :nodoc:
         delete_from_cache(hydra_attribute.entity_type_was, hydra_attribute.name_was)
         add_to_cache(hydra_attribute.entity_type, hydra_attribute.name, hydra_attribute.id)
       end
 
+      # Callback
       def hydra_attribute_destroyed(hydra_attribute) # :nodoc:
         delete_from_cache(hydra_attribute.entity_type, hydra_attribute.name)
       end
@@ -59,13 +69,24 @@ module HydraAttribute
         end
     end
 
-    attr_reader :entity
+    def initialize(entity, hydra_values = {})
+      @entity       = entity
+      @hydra_values = hydra_values
+    end
 
-    # Initializer
-    #
-    # @param [ActiveRecord::Base] entity
-    def initialize(entity)
-      @entity = entity
+    def save
+      touch = false
+      @hydra_values.each do |hydra_attribute_id, hydra_value|
+        if has_attribute_id?(hydra_attribute_id)
+          hydra_value.save
+          touch = true
+        end
+      end
+      entity.touch if touch
+    end
+
+    def destroy
+      #HydraValue.delete_for(entity.id)
     end
 
     def has_proxy_method?(method)
@@ -78,9 +99,20 @@ module HydraAttribute
     def delegate(method, *args, &block)
       self.class.generate_methods unless self.class.methods_generated?
       identity_map     = self.class.identity_map[entity.class.model_name] or raise WrongProxyMethodError, method
-      attribute_method = identity_map[:names_as_hash][method]             or raise WrongProxyMethodError, method
       attribute_id     = identity_map[:ids_as_hash][method]               or raise WrongProxyMethodError, method
-      entity.hydra_attribute_value_association.hydra_value_by_hydra_attribute_id(attribute_id).send(attribute_method, *args, &block)
+      attribute_method = identity_map[:names_as_hash][method]             or raise WrongProxyMethodError, method
+
+      if has_attribute_id?(attribute_id)
+        hydra_value = @hydra_values[attribute_id] ||= HydraValue.new(entity, hydra_attribute_id: attribute_id)
+        hydra_value.send(attribute_method, *args, &block)
+      else
+        raise HydraSet::MissingAttributeInHydraSetError, "Attribute ID #{attribute_id} is missed in Set ID #{entity.hydra_set.id}"
+      end
     end
+
+    private
+      def has_attribute_id?(hydra_attribute_id)
+        !entity.hydra_set || entity.hydra_set.has_hydra_attribute_id?(hydra_attribute_id)
+      end
   end
 end

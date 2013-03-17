@@ -4,5 +4,5 @@ HydraAttribute::Migrator.new(ActiveRecord::Base.connection).create :products do 
 end
 
 class Product < ActiveRecord::Base
-  # include HydraAttribute::ActiveRecord
+  include HydraAttribute::ActiveRecord
 end
