@@ -54,7 +54,7 @@ module HydraAttribute
     def hydra_attribute
       ::HydraAttribute::HydraAttribute.find(hydra_attribute_id) if hydra_attribute_id
     end
-    alias_method :hydra_attribute_was, :hydra_attribute
+    alias_method :hydra_attribute_was, :hydra_attribute # used for cache sweepers
 
     # Returns hydra set for this relation
     #
@@ -62,6 +62,6 @@ module HydraAttribute
     def hydra_set
       ::HydraAttribute::HydraSet.find(hydra_set_id) if hydra_set_id
     end
-    alias_method :hydra_set_was, :hydra_set
+    alias_method :hydra_set_was, :hydra_set # used for cache sweepers
   end
 end
