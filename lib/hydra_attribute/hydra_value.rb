@@ -25,8 +25,6 @@ module HydraAttribute
 
     define_attribute_method :value
 
-    register_nested_cache :column
-
     # Initialize hydra value object
     #
     # @param [ActiveRecord::Base] entity link to entity model
