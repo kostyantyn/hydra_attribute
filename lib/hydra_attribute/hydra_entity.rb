@@ -3,7 +3,8 @@ module HydraAttribute
     extend ActiveSupport::Concern
 
     included do
-      after_save :save_hydra_attributes
+      after_save    :save_hydra_attributes
+      after_destroy :destroy_hydra_attributes
     end
 
     # Returns association between hydra attributes and their values
@@ -34,6 +35,10 @@ module HydraAttribute
     private
       def save_hydra_attributes
         hydra_attribute_association.save
+      end
+
+      def destroy_hydra_attributes
+        hydra_attribute_association.destroy
       end
 
       def method_missing(method, *args, &block)

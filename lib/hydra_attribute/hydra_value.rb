@@ -69,6 +69,21 @@ module HydraAttribute
           ::ActiveRecord::ConnectionAdapters::Column.new(hydra_attribute.name, hydra_attribute.default_value, hydra_attribute.backend_type)
         end
       end
+
+      # Delete all values for current entity
+      #
+      # @param [HydraAttribute::HydraEntity] entity
+      # @return [NilClass]
+      def delete_entity_values(entity)
+        hydra_attributes = ::HydraAttribute::HydraAttribute.all_by_entity_type(entity.class.model_name)
+        hydra_attributes = hydra_attributes.group_by(&:backend_type)
+        hydra_attributes.each do |backend_type, attributes|
+          table = arel_tables[entity.class.table_name][backend_type]
+          where = table['hydra_attribute_id'].in(attributes.map(&:id)).and(table['entity_id'].eq(entity.id))
+          arel  = table.from(table)
+          connection.delete(arel.where(where).compile_delete, 'SQL')
+        end
+      end
     end
 
     # Returns virtual value column

@@ -86,7 +86,7 @@ module HydraAttribute
     end
 
     def destroy
-      #HydraValue.delete_for(entity.id)
+      HydraValue.delete_entity_values(entity)
     end
 
     def has_proxy_method?(method)

@@ -375,7 +375,7 @@ module HydraAttribute
         # @return [TrueClass]
         def delete
           return true unless persisted?
-          self.class.connection.delete(self.class.compile_delete(id: id))
+          self.class.connection.delete(self.class.compile_delete(id: id), 'SQL')
           @destroyed = true
         end
 

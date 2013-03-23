@@ -85,4 +85,27 @@ describe HydraAttribute::HydraEntity do
       end
     end
   end
+
+  describe '#destroy' do
+    let!(:attr1) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'title', backend_type: 'string') }
+    let!(:attr2) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'code', backend_type: 'integer') }
+
+    let(:find_query) { ->(entity_id, attr) { "SELECT value FROM hydra_#{attr.backend_type}_products WHERE entity_id = #{entity_id} AND hydra_attribute_id = #{attr.id}" } }
+    let(:find_value) { ->(entity_id, attr) { ::ActiveRecord::Base.connection.select_value(find_query.(entity_id, attr)) } }
+
+    it 'should destroy all saved attributes for current entity' do
+      product1 = Product.create(title: 'abc', code: 42)
+      product2 = Product.create(title: 'qwe', code: 55)
+
+      find_value.(product1.id, attr1).should      == 'abc'
+      find_value.(product1.id, attr2).to_i.should == 42
+      find_value.(product2.id, attr1).should      == 'qwe'
+      find_value.(product2.id, attr2).to_i.should == 55
+      product1.destroy
+      find_value.(product1.id, attr1).should be_nil
+      find_value.(product1.id, attr2).should be_nil
+      find_value.(product2.id, attr1).should      == 'qwe'
+      find_value.(product2.id, attr2).to_i.should == 55
+    end
+  end
 end
