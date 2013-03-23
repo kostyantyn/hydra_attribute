@@ -1,3 +1,7 @@
+require 'hydra_attribute/active_record/migration'
+require 'hydra_attribute/active_record/relation'
+require 'hydra_attribute/active_record/scoping'
+
 module HydraAttribute
   module ActiveRecord
     extend ActiveSupport::Concern
@@ -13,5 +17,6 @@ module HydraAttribute
     end
 
     include ::HydraAttribute::HydraEntity
+    include ::HydraAttribute::ActiveRecord::Scoping
   end
 end
