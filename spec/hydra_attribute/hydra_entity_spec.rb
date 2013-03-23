@@ -1,36 +1,6 @@
 require 'spec_helper'
 
 describe HydraAttribute::HydraEntity do
-  describe '#initialize' do
-    let!(:attr_id1) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'title', backend_type: 'string').id.to_i }
-    let!(:attr_id2) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'color', backend_type: 'string', default_value: 'red').id.to_i }
-
-    it 'should return default values for hydra attributes' do
-      product = Product.new
-      product.title.should be_nil
-      product.color.should == 'red'
-    end
-
-    it 'should accept hydra attributes' do
-      product = Product.new(title: 'abc', color: 'green')
-      product.title.should == 'abc'
-      product.color.should == 'green'
-    end
-
-    it 'should raise an error if attribute is not in hydra set' do
-      set_id = HydraAttribute::HydraSet.create(entity_type: 'Product', name: 'default').id
-      HydraAttribute::HydraAttributeSet.create(hydra_set_id: set_id, hydra_attribute_id: attr_id2)
-
-      product = Product.new(hydra_set_id: set_id)
-      product.color = 'red'
-      product.color.should == 'red'
-
-      lambda do
-        product.title = 'qwe'
-      end.should raise_error HydraAttribute::HydraSet::MissingAttributeInHydraSetError, "Attribute ID #{attr_id1} is missed in Set ID #{set_id}"
-    end
-  end
-
   describe '#save' do
     let!(:attr_id) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'code', backend_type: 'string', default_value: 'abc').id.to_i }
 
