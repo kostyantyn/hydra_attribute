@@ -62,9 +62,11 @@ describe HydraAttribute::HydraValue do
       end.should raise_error(HydraAttribute::HydraValue::HydraAttributeIdIsMissedError, 'Key :hydra_attribute_id is missed')
     end
 
-    it 'should not raise error when :hydra_attribute_id us passed' do
+    it 'should not raise error when :hydra_attribute_id is passed' do
+      attr = HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'price', backend_type: 'float')
+
       lambda do
-        HydraAttribute::HydraValue.new(Product.new, hydra_attribute_id: nil)
+        HydraAttribute::HydraValue.new(Product.new, hydra_attribute_id: attr.id)
       end.should_not raise_error
     end
   end
@@ -93,11 +95,13 @@ describe HydraAttribute::HydraValue do
   end
 
   describe '#id' do
+    let(:hydra_attribute) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'price', backend_type: 'float') }
+
     it 'should return model ID' do
-      hydra_value = HydraAttribute::HydraValue.new(Product.new, hydra_attribute_id: 1, id: 2)
+      hydra_value = HydraAttribute::HydraValue.new(Product.new, hydra_attribute_id: hydra_attribute.id, id: 2)
       hydra_value.id.should be(2)
 
-      hydra_value = HydraAttribute::HydraValue.new(Product.new, hydra_attribute_id: 1)
+      hydra_value = HydraAttribute::HydraValue.new(Product.new, hydra_attribute_id: hydra_attribute.id)
       hydra_value.id.should be_nil
     end
   end
@@ -209,13 +213,15 @@ describe HydraAttribute::HydraValue do
   end
 
   describe '#persisted?' do
+    let(:hydra_attribute) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'price', backend_type: 'float') }
+
     it 'should return true if model has ID' do
-      hydra_value = HydraAttribute::HydraValue.new(Product.new, hydra_attribute_id: 1, id: 2)
+      hydra_value = HydraAttribute::HydraValue.new(Product.new, hydra_attribute_id: hydra_attribute.id, id: 2)
       hydra_value.should be_persisted
     end
 
     it 'should return false unless model has ID' do
-      hydra_value = HydraAttribute::HydraValue.new(Product.new, hydra_attribute_id: 1)
+      hydra_value = HydraAttribute::HydraValue.new(Product.new, hydra_attribute_id: hydra_attribute.id)
       hydra_value.should_not be_persisted
     end
   end
@@ -226,7 +232,7 @@ describe HydraAttribute::HydraValue do
 
     describe 'validation' do
       it 'should raise error if entity model is not persisted' do
-        hydra_value = HydraAttribute::HydraValue.new(Product.new, hydra_attribute_id: 1)
+        hydra_value = HydraAttribute::HydraValue.new(Product.new, hydra_attribute_id: hydra_attribute.id)
         lambda do
           hydra_value.save
         end.should raise_error(HydraAttribute::HydraValue::EntityModelIsNotPersistedError, 'HydraValue model cannot be saved is entity model is not persisted')
@@ -284,8 +290,10 @@ describe HydraAttribute::HydraValue do
   end
 
   describe 'value methods' do
+    let(:hydra_attribute) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'code', backend_type: 'string') }
+
     it 'should respond to dirty methods' do
-      hydra_value = HydraAttribute::HydraValue.new(Product.new, hydra_attribute_id: 1)
+      hydra_value = HydraAttribute::HydraValue.new(Product.new, hydra_attribute_id: hydra_attribute.id)
       hydra_value.should respond_to(:value_changed?)
       hydra_value.should respond_to(:value_change)
       hydra_value.should respond_to(:value_will_change!)

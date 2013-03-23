@@ -6,7 +6,6 @@ module HydraAttribute
       def initialize(relation, records = [])
         @relation = relation
         @records  = records
-        prepared_records # lock attributes
       end
 
       def self.run(relation, records)
@@ -16,7 +15,7 @@ module HydraAttribute
       def run
         return if records.blank?
 
-        prepared_records.keys.each_slice(in_clause_length || prepared_records.keys.length) do |entity_ids|
+        prepared_records.keys.each_slice(in_clause_length || records.length) do |entity_ids|
           grouped_hydra_attribute_ids.each do |backend_type, hydra_attribute_ids|
             next if hydra_attribute_ids.blank?
 
@@ -26,7 +25,7 @@ module HydraAttribute
                 attributes[:id]                 = attributes[:id].to_i                 # for PostgreSQL driver
                 attributes[:entity_id]          = attributes[:entity_id].to_i          # for PostgreSQL driver
                 attributes[:hydra_attribute_id] = attributes[:hydra_attribute_id].to_i # for PostgreSQL driver
-                prepared_records[attributes[:id]].hydra_attribute_association.set_hydra_value(attributes.symbolize_keys)
+                prepared_records[attributes[:entity_id]].hydra_attribute_association.set_hydra_value(attributes.symbolize_keys)
               end
             end
           end

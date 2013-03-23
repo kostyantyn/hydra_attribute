@@ -21,7 +21,7 @@ module HydraAttribute
     include ActiveModel::AttributeMethods
     include ActiveModel::Dirty
 
-    attr_reader :entity
+    attr_reader :entity, :value
 
     define_attribute_method :value
 
@@ -37,7 +37,7 @@ module HydraAttribute
 
       @entity     = entity
       @attributes = attributes
-      @value      = column.type_cast(attributes[:value]) if attributes.has_key?(:value)
+      @value      = attributes.has_key?(:value) ? column.type_cast(attributes[:value]) : column.default
     end
 
     class << self
@@ -98,13 +98,6 @@ module HydraAttribute
     # @return [Fixnum]
     def id
       @attributes[:id]
-    end
-
-    # Current type casted attribute value
-    #
-    # @return [Object]
-    def value
-      @value ||= column.default
     end
 
     # Sets new type casted attribute value
