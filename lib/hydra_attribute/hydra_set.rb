@@ -18,6 +18,8 @@ module HydraAttribute
 
     include ::HydraAttribute::Model
 
+    define_cached_singleton_method :all_by_entity_type, cache_key: :entity_type, cache_value: :self, cache_key_cast: :to_s
+
     validates :entity_type, presence: true
     validates :name,        presence: true, unique: { scope: :entity_type }
 

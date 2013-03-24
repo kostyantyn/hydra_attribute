@@ -170,4 +170,35 @@ describe HydraAttribute::ActiveRecord do
       Product.count.should be(2)
     end
   end
+
+  describe '.group' do
+    before do
+      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'code', backend_type: 'integer')
+      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'title', backend_type: 'string')
+      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'total', backend_type: 'integer')
+
+      Product.create(name: 'a', code: 1, title: 'q', total: 5)
+      Product.create(name: 'b', code: 2, title: 'w', total: 5)
+      Product.create(name: 'b', code: 3, title: 'w')
+      Product.create(name: 'c', code: 4, title: 'e')
+    end
+
+    describe 'without where condition' do
+      it 'should be able to group by hydra and by static attributes' do
+        Product.group(:name).count.stringify_keys.should  == {'a'=>1, 'b'=>2, 'c'=>1}
+        Product.group(:code).count.stringify_keys.should  == {'1'=>1, '2'=>1, '3'=>1, '4'=>1}
+        Product.group(:total).count.stringify_keys.should == {'5'=>2, ''=>2}
+        Product.group(:name, :title).count.should         == {%w[a q]=>1, %w[b w]=>2, %w[c e]=>1}
+      end
+    end
+
+    describe 'with where condition' do
+      it 'should be able to group by hydra and by static attributes' do
+        Product.where(title: 'w').group(:name).count.stringify_keys.should  == {'b'=>2}
+        Product.where(title: 'w').group(:code).count.stringify_keys.should  == {'2'=>1, '3'=>1}
+        Product.where(title: 'w').group(:total).count.stringify_keys.should == {'5'=>1, ''=>1}
+        Product.where(total: nil).group(:name, :title).count.should         == {%w[b w]=>1, %w[c e]=>1}
+      end
+    end
+  end
 end

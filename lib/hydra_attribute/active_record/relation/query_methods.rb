@@ -56,8 +56,16 @@ module HydraAttribute
             @select_values << hydra_helper.prepend_table_name('hydra_set_id')
           end
 
+          # Add filter by sets which have all this attributes
           if hydra_attributes.any?
-            hydra_sets = klass.hydra_sets.select { |hydra_set| hydra_set.hydra_attributes.any? { |attr| attr.name.in?(hydra_attributes) } }
+            hydra_attribute_ids = hydra_attributes.map { |name| hydra_helper.hydra_attribute_id(name) }
+
+            hydra_sets = ::HydraAttribute::HydraSet.all_by_entity_type(klass.model_name).select do |hydra_set|
+              hydra_attribute_ids.all? do |hydra_attribute_id|
+                hydra_set.has_hydra_attribute_id?(hydra_attribute_id)
+              end
+            end
+
             @where_values << table[:hydra_set_id].in(hydra_sets.map(&:id)).or(table[:hydra_set_id].eq(nil))
           end
 
@@ -120,13 +128,9 @@ module HydraAttribute
             {ref_alias(name, value) => {value: value}}
           end
 
-          def ref_class(name)
-            type = klass.hydra_attribute(name).backend_type
-            AssociationBuilder.class_name(klass, type).constantize
-          end
-
           def ref_table(name)
-            ref_class(name).table_name
+            hydra_attribute = hydra_attribute_by_name(name)
+            "hydra_#{hydra_attribute.backend_type}_#{klass.table_name}"
           end
 
           def ref_alias(name, value)
@@ -138,7 +142,13 @@ module HydraAttribute
           end
 
           def hydra_attribute_id(name)
-            klass.hydra_attribute(name).id
+            hydra_attribute_by_name(name).id
+          end
+
+          def hydra_attribute_by_name(name)
+            ::HydraAttribute::HydraAttribute.all_by_entity_type(klass.model_name).find do |hydra_attribute|
+              hydra_attribute.name == name.to_s
+            end
           end
 
           def quote_columns(columns)
