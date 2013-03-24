@@ -40,6 +40,7 @@ module HydraAttribute
         end
 
         def build_arel
+          # remove duplicate columns and add table prefix to all of them
           @group_values = hydra_helper.quote_columns(@group_values.uniq.reject(&:blank?))
           @order_values = hydra_helper.quote_columns(@order_values.uniq.reject(&:blank?))
 
@@ -56,7 +57,7 @@ module HydraAttribute
             @select_values << hydra_helper.prepend_table_name('hydra_set_id')
           end
 
-          # Add filter by sets which have all this attributes
+          # Add filter by hydra sets which have all these attributes
           if hydra_attributes.any?
             hydra_attribute_ids = hydra_attributes.map { |name| hydra_helper.hydra_attribute_id(name) }
 
