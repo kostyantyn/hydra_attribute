@@ -201,4 +201,30 @@ describe HydraAttribute::ActiveRecord do
       end
     end
   end
+
+  describe '.order' do
+    before do
+      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'state', backend_type: 'integer')
+      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'title', backend_type: 'string')
+
+      Product.create(name: 'a', state: 3, title: 'c')
+      Product.create(name: 'b', state: 2, title: 'b')
+      Product.create(name: 'c', state: 1, title: 'b')
+    end
+
+    it 'should order by one field' do
+      Product.order(:name).map(&:name).should == %w[a b c]
+      Product.order(:state).map(&:name).should == %w[c b a]
+    end
+
+    it 'should order by two fields' do
+      Product.order(:title, :state).map(&:name).should == %w[c b a]
+      Product.order(:title, :name).map(&:name).should == %w[b c a]
+    end
+
+    it 'should order by field with with filter' do
+      Product.where(name: %w[a b]).order(:title).map(&:name).should == %w[b a]
+      Product.where(title: 'b').order(:state).map(&:name).should == %w[c b]
+    end
+  end
 end
