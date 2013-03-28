@@ -227,4 +227,30 @@ describe HydraAttribute::ActiveRecord do
       Product.where(title: 'b').order(:state).map(&:name).should == %w[c b]
     end
   end
+
+  describe '.reverse_order' do
+    before do
+      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'state', backend_type: 'integer')
+      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'title', backend_type: 'string')
+
+      Product.create(name: 'a', state: 3, title: 'c')
+      Product.create(name: 'b', state: 2, title: 'b')
+      Product.create(name: 'c', state: 1, title: 'b')
+    end
+
+    it 'should order by one field and reorder list' do
+      Product.order(:name).reverse_order.map(&:name).should == %w[c b a]
+      Product.order(:state).reverse_order.map(&:name).should == %w[a b c]
+    end
+
+    it 'should order by two fields and reorder list' do
+      Product.order(:title, :state).reverse_order.map(&:name).should == %w[a b c]
+      Product.order(:title, :name).reverse_order.map(&:name).should == %w[a c b]
+    end
+
+    it 'should order by field with with filter and reorder list' do
+      Product.where(name: %w[a b]).order(:title).reverse_order.map(&:name).should == %w[a b]
+      Product.where(title: 'b').order(:state).reverse_order.map(&:name).should == %w[b c]
+    end
+  end
 end
