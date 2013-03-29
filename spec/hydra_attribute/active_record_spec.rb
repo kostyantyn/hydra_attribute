@@ -253,4 +253,93 @@ describe HydraAttribute::ActiveRecord do
       Product.where(title: 'b').order(:state).reverse_order.map(&:name).should == %w[b c]
     end
   end
+
+  describe '.where' do
+    let!(:attr1) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'info',    backend_type: 'string')   }
+    let!(:attr2) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'total',   backend_type: 'integer')  }
+    let!(:attr3) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'price',   backend_type: 'float')    }
+    let!(:attr4) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'active',  backend_type: 'boolean')  }
+    let!(:attr5) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'started', backend_type: 'datetime') }
+
+    describe 'without attribute sets' do
+      before do
+        Product.create(name: 'a', info: 'a', total: 2,   price: 3.5, active: true,  started: '2013-01-01')
+        Product.create(name: 'b', info: 'a', total: 3,   price: nil, active: false, started: '2013-01-02')
+        Product.create(name: 'c' ,info: 'b', total: nil, price: nil, active: nil,   started: '2013-01-01')
+        Product.create(name: 'd', info: nil, total: 3,   price: 3.5, active: true,  started: nil)
+      end
+
+      it 'should filter by one attribute' do
+        Product.where(info: 'a').map(&:name).should =~ %w[a b]
+        Product.where(info: nil).map(&:name).should =~ %w[d]
+        Product.where(total: 3).map(&:name).should =~ %w[b d]
+        Product.where(total: nil).map(&:name).should =~ %w[c]
+        Product.where(price: 3.5).map(&:name).should =~ %w[a d]
+        Product.where(price: nil).map(&:name).should =~ %w[b c]
+        Product.where(active: true).map(&:name).should =~ %w[a d]
+        Product.where(active: false).map(&:name).should =~ %w[b]
+        Product.where(active: nil).map(&:name).should =~ %w[c]
+        Product.where(started: Time.utc('2013-01-01')).map(&:name).should =~ %w[a c]
+        Product.where(started: nil).map(&:name).should =~ %w[d]
+      end
+
+      it 'should filter by several attributes' do
+        Product.where(info: %w[a b], name: %w[b c]).map(&:name).should =~ %w[b c]
+        Product.where(info: %w[a b], price: nil).map(&:name).should =~ %w[b c]
+        Product.where(active: nil, started: Time.utc('2013-01-01')).map(&:name).should =~ %w[c]
+        Product.where(price: 3.5,  started: nil).map(&:name).should =~ %w[d]
+        Product.where(total: 3,  active: true).map(&:name).should =~ %w[d]
+      end
+    end
+
+    describe 'with attribute sets' do
+      before do
+        set1 = HydraAttribute::HydraSet.create(entity_type: 'Product', name: 'default')
+        set2 = HydraAttribute::HydraSet.create(entity_type: 'Product', name: 'second')
+        HydraAttribute::HydraAttributeSet.create(hydra_set_id: set1.id, hydra_attribute_id: attr1.id)
+        HydraAttribute::HydraAttributeSet.create(hydra_set_id: set2.id, hydra_attribute_id: attr2.id)
+        HydraAttribute::HydraAttributeSet.create(hydra_set_id: set1.id, hydra_attribute_id: attr3.id)
+        HydraAttribute::HydraAttributeSet.create(hydra_set_id: set2.id, hydra_attribute_id: attr4.id)
+        HydraAttribute::HydraAttributeSet.create(hydra_set_id: set1.id, hydra_attribute_id: attr5.id)
+
+        p1 = Product.create(name: 'a', info: 'a', total: 2,   price: 3.5, active: true,  started: '2013-01-01')
+        p2 = Product.create(name: 'b', info: 'a', total: 3,   price: nil, active: false, started: '2013-01-02')
+        p3 = Product.create(name: 'c' ,info: 'b', total: nil, price: nil, active: nil,   started: '2013-01-01')
+        p4 = Product.create(name: 'd', info: nil, total: 3,   price: 3.5, active: true,  started: nil)
+        p5 = Product.create(name: 'e', info: 'c', total: 7,   price: 4.2, active: false, started: '2013-01-03')
+        p6 = Product.create(name: 'f', info: 'c', total: 5,   price: 4.2, active: false, started: '2013-01-03')
+        p7 = Product.create(name: 'g', info: nil, total: 7,   price: 5.5, active: nil,   started: nil)
+        p1.hydra_set_id = nil
+        p2.hydra_set_id = set1.id
+        p3.hydra_set_id = set2.id
+        p4.hydra_set_id = set2.id
+        p5.hydra_set_id = set1.id
+        p6.hydra_set_id = set1.id
+        p7.hydra_set_id = nil
+        [p1, p2, p3, p4, p5, p6, p7].each(&:save)
+      end
+
+      it 'should filter by one attribute' do
+        Product.where(info: 'a').map(&:name).should =~ %w[a b]
+        Product.where(info: nil).map(&:name).should =~ %w[g]
+        Product.where(total: 3).map(&:name).should =~ %w[d]
+        Product.where(total: nil).map(&:name).should =~ %w[c]
+        Product.where(price: 3.5).map(&:name).should =~ %w[a]
+        Product.where(price: nil).map(&:name).should =~ %w[b]
+        Product.where(active: true).map(&:name).should =~ %w[a d]
+        Product.where(active: false).map(&:name).should == []
+        Product.where(active: nil).map(&:name).should =~ %w[c g]
+        Product.where(started: Time.utc('2013-01-01')).map(&:name).should =~ %w[a]
+        Product.where(started: nil).map(&:name).should =~ %w[g]
+      end
+
+      it 'should filter by several attributes' do
+        Product.where(info: ['a', 'b', 'c', nil], name: %w[a b c d e f g]).map(&:name).should =~ %w[a b e f g]
+        Product.where(info: %w[a b], price: nil).map(&:name).should =~ %w[b]
+        Product.where(active: nil, started: Time.utc('2013-01-01')).map(&:name).should == []
+        Product.where(price: 3.5,  started: Time.utc('2013-01-01')).map(&:name).should =~ %w[a]
+        Product.where(total: [3, 5, 7],  active: [true, false]).map(&:name).should =~ %w[d]
+      end
+    end
+  end
 end

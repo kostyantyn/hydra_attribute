@@ -139,7 +139,11 @@ module HydraAttribute
           end
 
           def join_type(value)
-            value.nil? ? 'LEFT' : 'INNER'
+            if value.nil? or (value.is_a?(Array) and value.include?(nil))
+              'LEFT'
+            else
+              'INNER'
+            end
           end
 
           def hydra_attribute_id(name)
