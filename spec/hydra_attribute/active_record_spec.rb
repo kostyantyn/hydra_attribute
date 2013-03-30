@@ -254,6 +254,32 @@ describe HydraAttribute::ActiveRecord do
     end
   end
 
+  describe '.reorder' do
+    before do
+      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'state', backend_type: 'integer')
+      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'title', backend_type: 'string')
+
+      Product.create(name: 'a', state: 3, title: 'c')
+      Product.create(name: 'b', state: 2, title: 'b')
+      Product.create(name: 'c', state: 1, title: 'b')
+    end
+
+    it 'should order by one field' do
+      Product.order(:name).reorder(:state).map(&:name).should == %w[c b a]
+      Product.order(:state).reorder(:name).map(&:name).should == %w[a b c]
+    end
+
+    it 'should order by two fields' do
+      Product.order(:title, :state).reorder(:title, :name).map(&:name).should == %w[b c a]
+      Product.order(:title, :name).reorder(:title, :state).map(&:name).should == %w[c b a]
+    end
+
+    it 'should order by field with with filter' do
+      Product.where(name: %w[b c]).order(:title).reorder(:state).map(&:name).should == %w[c b]
+      Product.where(title: %w[b c]).order(:name).reorder(:state).map(&:name).should == %w[c b a]
+    end
+  end
+
   describe '.where' do
     let!(:attr1) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'info',    backend_type: 'string')   }
     let!(:attr2) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'total',   backend_type: 'integer')  }
