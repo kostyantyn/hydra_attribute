@@ -77,8 +77,7 @@ module HydraAttribute
       touch = false
       hydra_values.each do |hydra_attribute_id, hydra_value|
         if has_attribute_id?(hydra_attribute_id)
-          hydra_value.save
-          touch = true
+          touch = true if hydra_value.save
         end
       end
       entity.touch if touch
@@ -89,7 +88,10 @@ module HydraAttribute
     end
 
     def hydra_values
-      @hydra_values ||= {}
+      @hydra_values ||= ::HydraAttribute::HydraAttribute.ids_by_entity_type(entity.class.model_name).inject({}) do |hydra_values, hydra_attribute_id|
+        hydra_values[hydra_attribute_id] = HydraValue.new(entity, hydra_attribute_id: hydra_attribute_id)
+        hydra_values
+      end
     end
 
     def set_hydra_value(options = {})
@@ -110,8 +112,7 @@ module HydraAttribute
       attribute_method = identity_map[:names_as_hash][method]             or raise WrongProxyMethodError, method
 
       if has_attribute_id?(attribute_id)
-        hydra_value = hydra_values[attribute_id] ||= HydraValue.new(entity, hydra_attribute_id: attribute_id)
-        hydra_value.send(attribute_method, *args, &block)
+        hydra_values[attribute_id].send(attribute_method, *args, &block)
       else
         raise HydraSet::MissingAttributeInHydraSetError, "Attribute ID #{attribute_id} is missed in Set ID #{entity.hydra_set.id}"
       end

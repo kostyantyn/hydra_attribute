@@ -7,20 +7,20 @@ describe HydraAttribute::HydraEntity do
     describe 'new model' do
       let(:product) { Product.new }
 
-      it 'should not save default attribute values' do
+      it 'should save with default attribute values' do
         product.save
-        value = ::ActiveRecord::Base.connection.select_value("SELECT value FROM hydra_string_products WHERE entity_id = #{product.id}")
-        value.should be_nil
+        value = ::ActiveRecord::Base.connection.select_value("SELECT value FROM hydra_string_products WHERE entity_id = #{product.id} AND hydra_attribute_id = #{attr_id}")
+        value.should == 'abc'
       end
 
-      it 'should save attribute value if its default value was changed' do
+      it 'should save changed attribute value' do
         product.code = 'qwe'
         product.save
-        value = ::ActiveRecord::Base.connection.select_value("SELECT value FROM hydra_string_products WHERE entity_id = #{product.id}")
+        value = ::ActiveRecord::Base.connection.select_value("SELECT value FROM hydra_string_products WHERE entity_id = #{product.id} AND hydra_attribute_id = #{attr_id}")
         value.should == 'qwe'
       end
 
-      it 'should save attributes which are belong to hydra set' do
+      it 'should save only attributes which are belong to hydra set' do
         attr_id2 = HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'color', backend_type: 'string').id
         set_id   = HydraAttribute::HydraSet.create(entity_type: 'Product', name: 'default').id
         HydraAttribute::HydraAttributeSet.create(hydra_set_id: set_id, hydra_attribute_id: attr_id2)

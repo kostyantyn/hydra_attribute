@@ -148,12 +148,15 @@ module HydraAttribute
     # Performs +insert+ or +update+ sql query
     # Method doesn't perform sql query if model isn't modified
     #
-    # @return [TrueClass]
+    # @return [TrueClass, FalseClass]
     def save
       raise EntityModelIsNotPersistedError unless entity.persisted?
 
-      if changed?
-        persisted? ? update : create
+      if persisted?
+        return false unless changed?
+        update
+      else
+        create
       end
 
       @previously_changed = changes
