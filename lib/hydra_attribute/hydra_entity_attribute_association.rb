@@ -6,6 +6,12 @@ module HydraAttribute
       end
     end
 
+    class AttributeWasNotSelectedError < ArgumentError
+      def initialize(attribute_id)
+        super("Attribute ID #{attribute_id} was not selected from DB")
+      end
+    end
+
     include ::HydraAttribute::Model::Mediator
     include ::HydraAttribute::Model::IdentityMap
 
@@ -94,7 +100,11 @@ module HydraAttribute
       end
     end
 
-    def set_hydra_value(options = {})
+    def lock_values
+      @hydra_values ||= {}
+    end
+
+    def hydra_value_options=(options = {})
       hydra_values[options[:hydra_attribute_id]] = HydraValue.new(entity, options)
     end
 
@@ -112,7 +122,8 @@ module HydraAttribute
       attribute_method = identity_map[:names_as_hash][method]             or raise WrongProxyMethodError, method
 
       if has_attribute_id?(attribute_id)
-        hydra_values[attribute_id].send(attribute_method, *args, &block)
+        hydra_value = hydra_values[attribute_id] or raise AttributeWasNotSelectedError, attribute_id
+        hydra_value.send(attribute_method, *args, &block)
       else
         raise HydraSet::MissingAttributeInHydraSetError, "Attribute ID #{attribute_id} is missed in Set ID #{entity.hydra_set.id}"
       end

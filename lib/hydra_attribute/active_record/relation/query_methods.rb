@@ -58,8 +58,8 @@ module HydraAttribute
           end
 
           # Add filter by hydra sets which have all these attributes
-          if hydra_attributes.any?
-            hydra_attribute_ids = hydra_attributes.map { |name| hydra_helper.hydra_attribute_id(name) }
+          if hydra_attributes.any? or @hydra_select_values.any?
+            hydra_attribute_ids = (hydra_attributes | hydra_select_values).map { |name| hydra_helper.hydra_attribute_id(name) }
 
             hydra_sets = ::HydraAttribute::HydraSet.all_by_entity_type(klass.model_name).select do |hydra_set|
               hydra_attribute_ids.all? do |hydra_attribute_id|

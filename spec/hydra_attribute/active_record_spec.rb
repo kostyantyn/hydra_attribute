@@ -368,4 +368,76 @@ describe HydraAttribute::ActiveRecord do
       end
     end
   end
+
+  describe '.select' do
+    let!(:attr1) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'code',     backend_type: 'string') }
+    let!(:attr2) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'quantity', backend_type: 'integer') }
+    let!(:attr3) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'title',    backend_type: 'string') }
+    let!(:attr4) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'active',   backend_type: 'boolean') }
+    let!(:set1)  { HydraAttribute::HydraSet.create(entity_type: 'Product', name: 'default') }
+    let!(:set2)  { HydraAttribute::HydraSet.create(entity_type: 'Product', name: 'second') }
+
+    before do
+      HydraAttribute::HydraAttributeSet.create(hydra_attribute_id: attr1.id, hydra_set_id: set1.id)
+      HydraAttribute::HydraAttributeSet.create(hydra_attribute_id: attr2.id, hydra_set_id: set2.id)
+      HydraAttribute::HydraAttributeSet.create(hydra_attribute_id: attr3.id, hydra_set_id: set1.id)
+      HydraAttribute::HydraAttributeSet.create(hydra_attribute_id: attr4.id, hydra_set_id: set2.id)
+
+      Product.create(name: 'name1', code: 'code1', quantity: 1, title: 'title1', active: true,  hydra_set_id: nil)
+      Product.create(name: 'name2', code: 'code2', quantity: 2, title: 'title2', active: false, hydra_set_id: set1.id)
+      Product.create(name: 'name3', code: 'code3', quantity: 3, title: 'title3', active: true,  hydra_set_id: set2.id)
+      Product.create(name: 'name4', code: 'code4', quantity: 4, title: 'title4', active: false, hydra_set_id: set1.id)
+    end
+
+    it 'should select only specific attributes and return models which have all these attributes in the attribute set' do
+      relation = Product.select([:name, :code])
+      relation.map(&:name).should =~ %w[name1 name2 name4]
+      relation.map(&:code).should =~ %w[code1 code2 code4]
+
+      entity_without_set, entity_with_set = relation.partition { |entity| entity.hydra_set_id.nil? }
+      entity_without_set.should have(1).item
+      entity_with_set.should have(2).items
+
+      lambda { entity_without_set.map(&:quantity) }.should raise_error(HydraAttribute::HydraEntityAttributeAssociation::AttributeWasNotSelectedError, "Attribute ID #{attr2.id} was not selected from DB")
+      lambda { entity_without_set.map(&:title) }.should    raise_error(HydraAttribute::HydraEntityAttributeAssociation::AttributeWasNotSelectedError, "Attribute ID #{attr3.id} was not selected from DB")
+      lambda { entity_without_set.map(&:active) }.should   raise_error(HydraAttribute::HydraEntityAttributeAssociation::AttributeWasNotSelectedError, "Attribute ID #{attr4.id} was not selected from DB")
+
+      entity_with_set.each do |entity|
+        lambda { entity.quantity }.should raise_error(HydraAttribute::HydraSet::MissingAttributeInHydraSetError, "Attribute ID #{attr2.id} is missed in Set ID #{set1.id}")
+        lambda { entity.title }.should    raise_error(HydraAttribute::HydraEntityAttributeAssociation::AttributeWasNotSelectedError, "Attribute ID #{attr3.id} was not selected from DB")
+        lambda { entity.active }.should   raise_error(HydraAttribute::HydraSet::MissingAttributeInHydraSetError, "Attribute ID #{attr4.id} is missed in Set ID #{set1.id}")
+      end
+
+      relation = Product.select([:name, :quantity])
+      relation.map(&:name).should     =~ %w[name1 name3]
+      relation.map(&:quantity).should =~ [1, 3]
+
+      entity_without_set, entity_with_set = relation.partition { |entity| entity.hydra_set_id.nil? }
+      entity_without_set.should have(1).item
+      entity_with_set.should have(1).item
+
+      lambda { entity_without_set.map(&:code) }.should   raise_error(HydraAttribute::HydraEntityAttributeAssociation::AttributeWasNotSelectedError, "Attribute ID #{attr1.id} was not selected from DB")
+      lambda { entity_without_set.map(&:title) }.should  raise_error(HydraAttribute::HydraEntityAttributeAssociation::AttributeWasNotSelectedError, "Attribute ID #{attr3.id} was not selected from DB")
+      lambda { entity_without_set.map(&:active) }.should raise_error(HydraAttribute::HydraEntityAttributeAssociation::AttributeWasNotSelectedError, "Attribute ID #{attr4.id} was not selected from DB")
+
+      lambda { entity_with_set.map(&:code) }.should   raise_error(HydraAttribute::HydraSet::MissingAttributeInHydraSetError, "Attribute ID #{attr1.id} is missed in Set ID #{set2.id}")
+      lambda { entity_with_set.map(&:title) }.should  raise_error(HydraAttribute::HydraSet::MissingAttributeInHydraSetError, "Attribute ID #{attr3.id} is missed in Set ID #{set2.id}")
+      lambda { entity_with_set.map(&:active) }.should raise_error(HydraAttribute::HydraEntityAttributeAssociation::AttributeWasNotSelectedError, "Attribute ID #{attr4.id} was not selected from DB")
+    end
+
+    it 'should be able to apply filter condition' do
+      relation = Product.select([:name, :code]).where(code: %w[code2 code3 code4])
+      relation.map(&:name).should =~ %w[name2 name4]
+      relation.map(&:code).should =~ %w[code2 code4]
+    end
+
+    it 'select attributes which were created after entities and their values should be always nil' do
+      attr = HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'color', backend_type: 'string', default_value: 'red')
+      HydraAttribute::HydraAttributeSet.create(hydra_attribute_id: attr.id, hydra_set_id: set1.id)
+
+      relation = Product.select([:name, :color])
+      relation.map(&:name).should  =~ %w[name1 name2 name4]
+      relation.map(&:color).should == [nil, nil, nil]
+    end
+  end
 end

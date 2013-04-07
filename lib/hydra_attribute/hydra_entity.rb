@@ -43,7 +43,7 @@ module HydraAttribute
 
       def method_missing(method, *args, &block)
         hydra_attribute_association.delegate(method, *args, &block)
-      rescue HydraSet::MissingAttributeInHydraSetError
+      rescue HydraSet::MissingAttributeInHydraSetError, HydraEntityAttributeAssociation::AttributeWasNotSelectedError
         raise
       rescue
         super
