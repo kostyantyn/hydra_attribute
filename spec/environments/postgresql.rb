@@ -9,7 +9,7 @@ config = {
 
 ActiveRecord::Base.establish_connection(config.merge(database: 'postgres', schema_search_path: 'public'))
 ActiveRecord::Base.connection.drop_database(config[:database])
-ActiveRecord::Base.connection.create_database(config[:database], config.merge(encoding: config[:encoding]))
+ActiveRecord::Base.connection.create_database(config[:database], config)
 ActiveRecord::Base.establish_connection(config)
 
 RSpec.configure do |spec|
