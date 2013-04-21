@@ -16,8 +16,7 @@ Gem::Specification.new do |gem|
 
   gem.add_dependency('activerecord', '~> 3.2')
 
-  gem.add_development_dependency('rspec',    '~> 2.12.0')
-  gem.add_development_dependency('cucumber', '~> 1.1.0')
+  gem.add_development_dependency('rspec', '~> 2.13')
   gem.add_development_dependency('sqlite3')
   gem.add_development_dependency('mysql2')
   gem.add_development_dependency('pg')
