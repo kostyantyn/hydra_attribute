@@ -94,7 +94,7 @@ describe HydraAttribute::Migrator do
       end
 
       it 'should have a correct indexes' do
-        connection.indexes(:hydra_attributes).should have(1).index
+        connection.indexes(:hydra_attributes).should have(1).indexes
         connection.indexes(:hydra_attributes)[0].name.should   == 'hydra_attributes_idx'
         connection.indexes(:hydra_attributes)[0].unique.should be_true
         connection.indexes(:hydra_attributes)[0].columns.should == %w[entity_type name]
@@ -127,7 +127,7 @@ describe HydraAttribute::Migrator do
       end
 
       it 'should have a correct indexes' do
-        connection.indexes(:hydra_sets).should have(1).index
+        connection.indexes(:hydra_sets).should have(1).indexes
         connection.indexes(:hydra_sets)[0].name.should   == 'hydra_sets_idx'
         connection.indexes(:hydra_sets)[0].unique.should be_true
         connection.indexes(:hydra_sets)[0].columns.should == %w[entity_type name]
@@ -180,7 +180,7 @@ describe HydraAttribute::Migrator do
       end
 
       it 'should have a correct indexes' do
-        connection.indexes(:hydra_attribute_sets).should have(1).index
+        connection.indexes(:hydra_attribute_sets).should have(1).indexes
         connection.indexes(:hydra_attribute_sets)[0].name.should    == 'hydra_attribute_sets_idx'
         connection.indexes(:hydra_attribute_sets)[0].unique.should  be_true
         connection.indexes(:hydra_attribute_sets)[0].columns.should == %w[hydra_attribute_id hydra_set_id]
