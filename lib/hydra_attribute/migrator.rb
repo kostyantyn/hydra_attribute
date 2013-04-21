@@ -65,29 +65,28 @@ module HydraAttribute
 
       def create_attribute
         create_table :hydra_attributes do |t|
-          t.string   :entity_type,  limit: 32, null: false
-          t.string   :name,         limit: 32, null: false
-          t.string   :backend_type, limit: 16, null: false
-          t.string   :default_value
-          t.boolean  :white_list,              null: false, default: false
-          t.datetime :created_at # @COMPATIBILITY with 3.1.x use "datetime" method instead of "timestamps" because Rails 3.1.x and 3.2.x have a different "null" value
-          t.datetime :updated_at # @COMPATIBILITY with 3.1.x
+          t.string  :entity_type,  limit: 32, null: false
+          t.string  :name,         limit: 32, null: false
+          t.string  :backend_type, limit: 16, null: false
+          t.string  :default_value
+          t.boolean :white_list,              null: false, default: false
+          t.timestamps
         end
         add_index :hydra_attributes, [:entity_type, :name], unique: true, name: 'hydra_attributes_index'
       end
 
       def create_set
         create_table :hydra_sets do |t|
-          t.string   :entity_type,  limit: 32, null: false
-          t.string   :name,         limit: 32, null: false
-          t.datetime :created_at # @COMPATIBILITY with 3.1.x
-          t.datetime :updated_at # @COMPATIBILITY with 3.1.x
+          t.string :entity_type,  limit: 32, null: false
+          t.string :name,         limit: 32, null: false
+          t.timestamps
         end
         add_index :hydra_sets, [:entity_type, :name], unique: true, name: 'hydra_sets_index'
 
         create_table :hydra_attribute_sets do |t|
           t.integer :hydra_attribute_id, null: false
           t.integer :hydra_set_id,       null: false
+          t.timestamps
         end
         add_index :hydra_attribute_sets, [:hydra_attribute_id, :hydra_set_id], unique: true, name: 'hydra_attribute_sets_index'
       end
@@ -99,8 +98,7 @@ module HydraAttribute
             t.integer :entity_id,          null: false
             t.integer :hydra_attribute_id, null: false
             t.send type, :value
-            t.datetime :created_at # @COMPATIBILITY with 3.1.x
-            t.datetime :updated_at # @COMPATIBILITY with 3.1.x
+            t.timestamps
           end
           add_index table_name, [:entity_id, :hydra_attribute_id], unique: true, name: "#{table_name}_index"
         end

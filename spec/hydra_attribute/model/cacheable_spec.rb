@@ -6,6 +6,7 @@ describe HydraAttribute::Model::Cacheable do
       t.string  :name
       t.float   :price
       t.integer :quantity
+      t.timestamps
     end
     Object.const_set('CustomProduct', Class.new)
     CustomProduct.send(:include, HydraAttribute::Model::Validations) # dependency
@@ -21,8 +22,8 @@ describe HydraAttribute::Model::Cacheable do
 
   describe '.all' do
     it 'should find all models and store them into the cache' do
-      q1 = %q[INSERT INTO custom_products (name, price, quantity) VALUES ('one', 2.5, 5)]
-      q2 = %q[INSERT INTO custom_products (name, price, quantity) VALUES ('two', 3.5, 6)]
+      q1 = %q[INSERT INTO custom_products (name, price, quantity, created_at, updated_at) VALUES ('one', 2.5, 5, '2012-12-12', '2012-12-12')]
+      q2 = %q[INSERT INTO custom_products (name, price, quantity, created_at, updated_at) VALUES ('two', 3.5, 6, '2012-12-12', '2012-12-12')]
 
       ActiveRecord::Base.connection.execute(q1)
       ActiveRecord::Base.connection.execute(q2)
@@ -39,8 +40,8 @@ describe HydraAttribute::Model::Cacheable do
 
   describe '.find' do
     it 'should load all records store them to the cache' do
-      q1 = %q[INSERT INTO custom_products (name, price, quantity) VALUES ('one', 2.5, 5)]
-      q2 = %q[INSERT INTO custom_products (name, price, quantity) VALUES ('two', 3.5, 6)]
+      q1 = %q[INSERT INTO custom_products (name, price, quantity, created_at, updated_at) VALUES ('one', 2.5, 5, '2012-12-12', '2012-12-12')]
+      q2 = %q[INSERT INTO custom_products (name, price, quantity, created_at, updated_at) VALUES ('two', 3.5, 6, '2012-12-12', '2012-12-12')]
 
       id1 = ActiveRecord::Base.connection.insert(q1)
       id2 = ActiveRecord::Base.connection.insert(q2)

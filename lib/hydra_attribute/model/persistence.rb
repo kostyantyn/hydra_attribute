@@ -359,14 +359,17 @@ module HydraAttribute
         # @return [Integer] primary key
         def create
           return id if persisted? or destroyed?
-          self.id = self.class.connection.insert(self.class.compile_insert(attributes.except(:id)), 'SQL').to_i
+          columns = attributes.except(:id, :created_at, :updated_at).merge(created_at: Time.now, updated_at: Time.now)
+          self.id = self.class.connection.insert(self.class.compile_insert(columns), 'SQL').to_i
         end
 
         # Performs +UPDATE+ query
         #
         # @return [TrueClass]
         def update
-          self.class.connection.update(self.class.compile_update(id, attributes.except(:id)), 'SQL') if persisted?
+          return true unless persisted?
+          columns = attributes.except(:id, :created_at, :updated_at).merge(updated_at: Time.now)
+          self.class.connection.update(self.class.compile_update(id, columns), 'SQL')
           true
         end
 

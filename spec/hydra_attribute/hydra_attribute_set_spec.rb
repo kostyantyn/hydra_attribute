@@ -3,15 +3,15 @@ require 'spec_helper'
 describe HydraAttribute::HydraAttributeSet do
   describe '.all_by_hydra_attribute_id' do
     describe 'hydra_attribute_sets table has several records' do
-      let(:hydra_attribute_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'name', 'string')]).to_i }
-      let(:hydra_attribute_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'code', 'string')]).to_i }
+      let(:hydra_attribute_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type, created_at, updated_at) VALUES('Product', 'name', 'string', '2012-12-12', '2012-12-12')]).to_i }
+      let(:hydra_attribute_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type, created_at, updated_at) VALUES('Product', 'code', 'string', '2012-12-12', '2012-12-12')]).to_i }
 
-      let(:hydra_set_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name) VALUES('Product', 'one')]).to_i }
-      let(:hydra_set_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name) VALUES('Product', 'two')]).to_i }
+      let(:hydra_set_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name, created_at, updated_at) VALUES('Product', 'one', '2012-12-12', '2012-12-12')]).to_i }
+      let(:hydra_set_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name, created_at, updated_at) VALUES('Product', 'two', '2012-12-12', '2012-12-12')]).to_i }
 
-      let!(:id1) { ::ActiveRecord::Base.connection.insert(%[INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id1}, #{hydra_set_id1})]).to_i }
-      let!(:id2) { ::ActiveRecord::Base.connection.insert(%[INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id1}, #{hydra_set_id2})]).to_i }
-      let!(:id3) { ::ActiveRecord::Base.connection.insert(%[INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id2}, #{hydra_set_id2})]).to_i }
+      let!(:id1) { ::ActiveRecord::Base.connection.insert(%[INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id, created_at, updated_at) VALUES(#{hydra_attribute_id1}, #{hydra_set_id1}, '2012-12-12', '2012-12-12')]).to_i }
+      let!(:id2) { ::ActiveRecord::Base.connection.insert(%[INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id, created_at, updated_at) VALUES(#{hydra_attribute_id1}, #{hydra_set_id2}, '2012-12-12', '2012-12-12')]).to_i }
+      let!(:id3) { ::ActiveRecord::Base.connection.insert(%[INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id, created_at, updated_at) VALUES(#{hydra_attribute_id2}, #{hydra_set_id2}, '2012-12-12', '2012-12-12')]).to_i }
 
       it 'should return models which have a correct hydra_attribute_id' do
         hydra_attribute_sets = HydraAttribute::HydraAttributeSet.all_by_hydra_attribute_id(hydra_attribute_id1)
@@ -87,15 +87,15 @@ describe HydraAttribute::HydraAttributeSet do
 
   describe '.all_by_hydra_set_id' do
     describe 'hydra_attribute_sets table has several records' do
-      let(:hydra_attribute_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'name', 'string')]).to_i }
-      let(:hydra_attribute_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'code', 'string')]).to_i }
+      let(:hydra_attribute_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type, created_at, updated_at) VALUES('Product', 'name', 'string', '2012-12-12', '2012-12-12')]).to_i }
+      let(:hydra_attribute_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type, created_at, updated_at) VALUES('Product', 'code', 'string', '2012-12-12', '2012-12-12')]).to_i }
 
-      let(:hydra_set_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name) VALUES('Product', 'one')]).to_i }
-      let(:hydra_set_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name) VALUES('Product', 'two')]).to_i }
+      let(:hydra_set_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name, created_at, updated_at) VALUES('Product', 'one', '2012-12-12', '2012-12-12')]).to_i }
+      let(:hydra_set_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name, created_at, updated_at) VALUES('Product', 'two', '2012-12-12', '2012-12-12')]).to_i }
 
-      let!(:id1) { ::ActiveRecord::Base.connection.insert(%[INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id1}, #{hydra_set_id1})]).to_i }
-      let!(:id2) { ::ActiveRecord::Base.connection.insert(%[INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id2}, #{hydra_set_id1})]).to_i }
-      let!(:id3) { ::ActiveRecord::Base.connection.insert(%[INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id2}, #{hydra_set_id2})]).to_i }
+      let!(:id1) { ::ActiveRecord::Base.connection.insert(%[INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id, created_at, updated_at) VALUES(#{hydra_attribute_id1}, #{hydra_set_id1}, '2012-12-12', '2012-12-12')]).to_i }
+      let!(:id2) { ::ActiveRecord::Base.connection.insert(%[INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id, created_at, updated_at) VALUES(#{hydra_attribute_id2}, #{hydra_set_id1}, '2012-12-12', '2012-12-12')]).to_i }
+      let!(:id3) { ::ActiveRecord::Base.connection.insert(%[INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id, created_at, updated_at) VALUES(#{hydra_attribute_id2}, #{hydra_set_id2}, '2012-12-12', '2012-12-12')]).to_i }
 
       it 'should return models which have a correct hydra_set_id' do
         hydra_attribute_sets = HydraAttribute::HydraAttributeSet.all_by_hydra_set_id(hydra_set_id1)
@@ -166,15 +166,15 @@ describe HydraAttribute::HydraAttributeSet do
 
   describe '.hydra_attributes_by_hydra_set_id' do
     describe 'hydra_attribute_sets table has several records' do
-      let(:hydra_set_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name) VALUES('Product', 'one')]).to_i }
-      let(:hydra_set_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name) VALUES('Product', 'two')]).to_i }
+      let(:hydra_set_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name, created_at, updated_at) VALUES('Product', 'one', '2012-12-12', '2012-12-12')]).to_i }
+      let(:hydra_set_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name, created_at, updated_at) VALUES('Product', 'two', '2012-12-12', '2012-12-12')]).to_i }
 
-      let(:hydra_attribute_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'name', 'string')]).to_i }
-      let(:hydra_attribute_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'code', 'string')]).to_i }
+      let(:hydra_attribute_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type, created_at, updated_at) VALUES('Product', 'name', 'string', '2012-12-12', '2012-12-12')]).to_i }
+      let(:hydra_attribute_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type, created_at, updated_at) VALUES('Product', 'code', 'string', '2012-12-12', '2012-12-12')]).to_i }
 
-      let!(:id1) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id1}, #{hydra_set_id1})").to_i }
-      let!(:id2) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id2}, #{hydra_set_id1})").to_i }
-      let!(:id3) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id2}, #{hydra_set_id2})").to_i }
+      let!(:id1) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id, created_at, updated_at) VALUES(#{hydra_attribute_id1}, #{hydra_set_id1}, '2012-12-12', '2012-12-12')").to_i }
+      let!(:id2) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id, created_at, updated_at) VALUES(#{hydra_attribute_id2}, #{hydra_set_id1}, '2012-12-12', '2012-12-12')").to_i }
+      let!(:id3) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id, created_at, updated_at) VALUES(#{hydra_attribute_id2}, #{hydra_set_id2}, '2012-12-12', '2012-12-12')").to_i }
 
       it 'should return hydra_attribute models which assigned to the correct hydra_set_id' do
         hydra_attributes = HydraAttribute::HydraAttributeSet.hydra_attributes_by_hydra_set_id(hydra_set_id1)
@@ -251,15 +251,15 @@ describe HydraAttribute::HydraAttributeSet do
 
   describe '.hydra_sets_by_hydra_attribute_id' do
     describe 'hydra_attribute_sets table has several records' do
-      let(:hydra_set_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name) VALUES('Product', 'one')]).to_i }
-      let(:hydra_set_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name) VALUES('Product', 'two')]).to_i }
+      let(:hydra_set_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name, created_at, updated_at) VALUES('Product', 'one', '2012-12-12', '2012-12-12')]).to_i }
+      let(:hydra_set_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name, created_at, updated_at) VALUES('Product', 'two', '2012-12-12', '2012-12-12')]).to_i }
 
-      let(:hydra_attribute_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'name', 'string')]).to_i }
-      let(:hydra_attribute_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'code', 'string')]).to_i }
+      let(:hydra_attribute_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type, created_at, updated_at) VALUES('Product', 'name', 'string', '2012-12-12', '2012-12-12')]).to_i }
+      let(:hydra_attribute_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type, created_at, updated_at) VALUES('Product', 'code', 'string', '2012-12-12', '2012-12-12')]).to_i }
 
-      let!(:id1) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id1}, #{hydra_set_id1})").to_i }
-      let!(:id2) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id1}, #{hydra_set_id2})").to_i }
-      let!(:id3) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id2}, #{hydra_set_id2})").to_i }
+      let!(:id1) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id, created_at, updated_at) VALUES(#{hydra_attribute_id1}, #{hydra_set_id1}, '2012-12-12', '2012-12-12')").to_i }
+      let!(:id2) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id, created_at, updated_at) VALUES(#{hydra_attribute_id1}, #{hydra_set_id2}, '2012-12-12', '2012-12-12')").to_i }
+      let!(:id3) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id, created_at, updated_at) VALUES(#{hydra_attribute_id2}, #{hydra_set_id2}, '2012-12-12', '2012-12-12')").to_i }
 
       it 'should return hydra_set models which assigned to the correct hydra_attribute_id' do
         hydra_sets = HydraAttribute::HydraAttributeSet.hydra_sets_by_hydra_attribute_id(hydra_attribute_id1)
@@ -336,15 +336,15 @@ describe HydraAttribute::HydraAttributeSet do
 
   describe '.hydra_attribute_ids_by_hydra_set_id' do
     describe 'hydra_attribute_sets table has several records' do
-      let(:hydra_set_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name) VALUES('Product', 'one')]).to_i }
-      let(:hydra_set_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name) VALUES('Product', 'two')]).to_i }
+      let(:hydra_set_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name, created_at, updated_at) VALUES('Product', 'one', '2012-12-12', '2012-12-12')]).to_i }
+      let(:hydra_set_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name, created_at, updated_at) VALUES('Product', 'two', '2012-12-12', '2012-12-12')]).to_i }
 
-      let(:hydra_attribute_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'name', 'string')]).to_i }
-      let(:hydra_attribute_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'code', 'string')]).to_i }
+      let(:hydra_attribute_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type, created_at, updated_at) VALUES('Product', 'name', 'string', '2012-12-12', '2012-12-12')]).to_i }
+      let(:hydra_attribute_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type, created_at, updated_at) VALUES('Product', 'code', 'string', '2012-12-12', '2012-12-12')]).to_i }
 
-      let!(:id1) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id1}, #{hydra_set_id1})").to_i }
-      let!(:id2) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id1}, #{hydra_set_id2})").to_i }
-      let!(:id3) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id2}, #{hydra_set_id2})").to_i }
+      let!(:id1) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id, created_at, updated_at) VALUES(#{hydra_attribute_id1}, #{hydra_set_id1}, '2012-12-12', '2012-12-12')").to_i }
+      let!(:id2) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id, created_at, updated_at) VALUES(#{hydra_attribute_id1}, #{hydra_set_id2}, '2012-12-12', '2012-12-12')").to_i }
+      let!(:id3) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id, created_at, updated_at) VALUES(#{hydra_attribute_id2}, #{hydra_set_id2}, '2012-12-12', '2012-12-12')").to_i }
 
       it 'should return collection of hydra_attribute_id which are assigned to the correct hydra_set_id' do
         HydraAttribute::HydraAttributeSet.hydra_attribute_ids_by_hydra_set_id(hydra_set_id1).should =~ [hydra_attribute_id1]
@@ -407,15 +407,15 @@ describe HydraAttribute::HydraAttributeSet do
 
   describe '.hydra_set_ids_by_hydra_attribute_id' do
     describe 'hydra_attribute_sets table has several records' do
-      let(:hydra_set_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name) VALUES('Product', 'one')]).to_i }
-      let(:hydra_set_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name) VALUES('Product', 'two')]).to_i }
+      let(:hydra_set_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name, created_at, updated_at) VALUES('Product', 'one', '2012-12-12', '2012-12-12')]).to_i }
+      let(:hydra_set_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name, created_at, updated_at) VALUES('Product', 'two', '2012-12-12', '2012-12-12')]).to_i }
 
-      let(:hydra_attribute_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'name', 'string')]).to_i }
-      let(:hydra_attribute_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'code', 'string')]).to_i }
+      let(:hydra_attribute_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type, created_at, updated_at) VALUES('Product', 'name', 'string', '2012-12-12', '2012-12-12')]).to_i }
+      let(:hydra_attribute_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type, created_at, updated_at) VALUES('Product', 'code', 'string', '2012-12-12', '2012-12-12')]).to_i }
 
-      let!(:id1) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id1}, #{hydra_set_id1})").to_i }
-      let!(:id2) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id1}, #{hydra_set_id2})").to_i }
-      let!(:id3) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id2}, #{hydra_set_id2})").to_i }
+      let!(:id1) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id, created_at, updated_at) VALUES(#{hydra_attribute_id1}, #{hydra_set_id1}, '2012-12-12', '2012-12-12')").to_i }
+      let!(:id2) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id, created_at, updated_at) VALUES(#{hydra_attribute_id1}, #{hydra_set_id2}, '2012-12-12', '2012-12-12')").to_i }
+      let!(:id3) { ::ActiveRecord::Base.connection.insert("INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id, created_at, updated_at) VALUES(#{hydra_attribute_id2}, #{hydra_set_id2}, '2012-12-12', '2012-12-12')").to_i }
 
       it 'should return collection of hydra_set_id which are assigned to the correct hydra_attribute_id' do
         HydraAttribute::HydraAttributeSet.hydra_set_ids_by_hydra_attribute_id(hydra_attribute_id1).should =~ [hydra_set_id1, hydra_set_id2]
@@ -477,9 +477,9 @@ describe HydraAttribute::HydraAttributeSet do
   end
 
   describe '.has_hydra_attribute_id_in_hydra_set_id?' do
-    let(:hydra_attribute_id)      { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'attr', 'string')]).to_i }
-    let(:hydra_set_id)            { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name) VALUES('Product', 'set')]).to_i }
-    let!(:hydra_attribute_set_id) { ::ActiveRecord::Base.connection.insert(%[INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id) VALUES(#{hydra_attribute_id}, #{hydra_set_id})]).to_i }
+    let(:hydra_attribute_id)      { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type, created_at, updated_at) VALUES('Product', 'attr', 'string', '2012-12-12', '2012-12-12')]).to_i }
+    let(:hydra_set_id)            { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name, created_at, updated_at) VALUES('Product', 'set', '2012-12-12', '2012-12-12')]).to_i }
+    let!(:hydra_attribute_set_id) { ::ActiveRecord::Base.connection.insert(%[INSERT INTO hydra_attribute_sets(hydra_attribute_id, hydra_set_id, created_at, updated_at) VALUES(#{hydra_attribute_id}, #{hydra_set_id}, '2012-12-12', '2012-12-12')]).to_i }
 
     it 'should return true if hydra_attribute_id is assigned to hydra_set_id' do
       HydraAttribute::HydraAttributeSet.should have_hydra_attribute_id_in_hydra_set_id(hydra_attribute_id, hydra_set_id)
@@ -503,7 +503,7 @@ describe HydraAttribute::HydraAttributeSet do
     end
 
     it 'should return false if hydra_attribute_set was updated in runtime' do
-      hydra_attribute_id2 = ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'attr2', 'string')]).to_i
+      hydra_attribute_id2 = ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type, created_at, updated_at) VALUES('Product', 'attr2', 'string', '2012-12-12', '2012-12-12')]).to_i
       hydra_attribute_set = HydraAttribute::HydraAttributeSet.find(hydra_attribute_set_id)
       hydra_attribute_set.hydra_attribute_id = hydra_attribute_id2
       hydra_attribute_set.save
@@ -512,7 +512,7 @@ describe HydraAttribute::HydraAttributeSet do
     end
 
     it 'should return false if hydra_set_id was updated in runtime' do
-      hydra_set_id2       = ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name) VALUES('Product', 'set2')]).to_i
+      hydra_set_id2       = ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_sets(entity_type, name, created_at, updated_at) VALUES('Product', 'set2', '2012-12-12', '2012-12-12')]).to_i
       hydra_attribute_set = HydraAttribute::HydraAttributeSet.find(hydra_attribute_set_id)
       hydra_attribute_set.hydra_set_id = hydra_set_id2
       hydra_attribute_set.save

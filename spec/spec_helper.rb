@@ -5,8 +5,8 @@ ActiveSupport.on_load(:active_record) do
   self.mass_assignment_sanitizer = :strict
 end
 
-db = ENV['DB'] || 'sqlite'
-require File.expand_path("../environments/#{db}", __FILE__)
+ENV['DB'] ||= 'sqlite'
+require File.expand_path("../environments/#{ENV['DB']}", __FILE__)
 
 if ENV['SQL_LOGGER']
   require 'active_support/all'

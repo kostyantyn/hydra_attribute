@@ -4,8 +4,9 @@ describe HydraAttribute::Model::Persistence do
   before(:all) do
     ::ActiveRecord::Base.connection.create_table(:custom_products) do |t|
       t.string  :name
-      t.decimal :price,   precision: 4, scale: 2
+      t.decimal :price, precision: 4, scale: 2
       t.integer :quantity
+      t.timestamps
     end
     Object.const_set('CustomProduct', Class.new)
     CustomProduct.send(:include, HydraAttribute::Model::Validations) # dependency
@@ -23,6 +24,7 @@ describe HydraAttribute::Model::Persistence do
         t.string  :title
         t.float   :price
         t.integer :count
+        t.timestamps
       end
       Object.const_set('ExampleProduct', Class.new)
       ExampleProduct.send(:include, HydraAttribute::Model::Persistence)
@@ -70,7 +72,7 @@ describe HydraAttribute::Model::Persistence do
 
   describe '.columns' do
     it 'should return collection of objects which represent table columns' do
-      CustomProduct.should have(4).columns
+      CustomProduct.should have(6).columns
       CustomProduct.columns.each do |column|
         column.should be_a_kind_of(ActiveRecord::ConnectionAdapters::Column)
       end
@@ -85,7 +87,7 @@ describe HydraAttribute::Model::Persistence do
 
   describe '.column_names' do
     it 'should return all column names in table' do
-      CustomProduct.column_names.should == %w[id name price quantity]
+      CustomProduct.column_names.should == %w[id name price quantity created_at updated_at]
     end
   end
 
@@ -95,8 +97,8 @@ describe HydraAttribute::Model::Persistence do
     end
 
     it 'should return array of models if table has records' do
-      q1 = %[INSERT INTO custom_products (name, price, quantity) VALUES ('one', 2.5, 5)]
-      q2 = %[INSERT INTO custom_products (name, price, quantity) VALUES ('two', 3.5, 6)]
+      q1 = %[INSERT INTO custom_products (name, price, quantity, created_at, updated_at) VALUES ('one', 2.5, 5, '2012-12-12', '2012-12-12')]
+      q2 = %[INSERT INTO custom_products (name, price, quantity, created_at, updated_at) VALUES ('two', 3.5, 6, '2012-12-12', '2012-12-12')]
 
       ActiveRecord::Base.connection.execute(q1)
       ActiveRecord::Base.connection.execute(q2)
@@ -124,7 +126,7 @@ describe HydraAttribute::Model::Persistence do
     end
 
     it 'should return model if record exists' do
-      q1 = %[INSERT INTO custom_products (id, name, price, quantity) VALUES (1, 'book', 2.2, 3)]
+      q1 = %[INSERT INTO custom_products (id, name, price, quantity, created_at, updated_at) VALUES (1, 'book', 2.2, 3, '2012-12-12', '2012-12-12')]
       ActiveRecord::Base.connection.execute(q1)
 
       model = CustomProduct.find(1)
@@ -145,9 +147,9 @@ describe HydraAttribute::Model::Persistence do
 
     describe 'table has records' do
       before(:each) do
-        q1 = %[INSERT INTO custom_products (id, name, price, quantity) VALUES (1, 'one', 1.1, 2)]
-        q2 = %[INSERT INTO custom_products (id, name, price, quantity) VALUES (2, 'two', 2.2, 2)]
-        q3 = %[INSERT INTO custom_products (id, name, price, quantity) VALUES (3, 'three', 3.3, 4)]
+        q1 = %[INSERT INTO custom_products (id, name, price, quantity, created_at, updated_at) VALUES (1, 'one', 1.1, 2, '2012-12-12', '2012-12-12')]
+        q2 = %[INSERT INTO custom_products (id, name, price, quantity, created_at, updated_at) VALUES (2, 'two', 2.2, 2, '2012-12-12', '2012-12-12')]
+        q3 = %[INSERT INTO custom_products (id, name, price, quantity, created_at, updated_at) VALUES (3, 'three', 3.3, 4, '2012-12-12', '2012-12-12')]
 
         ActiveRecord::Base.connection.execute(q1)
         ActiveRecord::Base.connection.execute(q2)
@@ -220,9 +222,9 @@ describe HydraAttribute::Model::Persistence do
 
     describe 'table has records' do
       before(:each) do
-        q1 = %q[INSERT INTO custom_products (id, name, price, quantity) VALUES (1, 'one', 1.1, 2)]
-        q2 = %q[INSERT INTO custom_products (id, name, price, quantity) VALUES (2, 'two', 2.2, 2)]
-        q3 = %q[INSERT INTO custom_products (id, name, price, quantity) VALUES (3, 'three', 3.3, 4)]
+        q1 = %q[INSERT INTO custom_products (id, name, price, quantity, created_at, updated_at) VALUES (1, 'one', 1.1, 2, '2012-12-12', '2012-12-12')]
+        q2 = %q[INSERT INTO custom_products (id, name, price, quantity, created_at, updated_at) VALUES (2, 'two', 2.2, 2, '2012-12-12', '2012-12-12')]
+        q3 = %q[INSERT INTO custom_products (id, name, price, quantity, created_at, updated_at) VALUES (3, 'three', 3.3, 4, '2012-12-12', '2012-12-12')]
 
         ActiveRecord::Base.connection.execute(q1)
         ActiveRecord::Base.connection.execute(q2)
@@ -259,7 +261,7 @@ describe HydraAttribute::Model::Persistence do
 
   describe '.update' do
     it 'should update record by its ID' do
-      q = %[INSERT INTO custom_products (id, name, price, quantity) VALUES (1, 'one', 1.1, 2)]
+      q = %[INSERT INTO custom_products (id, name, price, quantity, created_at, updated_at) VALUES (1, 'one', 1.1, 2, '2012-12-12', '2012-12-12')]
       ActiveRecord::Base.connection.execute(q)
 
       CustomProduct.update(1, name: 'book', price: 2.5)
@@ -275,7 +277,7 @@ describe HydraAttribute::Model::Persistence do
   describe '#attributes' do
     it 'should return all attributes' do
       product = CustomProduct.new(name: 'a', price: 2)
-      product.attributes.should == {id: nil, name: 'a', price: 2, quantity: nil}
+      product.attributes.should == {id: nil, name: 'a', price: 2, quantity: nil, updated_at: nil, created_at: nil}
     end
   end
 
@@ -360,7 +362,7 @@ describe HydraAttribute::Model::Persistence do
 
     describe 'update' do
       it 'should update record if id exists' do
-        ActiveRecord::Base.connection.insert(%q[INSERT INTO custom_products(id, name, price, quantity) VALUES (1, 'book', 35.5, 6)])
+        ActiveRecord::Base.connection.insert(%q[INSERT INTO custom_products(id, name, price, quantity, created_at, updated_at) VALUES (1, 'book', 35.5, 6, '2012-12-12', '2012-12-12')])
 
         product = CustomProduct.new(id: 1, name: 'book 2', price: 45.7, quantity: 10)
         product.save
@@ -373,7 +375,7 @@ describe HydraAttribute::Model::Persistence do
       end
 
       it 'should not update record if error was raised during saving' do
-        ActiveRecord::Base.connection.insert(%q[INSERT INTO custom_products(id, name, price, quantity) VALUES (1, 'book', 35.5, 6)])
+        ActiveRecord::Base.connection.insert(%q[INSERT INTO custom_products(id, name, price, quantity, created_at, updated_at) VALUES (1, 'book', 35.5, 6, '2012-12-12', '2012-12-12')])
 
         Class.new do
           include HydraAttribute::Model::Mediator
@@ -389,7 +391,7 @@ describe HydraAttribute::Model::Persistence do
 
   describe '#destroy' do
     it 'should delete record from database' do
-      ActiveRecord::Base.connection.insert('INSERT INTO custom_products(id) VALUES (1)')
+      ActiveRecord::Base.connection.insert(%q[INSERT INTO custom_products(id, created_at, updated_at) VALUES (1, '2012-12-12', '2012-12-12')])
       product = CustomProduct.new(id: 1)
       product.destroy
       ActiveRecord::Base.connection.select_value('SELECT COUNT(*) FROM custom_products WHERE id=1').to_i.should be(0)
@@ -405,7 +407,7 @@ describe HydraAttribute::Model::Persistence do
         def self.after_destroy(*) raise Exception, 'Testing rollback' end
       end
 
-      ActiveRecord::Base.connection.insert('INSERT INTO custom_products(id) VALUES (1)')
+      ActiveRecord::Base.connection.insert(%q[INSERT INTO custom_products(id, created_at, updated_at) VALUES (1, '2012-12-12', '2012-12-12')])
       product = CustomProduct.new(id: 1)
       lambda { product.destroy }.should raise_error(Exception, 'Testing rollback')
       ActiveRecord::Base.connection.select_value('SELECT COUNT(*) FROM custom_products WHERE id=1').to_i.should be(1)
@@ -418,6 +420,7 @@ describe HydraAttribute::Model::Persistence do
         t.string  :title
         t.float   :price
         t.integer :count
+        t.timestamps
       end
       Object.const_set('ExampleProduct', Class.new)
       ExampleProduct.send(:include, HydraAttribute::Model)

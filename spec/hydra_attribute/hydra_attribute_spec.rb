@@ -3,9 +3,9 @@ require 'spec_helper'
 describe HydraAttribute::HydraAttribute do
   describe '.all_by_entity_type' do
     describe 'hydra_attributes table has several records' do
-      let!(:attr_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'attr1', 'string')])  }
-      let!(:attr_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'attr2', 'integer')]) }
-      let!(:attr_id3) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Category', 'attr3', 'string')]) }
+      let!(:attr_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type, created_at, updated_at) VALUES('Product', 'attr1', 'string', '2012-12-12', '2012-12-12')])  }
+      let!(:attr_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type, created_at, updated_at) VALUES('Product', 'attr2', 'integer', '2012-12-12', '2012-12-12')]) }
+      let!(:attr_id3) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type, created_at, updated_at) VALUES('Category', 'attr3', 'string', '2012-12-12', '2012-12-12')]) }
 
       it 'should return hydra_attributes which have the following entity_type' do
         HydraAttribute::HydraAttribute.all_by_entity_type('Product').map(&:name).should =~ %w[attr1 attr2]
@@ -43,9 +43,9 @@ describe HydraAttribute::HydraAttribute do
 
   describe '.ids_by_entity_type' do
     describe 'hydra_attributes table has several records' do
-      let!(:attr_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'attr1', 'string')]).to_i  }
-      let!(:attr_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'attr2', 'integer')]).to_i }
-      let!(:attr_id3) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Category', 'attr3', 'string')]).to_i }
+      let!(:attr_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type, created_at, updated_at) VALUES('Product', 'attr1', 'string', '2012-12-12', '2012-12-12')]).to_i  }
+      let!(:attr_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type, created_at, updated_at) VALUES('Product', 'attr2', 'integer', '2012-12-12', '2012-12-12')]).to_i }
+      let!(:attr_id3) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type, created_at, updated_at) VALUES('Category', 'attr3', 'string', '2012-12-12', '2012-12-12')]).to_i }
 
       it 'should return IDs by entity_type' do
         HydraAttribute::HydraAttribute.ids_by_entity_type('Product').should  =~ [attr_id1, attr_id2]
@@ -85,9 +85,9 @@ describe HydraAttribute::HydraAttribute do
 
   describe '.names_by_entity_type' do
     describe 'hydra_attributes table has several records' do
-      let!(:attr_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'attr1', 'string')])  }
-      let!(:attr_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Product', 'attr2', 'integer')]) }
-      let!(:attr_id3) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type) VALUES('Category', 'attr3', 'string')]) }
+      let!(:attr_id1) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type, created_at, updated_at) VALUES('Product', 'attr1', 'string', '2012-12-12', '2012-12-12')])  }
+      let!(:attr_id2) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type, created_at, updated_at) VALUES('Product', 'attr2', 'integer', '2012-12-12', '2012-12-12')]) }
+      let!(:attr_id3) { ::ActiveRecord::Base.connection.insert(%q[INSERT INTO hydra_attributes(entity_type, name, backend_type, created_at, updated_at) VALUES('Category', 'attr3', 'string', '2012-12-12', '2012-12-12')]) }
 
       it 'should return names by entity_type' do
         HydraAttribute::HydraAttribute.names_by_entity_type('Product').should  =~ %w[attr1 attr2]
