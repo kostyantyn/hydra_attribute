@@ -18,19 +18,36 @@ describe HydraAttribute::Migrator do
     describe 'entity' do
       let(:columns) { connection.columns(:wheels) }
 
-      it 'should have the necessary fields' do
+      it 'should have the necessary columns' do
         columns.map(&:name).should =~ %w[id hydra_set_id name created_at updated_at]
+      end
+
+      it 'should have a correct column types' do
+        column = columns.find { |c| c.name == 'hydra_set_id' }
+        column.null.should be_true
+        case ENV['DB']
+        when 'postgresql' then column.sql_type.should == 'integer'
+        when 'mysql'      then column.sql_type.should == 'int(11)'
+        when 'sqlite'     then column.sql_type.should == 'integer'
+        else raise 'Unknown database'
+        end
+      end
+
+      it 'should have a correct indexes' do
+        index = connection.indexes(:wheels).find { |i| i.name == 'wheels_hydra_set_id_idx' }
+        index.unique.should be_false
+        index.columns.should == %w[hydra_set_id]
       end
     end
 
     describe 'hydra_attributes' do
       let(:columns) { connection.columns(:hydra_attributes) }
 
-      it 'should have the necessary fields' do
+      it 'should have the necessary columns' do
         columns.map(&:name).should =~ %w[id entity_type name backend_type default_value white_list created_at updated_at]
       end
 
-      it 'should have a correct field types' do
+      it 'should have a correct column types' do
         column = columns.find { |c| c.name == 'entity_type' }
         column.sql_type.should == (ENV['DB'] == 'postgresql' ? 'character varying(32)' : 'varchar(32)')
         column.null.should be_false
@@ -78,7 +95,7 @@ describe HydraAttribute::Migrator do
 
       it 'should have a correct indexes' do
         connection.indexes(:hydra_attributes).should have(1).index
-        connection.indexes(:hydra_attributes)[0].name.should   == 'hydra_attributes_index'
+        connection.indexes(:hydra_attributes)[0].name.should   == 'hydra_attributes_idx'
         connection.indexes(:hydra_attributes)[0].unique.should be_true
         connection.indexes(:hydra_attributes)[0].columns.should == %w[entity_type name]
       end
@@ -111,7 +128,7 @@ describe HydraAttribute::Migrator do
 
       it 'should have a correct indexes' do
         connection.indexes(:hydra_sets).should have(1).index
-        connection.indexes(:hydra_sets)[0].name.should   == 'hydra_sets_index'
+        connection.indexes(:hydra_sets)[0].name.should   == 'hydra_sets_idx'
         connection.indexes(:hydra_sets)[0].unique.should be_true
         connection.indexes(:hydra_sets)[0].columns.should == %w[entity_type name]
       end
@@ -120,11 +137,11 @@ describe HydraAttribute::Migrator do
     describe 'hydra_attribute_sets' do
       let(:columns) { connection.columns(:hydra_attribute_sets) }
 
-      it 'should have the necessary fields' do
+      it 'should have the necessary columns' do
         columns.map(&:name).should =~ %w[id hydra_attribute_id hydra_set_id created_at updated_at]
       end
 
-      it 'should have a correct field types' do
+      it 'should have a correct column types' do
         column = columns.find { |c| c.name == 'hydra_attribute_id' }
         column.null.should be_false
         case ENV['DB']
@@ -164,7 +181,7 @@ describe HydraAttribute::Migrator do
 
       it 'should have a correct indexes' do
         connection.indexes(:hydra_attribute_sets).should have(1).index
-        connection.indexes(:hydra_attribute_sets)[0].name.should    == 'hydra_attribute_sets_index'
+        connection.indexes(:hydra_attribute_sets)[0].name.should    == 'hydra_attribute_sets_idx'
         connection.indexes(:hydra_attribute_sets)[0].unique.should  be_true
         connection.indexes(:hydra_attribute_sets)[0].columns.should == %w[hydra_attribute_id hydra_set_id]
       end
@@ -279,32 +296,32 @@ describe HydraAttribute::Migrator do
 
       it 'should have a correct indexes' do
         connection.indexes(:hydra_string_wheels).should have(1).indexes
-        connection.indexes(:hydra_string_wheels)[0].name.should    == 'hydra_string_wheels_index'
+        connection.indexes(:hydra_string_wheels)[0].name.should    == 'hydra_string_wheels_idx'
         connection.indexes(:hydra_string_wheels)[0].unique.should  be_true
         connection.indexes(:hydra_string_wheels)[0].columns.should == %w[entity_id hydra_attribute_id]
 
         connection.indexes(:hydra_text_wheels).should have(1).indexes
-        connection.indexes(:hydra_text_wheels)[0].name.should    == 'hydra_text_wheels_index'
+        connection.indexes(:hydra_text_wheels)[0].name.should    == 'hydra_text_wheels_idx'
         connection.indexes(:hydra_text_wheels)[0].unique.should  be_true
         connection.indexes(:hydra_text_wheels)[0].columns.should == %w[entity_id hydra_attribute_id]
 
         connection.indexes(:hydra_integer_wheels).should have(1).indexes
-        connection.indexes(:hydra_integer_wheels)[0].name.should    == 'hydra_integer_wheels_index'
+        connection.indexes(:hydra_integer_wheels)[0].name.should    == 'hydra_integer_wheels_idx'
         connection.indexes(:hydra_integer_wheels)[0].unique.should  be_true
         connection.indexes(:hydra_integer_wheels)[0].columns.should == %w[entity_id hydra_attribute_id]
 
         connection.indexes(:hydra_float_wheels).should have(1).indexes
-        connection.indexes(:hydra_float_wheels)[0].name.should    == 'hydra_float_wheels_index'
+        connection.indexes(:hydra_float_wheels)[0].name.should    == 'hydra_float_wheels_idx'
         connection.indexes(:hydra_float_wheels)[0].unique.should  be_true
         connection.indexes(:hydra_float_wheels)[0].columns.should == %w[entity_id hydra_attribute_id]
 
         connection.indexes(:hydra_boolean_wheels).should have(1).indexes
-        connection.indexes(:hydra_boolean_wheels)[0].name.should    == 'hydra_boolean_wheels_index'
+        connection.indexes(:hydra_boolean_wheels)[0].name.should    == 'hydra_boolean_wheels_idx'
         connection.indexes(:hydra_boolean_wheels)[0].unique.should  be_true
         connection.indexes(:hydra_boolean_wheels)[0].columns.should == %w[entity_id hydra_attribute_id]
 
         connection.indexes(:hydra_datetime_wheels).should have(1).indexes
-        connection.indexes(:hydra_datetime_wheels)[0].name.should    == 'hydra_datetime_wheels_index'
+        connection.indexes(:hydra_datetime_wheels)[0].name.should    == 'hydra_datetime_wheels_idx'
         connection.indexes(:hydra_datetime_wheels)[0].unique.should  be_true
         connection.indexes(:hydra_datetime_wheels)[0].columns.should == %w[entity_id hydra_attribute_id]
       end

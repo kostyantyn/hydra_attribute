@@ -53,14 +53,14 @@ module HydraAttribute
           t.integer :hydra_set_id, null: true
           yield t if block_given?
         end
-        add_index name, :hydra_set_id, unique: false, name: "#{name}_hydra_set_id_index"
+        add_index name, :hydra_set_id, unique: false, name: "#{name}_hydra_set_id_idx"
       end
 
       def migrate_entity(name, options = {})
         change_table name, options do |t|
           t.integer :hydra_set_id, null: true
         end
-        add_index name, :hydra_set_id, unique: false, name: "#{name}_hydra_set_id_index"
+        add_index name, :hydra_set_id, unique: false, name: "#{name}_hydra_set_id_idx"
       end
 
       def create_attribute
@@ -72,7 +72,7 @@ module HydraAttribute
           t.boolean :white_list,              null: false, default: false
           t.timestamps
         end
-        add_index :hydra_attributes, [:entity_type, :name], unique: true, name: 'hydra_attributes_index'
+        add_index :hydra_attributes, [:entity_type, :name], unique: true, name: 'hydra_attributes_idx'
       end
 
       def create_set
@@ -81,14 +81,14 @@ module HydraAttribute
           t.string :name,         limit: 32, null: false
           t.timestamps
         end
-        add_index :hydra_sets, [:entity_type, :name], unique: true, name: 'hydra_sets_index'
+        add_index :hydra_sets, [:entity_type, :name], unique: true, name: 'hydra_sets_idx'
 
         create_table :hydra_attribute_sets do |t|
           t.integer :hydra_attribute_id, null: false
           t.integer :hydra_set_id,       null: false
           t.timestamps
         end
-        add_index :hydra_attribute_sets, [:hydra_attribute_id, :hydra_set_id], unique: true, name: 'hydra_attribute_sets_index'
+        add_index :hydra_attribute_sets, [:hydra_attribute_id, :hydra_set_id], unique: true, name: 'hydra_attribute_sets_idx'
       end
 
       def create_values(name)
@@ -100,7 +100,7 @@ module HydraAttribute
             t.send type, :value
             t.timestamps
           end
-          add_index table_name, [:entity_id, :hydra_attribute_id], unique: true, name: "#{table_name}_index"
+          add_index table_name, [:entity_id, :hydra_attribute_id], unique: true, name: "#{table_name}_idx"
         end
       end
 
