@@ -1,3 +1,4 @@
+.DS_Store
 *.gem
 *.rbc
 .bundle
@@ -18,4 +19,4 @@ tmp
 .idea
 .rvmrc
 bin/
-gemfiles
+gemfiles/*.lock

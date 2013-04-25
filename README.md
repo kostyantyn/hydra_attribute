@@ -1,4 +1,4 @@
-# hydra_attribute [![Gem Version](https://fury-badge.herokuapp.com/rb/hydra_attribute.png)](http://badge.fury.io/rb/hydra_attribute) [![Build Status](https://secure.travis-ci.org/kostyantyn/hydra_attribute.png)](http://travis-ci.org/kostyantyn/hydra_attribute)
+# hydra_attribute [![Gem Version](https://fury-badge.herokuapp.com/rb/hydra_attribute.png)](http://badge.fury.io/rb/hydra_attribute) [![Build Status](https://travis-ci.org/kostyantyn/hydra_attribute.png?branch=value_model_optimization)](https://travis-ci.org/kostyantyn/hydra_attribute)
 
 [Wiki](https://github.com/kostyantyn/hydra_attribute/wiki) | [RDoc](http://rdoc.info/github/kostyantyn/hydra_attribute)
 
@@ -12,7 +12,7 @@ Until the first major version is released:
 
 ## Requirements
 * ruby >= 1.9.2
-* active_record ~> 3.1
+* active_record ~> 3.2
 
 ## Installation
 

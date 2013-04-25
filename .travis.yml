@@ -1,9 +1,10 @@
 language: ruby
 rvm:
   - 1.9.3
-
-before_install: bundle && rake appraisal:gemfiles
-
+  - 2.0.0
 gemfile:
-  - gemfiles/3.1.gemfile
-  - gemfiles/3.2.gemfile
+  - gemfiles/activerecord-3.2.gemfile
+env:
+  - DB=sqlite
+  - DB=mysql
+  - DB=postgresql

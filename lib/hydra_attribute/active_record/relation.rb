@@ -1,3 +1,7 @@
+require 'hydra_attribute/active_record/relation/calculations'
+require 'hydra_attribute/active_record/relation/query_methods'
+require 'hydra_attribute/active_record/association_preloader'
+
 module HydraAttribute
   module ActiveRecord
     module Relation
@@ -6,16 +10,11 @@ module HydraAttribute
       included do
         include Calculation
         include QueryMethods
-
-        # @COMPATIBILITY with 3.1.x active_record 3.1 doesn't have "exec_queries" method
-        target = ::ActiveRecord::VERSION::STRING.starts_with?('3.1.') ? :to_a : :exec_queries
-        alias_method :__old_exec_queries__, target
-        alias_method target, :__exec_queries__
       end
 
-      def __exec_queries__
+      def exec_queries
         return @records if loaded?
-        records = __old_exec_queries__
+        records = super
         return records if records.empty?
 
         AssociationPreloader.run(self, records)

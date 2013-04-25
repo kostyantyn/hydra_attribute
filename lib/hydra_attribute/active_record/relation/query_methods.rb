@@ -23,7 +23,7 @@ module HydraAttribute
 
           if opts.is_a?(Hash)
             opts.inject(self) do |relation, (name, value)|
-              if klass.hydra_attribute_names.include?(name.to_s)
+              if ::HydraAttribute::HydraAttribute.names_by_entity_type(klass.model_name).include?(name.to_s)
                 relation, name = relation.clone, name.to_s
                 relation.hydra_attributes    << name
                 relation.hydra_joins_aliases << hydra_helper.ref_alias(name, value)
@@ -40,16 +40,12 @@ module HydraAttribute
         end
 
         def build_arel
+          # remove duplicate columns and add table prefix to all of them
           @group_values = hydra_helper.quote_columns(@group_values.uniq.reject(&:blank?))
           @order_values = hydra_helper.quote_columns(@order_values.uniq.reject(&:blank?))
 
-          # @COMPATIBILITY with 3.1.x active_record 3.1 uses the separate @reorder_value instance
-          if instance_variable_defined?(:@reorder_value) and instance_variable_get(:@reorder_value).present?
-            @reorder_value = hydra_helper.quote_columns(@reorder_value.uniq.reject(&:blank?))
-          end
-
           # detect hydra attributes from select list
-          @hydra_select_values, @select_values = @select_values.partition { |value| klass.hydra_attribute_names.include?(value.to_s) }
+          @hydra_select_values, @select_values = @select_values.partition { |value| ::HydraAttribute::HydraAttribute.names_by_entity_type(klass.model_name).include?(value.to_s) }
           @hydra_select_values.map!(&:to_s)
           @select_values.map!{ |value| hydra_helper.prepend_table_name(value) }
 
@@ -61,8 +57,16 @@ module HydraAttribute
             @select_values << hydra_helper.prepend_table_name('hydra_set_id')
           end
 
-          if hydra_attributes.any?
-            hydra_sets = klass.hydra_sets.select { |hydra_set| hydra_set.hydra_attributes.any? { |attr| attr.name.in?(hydra_attributes) } }
+          # Add filter by hydra sets which have all these attributes
+          if hydra_attributes.any? or @hydra_select_values.any?
+            hydra_attribute_ids = (hydra_attributes | hydra_select_values).map { |name| hydra_helper.hydra_attribute_id(name) }
+
+            hydra_sets = ::HydraAttribute::HydraSet.all_by_entity_type(klass.model_name).select do |hydra_set|
+              hydra_attribute_ids.all? do |hydra_attribute_id|
+                hydra_set.has_hydra_attribute_id?(hydra_attribute_id)
+              end
+            end
+
             @where_values << table[:hydra_set_id].in(hydra_sets.map(&:id)).or(table[:hydra_set_id].eq(nil))
           end
 
@@ -125,13 +129,9 @@ module HydraAttribute
             {ref_alias(name, value) => {value: value}}
           end
 
-          def ref_class(name)
-            type = klass.hydra_attribute(name).backend_type
-            AssociationBuilder.class_name(klass, type).constantize
-          end
-
           def ref_table(name)
-            ref_class(name).table_name
+            hydra_attribute = hydra_attribute_by_name(name)
+            "hydra_#{hydra_attribute.backend_type}_#{klass.table_name}"
           end
 
           def ref_alias(name, value)
@@ -139,17 +139,27 @@ module HydraAttribute
           end
 
           def join_type(value)
-            value.nil? ? 'LEFT' : 'INNER'
+            if value.nil? or (value.is_a?(Array) and value.include?(nil))
+              'LEFT'
+            else
+              'INNER'
+            end
           end
 
           def hydra_attribute_id(name)
-            klass.hydra_attribute(name).id
+            hydra_attribute_by_name(name).id
+          end
+
+          def hydra_attribute_by_name(name)
+            ::HydraAttribute::HydraAttribute.all_by_entity_type(klass.model_name).find do |hydra_attribute|
+              hydra_attribute.name == name.to_s
+            end
           end
 
           def quote_columns(columns)
             columns.map do |column|
               column = column.respond_to?(:to_sql) ? column.to_sql : column.to_s
-              if klass.hydra_attribute_names.include?(column)
+              if ::HydraAttribute::HydraAttribute.names_by_entity_type(klass.model_name).include?(column)
                 join_alias = ref_alias(column, 'inner') # alias for inner join
                 join_alias = ref_alias(column, nil) unless relation.hydra_joins_aliases.include?(join_alias) # alias for left join
 

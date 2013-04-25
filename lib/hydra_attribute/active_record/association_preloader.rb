@@ -6,7 +6,6 @@ module HydraAttribute
       def initialize(relation, records = [])
         @relation = relation
         @records  = records
-        prepared_records # lock attributes
       end
 
       def self.run(relation, records)
@@ -16,54 +15,74 @@ module HydraAttribute
       def run
         return if records.blank?
 
-        prepared_records.keys.each_slice(in_clause_length || prepared_records.keys.length) do |entity_ids|
-          grouped_attribute_ids.each do |backend_type, hydra_attribute_ids|
-            next if hydra_attribute_ids.blank?
+        prepared_records.keys.each_slice(in_clause_length || records.length) do |entity_ids|
+          grouped_hydra_attribute_ids.each do |backend_type, hydra_attribute_ids|
+            next if hydra_attribute_ids.blank? # entity doesn't have any hydra attributes for the current backend type
 
+            # set values from database
+            database_entity_and_hydra_attribute_ids = {}
             hydra_attribute_ids.each_slice(in_clause_length || hydra_attribute_ids.length) do |attribute_ids|
-              value_class(backend_type).select(%w(id entity_id hydra_attribute_id value)).where(entity_id: entity_ids, hydra_attribute_id: attribute_ids).each do |model|
-                assoc = association_builder.association_name(backend_type)
-                prepared_records[model.entity_id].association(assoc).target.push(model)
+              ::ActiveRecord::Base.connection.select_all("SELECT id, entity_id, hydra_attribute_id, value FROM hydra_#{backend_type}_#{klass.table_name} WHERE entity_id IN (#{entity_ids.join(', ')}) AND hydra_attribute_id IN (#{attribute_ids.join(', ')})").each do |attributes|
+                # PostgreSQL driver doesn't convert values, it returns them as strings
+                id                 = attributes['id'].to_i
+                entity_id          = attributes['entity_id'].to_i
+                hydra_attribute_id = attributes['hydra_attribute_id'].to_i
+
+                assign_hydra_value_options(id: id, entity_id: entity_id, hydra_attribute_id: hydra_attribute_id, value: attributes['value'])
+                (database_entity_and_hydra_attribute_ids[entity_id] ||= []) << hydra_attribute_id
+              end
+            end
+
+            # set nil if attribute's value is not saved into the database
+            # these values are not persisted
+            entity_ids.each do |entity_id|
+              missing_hydra_attribute_ids = hydra_attribute_ids - Array(database_entity_and_hydra_attribute_ids[entity_id])
+              missing_hydra_attribute_ids.each do |missing_hydra_attribute_id|
+                assign_hydra_value_options(entity_id: entity_id, hydra_attribute_id: missing_hydra_attribute_id, value: nil)
               end
             end
           end
         end
       end
 
+      def assign_hydra_value_options(options = {})
+        entity = prepared_records[options[:entity_id]]
+        assoc  = entity.hydra_attribute_association
+
+        if entity.hydra_set_id
+          assoc.hydra_value_options = options.symbolize_keys if entity.hydra_set.has_hydra_attribute_id?(options[:hydra_attribute_id])
+        else
+          assoc.hydra_value_options = options.symbolize_keys
+        end
+      end
+
       private
         def prepared_records
-          limit = attribute_limit?
           @prepared_records ||= records.each_with_object({}) do |record, hash|
-            grouped_attribute_ids.each do |backend_type, hydra_attribute_ids|
-              association = record.association(association_builder.association_name(backend_type))
-              limit ? association.lock!(hydra_attribute_ids) : association.loaded!
-            end
+            record.hydra_attribute_association.lock_values
             hash[record.id] = record
           end
         end
 
-        def grouped_attribute_ids
-          @grouped_attribute_ids ||= if attribute_limit?
-            map = klass.hydra_attribute_backend_types.each_with_object({}) { |backend_type, hash| hash[backend_type] = [] }
-            relation.hydra_select_values.each_with_object(map) do |name, grouped_ids|
-              hydra_attribute = klass.hydra_attribute(name)
-              grouped_ids[hydra_attribute.backend_type] << hydra_attribute.id
+        def grouped_hydra_attribute_ids
+          @grouped_hydra_attribute_ids ||= begin
+            hydra_attributes = ::HydraAttribute::HydraAttribute.all_by_entity_type(klass.model_name)
+            if attribute_limit?
+              map = hydra_attributes.map(&:backend_type).each_with_object({}) { |backend_type, hash| hash[backend_type] = [] }
+              relation.hydra_select_values.each_with_object(map) do |name, grouped_ids|
+                hydra_attribute = hydra_attributes.find { |attr| attr.name == name }
+                grouped_ids[hydra_attribute.backend_type] << hydra_attribute.id
+              end
+            else
+              hydra_attributes.each_with_object({}) do |hydra_attribute, hash|
+                (hash[hydra_attribute.backend_type] ||= []) << hydra_attribute.id
+              end
             end
-          else
-            klass.hydra_attribute_ids_by_backend_type
           end
         end
 
         def attribute_limit?
           relation.select_values.any? or relation.hydra_select_values.any?
-        end
-
-        def value_class(backend_type)
-          instance_variable_get(:"@#{backend_type}_class") || instance_variable_set(:"@#{backend_type}_class", association_builder.class_name(klass, backend_type).constantize)
-        end
-
-        def association_builder
-          AssociationBuilder
         end
 
         def connection
