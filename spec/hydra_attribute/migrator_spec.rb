@@ -192,6 +192,7 @@ describe HydraAttribute::Migrator do
         connection.table_exists?('hydra_string_wheels').should   be_true
         connection.table_exists?('hydra_text_wheels').should     be_true
         connection.table_exists?('hydra_float_wheels').should    be_true
+        connection.table_exists?('hydra_decimal_wheels').should  be_true
         connection.table_exists?('hydra_boolean_wheels').should  be_true
         connection.table_exists?('hydra_datetime_wheels').should be_true
       end
@@ -266,12 +267,14 @@ describe HydraAttribute::Migrator do
         else raise 'Unknown database'
         end
 
-        column = connection.columns('hydra_float_wheels').find { |c| c.name == 'value' }
-        column.null.should be_true
+        column = connection.columns('hydra_decimal_wheels').find { |c| c.name == 'value' }
+        column.null.should      be_true
+        column.precision.should be(10)
+        column.scale.should     be(4)
         case ENV['DB']
-        when 'postgresql' then column.sql_type.should == 'double precision'
-        when 'mysql'      then column.sql_type.should == 'float'
-        when 'sqlite'     then column.sql_type.should == 'float'
+        when 'postgresql' then column.sql_type.should == 'numeric(10,4)'
+        when 'mysql'      then column.sql_type.should == 'decimal(10,4)'
+        when 'sqlite'     then column.sql_type.should == 'decimal(10,4)'
         else raise 'Unknown database'
         end
 
@@ -314,6 +317,11 @@ describe HydraAttribute::Migrator do
         connection.indexes(:hydra_float_wheels)[0].name.should    == 'hydra_float_wheels_idx'
         connection.indexes(:hydra_float_wheels)[0].unique.should  be_true
         connection.indexes(:hydra_float_wheels)[0].columns.should == %w[entity_id hydra_attribute_id]
+
+        connection.indexes(:hydra_decimal_wheels).should have(1).indexes
+        connection.indexes(:hydra_decimal_wheels)[0].name.should    == 'hydra_decimal_wheels_idx'
+        connection.indexes(:hydra_decimal_wheels)[0].unique.should  be_true
+        connection.indexes(:hydra_decimal_wheels)[0].columns.should == %w[entity_id hydra_attribute_id]
 
         connection.indexes(:hydra_boolean_wheels).should have(1).indexes
         connection.indexes(:hydra_boolean_wheels)[0].name.should    == 'hydra_boolean_wheels_idx'

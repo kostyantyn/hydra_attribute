@@ -1,7 +1,7 @@
 require 'active_record'
 
 module HydraAttribute
-  SUPPORTED_BACKEND_TYPES = %w(string text integer float boolean datetime).freeze
+  SUPPORTED_BACKEND_TYPES = %w[string text integer float decimal boolean datetime].freeze
 
   class << self
     def config

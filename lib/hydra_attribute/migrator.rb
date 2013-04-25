@@ -97,7 +97,12 @@ module HydraAttribute
           create_table table_name do |t|
             t.integer :entity_id,          null: false
             t.integer :hydra_attribute_id, null: false
-            t.send type, :value
+            case type
+            when 'decimal'
+              t.send type, :value, precision: 10, scale: 4, null: true
+            else
+              t.send type, :value, null: true
+            end
             t.timestamps
           end
           add_index table_name, [:entity_id, :hydra_attribute_id], unique: true, name: "#{table_name}_idx"
