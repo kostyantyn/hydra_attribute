@@ -1,5 +1,8 @@
 **0.5.0 (...)**
+* Cache all hydra attributes per request
+* Add support of `decimal` backend type
 * Add `id` to `hydra_attribute_sets` table
+* Use new index name pattern `*_idx` instead of `*_index`
 
 **0.4.2 (January 20, 2013)**
 * Fixed bug in `count` method which added unnecessary columns to query [#2](https://github.com/kostyantyn/hydra_attribute/issues/2)

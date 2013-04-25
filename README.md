@@ -12,7 +12,7 @@ Until the first major version is released:
 
 ## Requirements
 * ruby >= 1.9.2
-* active_record ~> 3.1
+* active_record ~> 3.2
 
 ## Installation
 
