@@ -1,58 +1,30 @@
-require 'active_support/core_ext/object/with_options'
-
 module HydraAttribute
-  class HydraAttribute < ActiveRecord::Base
-    self.table_name = 'hydra_attributes'
+  class HydraAttribute
 
-    with_options as: [:default, :admin] do |klass|
-      klass.attr_accessible :name, :backend_type, :default_value
-    end
-    attr_accessible :white_list, as: :admin
-
-    has_and_belongs_to_many :hydra_sets, join_table: 'hydra_attribute_sets', class_name: 'HydraAttribute::HydraSet', conditions: proc { {hydra_sets: {entity_type: entity_type}} }
-
-    with_options presence: true do |klass|
-      klass.validates :entity_type,  inclusion: { in: lambda { |attr| [(attr.entity_type.constantize.name rescue nil)] } }
-      klass.validates :name,         uniqueness: { scope: :entity_type }
-      klass.validates :backend_type, inclusion: SUPPORTED_BACKEND_TYPES
+    # This error is raised when created +HydraAttribute::HydraAttribute+ models don't have this ID
+    class UnknownHydraAttributeIdError < ArgumentError
     end
 
-    before_destroy :delete_dependent_values
-    after_commit   :clear_entity_cache
-    after_commit   :update_mass_assignment_security
+    include ::HydraAttribute::Model
 
-    # @COMPATIBILITY with 3.1.x association module is directly added to the class instead of including module
-    def hydra_sets_with_clearing_cache=(value)
-      self.hydra_sets_without_clearing_cache = value
-      entity_type.constantize.clear_hydra_method_cache!
-      value
-    end
-    alias_method_chain :hydra_sets=, :clearing_cache
+    validates :entity_type,  presence: true
+    validates :name,         presence: true, unique: { scope: :entity_type }
+    validates :backend_type, presence: true, inclusion: { in: ::HydraAttribute::SUPPORTED_BACKEND_TYPES }
 
-    def update_mass_assignment_security
-      if destroyed? or !white_list?
-        remove_from_white_list
+    define_cached_singleton_method :all_by_entity_type,           cache_key: :entity_type, cache_value: :self,         cache_key_cast: :to_s
+    define_cached_singleton_method :ids_by_entity_type,           cache_key: :entity_type, cache_value: :id,           cache_key_cast: :to_s
+    define_cached_singleton_method :names_by_entity_type,         cache_key: :entity_type, cache_value: :name,         cache_key_cast: :to_s
+    define_cached_singleton_method :backend_types_by_entity_type, cache_key: :entity_type, cache_value: :backend_type, cache_key_cast: :to_s
+
+    # Returns collection of hydra sets for this hydra attribute
+    #
+    # @return [Array<HydraAttribute::HydraSet>]
+    def hydra_sets
+      if id?
+        HydraAttributeSet.hydra_sets_by_hydra_attribute_id(id)
       else
-        add_to_white_list
+        []
       end
     end
-
-    private
-      def delete_dependent_values
-        value_class = AssociationBuilder.class_name(entity_type.constantize, backend_type).constantize
-        value_class.delete_all(hydra_attribute_id: id)
-      end
-
-      def clear_entity_cache
-        entity_type.constantize.reset_hydra_attribute_methods!
-      end
-
-      def add_to_white_list
-        entity_type.constantize.accessible_attributes.add(name)
-      end
-
-      def remove_from_white_list
-        entity_type.constantize.accessible_attributes.delete(name)
-      end
   end
 end

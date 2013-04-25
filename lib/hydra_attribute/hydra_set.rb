@@ -1,36 +1,42 @@
-require 'active_support/core_ext/object/with_options'
-
 module HydraAttribute
-  class HydraSet < ActiveRecord::Base
-    self.table_name = 'hydra_sets'
+  class HydraSet
 
-    attr_accessible :name
-
-    has_and_belongs_to_many :hydra_attributes, join_table: 'hydra_attribute_sets', class_name: 'HydraAttribute::HydraAttribute', conditions: proc { {hydra_attributes: {entity_type: entity_type}} }
-
-    with_options presence: true do |klass|
-      klass.validates :entity_type,  inclusion: { in: lambda { |attr| [(attr.entity_type.constantize.name rescue nil)] } }
-      klass.validates :name,         uniqueness: { scope: :entity_type }
+    # This error is raised when called method for attribute which doesn't exist in current hydra set
+    #
+    # @example
+    #   Product.hydra_attributes.create(name: 'price', backend_type: 'float')
+    #   Product.hydra_attributes.create(name: 'title', backend_type: 'string')
+    #
+    #   hydra_set = Product.hydra_sets.create(name: 'Default')
+    #   hydra_set.hydra_attributes = [Product.hydra_attribute('title')]
+    #
+    #   product = Product.new(hydra_set_id: hydra_set.id)
+    #   product.title = 'Toy' # ok
+    #   product.price = 2.50  # raise HydraAttribute::HydraSet::MissingAttributeInHydraSetError
+    class MissingAttributeInHydraSetError < NoMethodError
     end
 
-    after_destroy :detach_entities
-    after_commit  :clear_entity_cache
+    include ::HydraAttribute::Model
 
-    # @COMPATIBILITY with 3.1.x association module is directly added to the class instead of including module
-    def hydra_attributes_with_clearing_cache=(value)
-      self.hydra_attributes_without_clearing_cache = value
-      clear_entity_cache
-      value
+    define_cached_singleton_method :all_by_entity_type, cache_key: :entity_type, cache_value: :self, cache_key_cast: :to_s
+
+    validates :entity_type, presence: true
+    validates :name,        presence: true, unique: { scope: :entity_type }
+
+    # Returns collection of hydra attributes for this hydra set
+    #
+    # @return [Array<HydraAttribute::HydraAttribute>]
+    def hydra_attributes
+      if id?
+        HydraAttributeSet.hydra_attributes_by_hydra_set_id(id)
+      else
+        []
+      end
     end
-    alias_method_chain :hydra_attributes=, :clearing_cache
 
-    private
-      def clear_entity_cache
-        entity_type.constantize.clear_hydra_method_cache!
-      end
+    def has_hydra_attribute_id?(hydra_attribute_id)
+      HydraAttributeSet.has_hydra_attribute_id_in_hydra_set_id?(hydra_attribute_id, id)
+    end
 
-      def detach_entities
-        entity_type.constantize.where(hydra_set_id: id).update_all(hydra_set_id: nil)
-      end
   end
 end
