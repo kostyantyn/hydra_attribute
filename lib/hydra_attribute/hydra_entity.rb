@@ -1,10 +1,50 @@
 module HydraAttribute
   module HydraEntity
+    class RelationDecorator
+      def initialize(entity_type, model_class)
+        @entity_type = entity_type
+        @model_class = model_class
+      end
+
+      def create(options = {})
+        @model_class.create(options.merge(entity_type: @entity_type))
+      end
+
+      private
+        def respond_to_missing?(symbol, include_private)
+          _models.respond_to?(symbol, include_private)
+        end
+
+        def method_missing(method, *args, &block)
+          _models.send(method, *args, &block)
+        end
+
+        def _models
+          @model_class.all_by_entity_type(@entity_type)
+        end
+    end
+
     extend ActiveSupport::Concern
 
     included do
       after_save    :save_hydra_attributes
       after_destroy :destroy_hydra_attributes
+    end
+
+    module ClassMethods
+      # Returns collection of hydra attributes for current entity
+      #
+      # @return [HydraAttribute::HydraEntity::RelationDecorator]
+      def hydra_attributes
+        @hydra_attributes ||= RelationDecorator.new(model_name, ::HydraAttribute::HydraAttribute)
+      end
+
+      # Returns collection of hydra sets for current entity
+      #
+      # @return [HydraAttribute::HydraEntity::RelationDecorator]
+      def hydra_sets
+        @hydra_sets ||= RelationDecorator.new(model_name, ::HydraAttribute::HydraSet)
+      end
     end
 
     # Returns association between hydra attributes and their values
