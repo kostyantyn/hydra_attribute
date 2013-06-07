@@ -326,91 +326,123 @@ describe HydraAttribute::Model::Persistence do
 
   describe '#save' do
     describe 'create' do
-      it 'should create blank record' do
-        product = CustomProduct.new
-        product.save
-        product.id.should_not be_nil
-        ActiveRecord::Base.connection.select_value("SELECT COUNT(*) FROM custom_products WHERE id=#{product.id}").to_i.should be(1)
-      end
-
-      it 'should create record with several fields' do
-        product = CustomProduct.new(name: 'my name', price: 2.50, quantity: 4)
-        product.save
-        product.id.should_not be_nil
-
-        results = ActiveRecord::Base.connection.select_one("SELECT * FROM custom_products WHERE id=#{product.id}")
-        results['id'].to_i.should       == product.id
-        results['name'].should          == 'my name'
-        results['price'].to_f.should    == 2.50
-        results['quantity'].to_i.should == 4
-      end
-
-      it 'should not commit insert query if error was raised during saving' do
-        CustomProduct.send(:include, HydraAttribute::Model::Mediator)
-        CustomProduct.send(:include, HydraAttribute::Model::Notifiable)
-
-        Class.new do
-          include HydraAttribute::Model::Mediator
-          observe 'CustomProduct', after_create: :after_create
-          def self.after_create(*) raise Exception, 'Testing rollback' end
+      describe 'when save is succeed' do
+        it 'should create blank record' do
+          product = CustomProduct.new
+          product.save
+          product.id.should_not be_nil
+          ActiveRecord::Base.connection.select_value("SELECT COUNT(*) FROM custom_products WHERE id=#{product.id}").to_i.should be(1)
         end
 
-        lambda { CustomProduct.new.save }.should raise_error(Exception, 'Testing rollback')
-        CustomProduct.connection.select_value('SELECT COUNT(*) FROM custom_products').to_i.should be(0)
+        it 'should create record with several fields' do
+          product = CustomProduct.new(name: 'my name', price: 2.50, quantity: 4)
+          product.save
+          product.id.should_not be_nil
+
+          results = ActiveRecord::Base.connection.select_one("SELECT * FROM custom_products WHERE id=#{product.id}")
+          results['id'].to_i.should       == product.id
+          results['name'].should          == 'my name'
+          results['price'].to_f.should    == 2.50
+          results['quantity'].to_i.should == 4
+        end
+      end
+
+      describe 'when save is failed' do
+        before do
+          CustomProduct.send(:include, HydraAttribute::Model::Mediator)
+          CustomProduct.send(:include, HydraAttribute::Model::Notifiable)
+
+          class CustomObserverClass
+            include HydraAttribute::Model::Mediator
+            observe 'CustomProduct', after_create: :after_create
+            def self.after_create(*) raise Exception, 'Testing rollback' end
+          end
+        end
+
+        after do
+          Object.send(:remove_const, 'CustomObserverClass')
+        end
+
+        it 'should not commit insert query if error was raised during saving' do
+          lambda { CustomProduct.new.save }.should raise_error(Exception, 'Testing rollback')
+          CustomProduct.connection.select_value('SELECT COUNT(*) FROM custom_products').to_i.should be(0)
+        end
       end
     end
 
     describe 'update' do
-      it 'should update record if id exists' do
-        ActiveRecord::Base.connection.insert(%q[INSERT INTO custom_products(id, name, price, quantity, created_at, updated_at) VALUES (1, 'book', 35.5, 6, '2012-12-12', '2012-12-12')])
+      describe 'when save is succeed' do
+        it 'should update record if id exists' do
+          ActiveRecord::Base.connection.insert(%q[INSERT INTO custom_products(id, name, price, quantity, created_at, updated_at) VALUES (1, 'book', 35.5, 6, '2012-12-12', '2012-12-12')])
 
-        product = CustomProduct.new(id: 1, name: 'book 2', price: 45.7, quantity: 10)
-        product.save
+          product = CustomProduct.new(id: 1, name: 'book 2', price: 45.7, quantity: 10)
+          product.save
 
-        results = ActiveRecord::Base.connection.select_one("SELECT * FROM custom_products WHERE id=#{product.id}")
-        results['id'].to_i.should       == product.id
-        results['name'].should          == 'book 2'
-        results['price'].to_f.should    == 45.7
-        results['quantity'].to_i.should == 10
+          results = ActiveRecord::Base.connection.select_one("SELECT * FROM custom_products WHERE id=#{product.id}")
+          results['id'].to_i.should       == product.id
+          results['name'].should          == 'book 2'
+          results['price'].to_f.should    == 45.7
+          results['quantity'].to_i.should == 10
+        end
       end
 
-      it 'should not update record if error was raised during saving' do
-        ActiveRecord::Base.connection.insert(%q[INSERT INTO custom_products(id, name, price, quantity, created_at, updated_at) VALUES (1, 'book', 35.5, 6, '2012-12-12', '2012-12-12')])
+      describe 'when save is failed' do
+        before do
+          CustomProduct.send(:include, HydraAttribute::Model::Mediator)
+          CustomProduct.send(:include, HydraAttribute::Model::Notifiable)
 
-        Class.new do
-          include HydraAttribute::Model::Mediator
-          observe 'CustomProduct', after_update: :after_update
-          def self.after_update(*) raise Exception, 'Testing rollback' end
+          class CustomObserverClass
+            include HydraAttribute::Model::Mediator
+            observe 'CustomProduct', after_update: :after_update
+            def self.after_update(*) raise Exception, 'Testing rollback' end
+          end
         end
 
-        lambda { CustomProduct.new(id: 1, name: 'ball').save }.should raise_error(Exception, 'Testing rollback')
-        CustomProduct.connection.select_value("SELECT name FROM custom_products WHERE id=1").should == 'book'
+        after do
+          Object.send(:remove_const, 'CustomObserverClass')
+        end
+
+        it 'should not update record if error was raised during saving' do
+          ActiveRecord::Base.connection.insert(%q[INSERT INTO custom_products(id, name, price, quantity, created_at, updated_at) VALUES (1, 'book', 35.5, 6, '2012-12-12', '2012-12-12')])
+          lambda { CustomProduct.new(id: 1, name: 'ball').save }.should raise_error(Exception, 'Testing rollback')
+          CustomProduct.connection.select_value("SELECT name FROM custom_products WHERE id=1").should == 'book'
+        end
       end
     end
   end
 
   describe '#destroy' do
-    it 'should delete record from database' do
-      ActiveRecord::Base.connection.insert(%q[INSERT INTO custom_products(id, created_at, updated_at) VALUES (1, '2012-12-12', '2012-12-12')])
-      product = CustomProduct.new(id: 1)
-      product.destroy
-      ActiveRecord::Base.connection.select_value('SELECT COUNT(*) FROM custom_products WHERE id=1').to_i.should be(0)
+    describe 'when destroy is succeed' do
+      it 'should delete record from database' do
+        ActiveRecord::Base.connection.insert(%q[INSERT INTO custom_products(id, created_at, updated_at) VALUES (1, '2012-12-12', '2012-12-12')])
+        product = CustomProduct.new(id: 1)
+        product.destroy
+        ActiveRecord::Base.connection.select_value('SELECT COUNT(*) FROM custom_products WHERE id=1').to_i.should be(0)
+      end
     end
 
-    it 'should not commit delete query if error was raised during destroying' do
-      CustomProduct.send(:include, HydraAttribute::Model::Mediator)
-      CustomProduct.send(:include, HydraAttribute::Model::Notifiable)
+    describe 'when destroy is failed' do
+      before do
+        CustomProduct.send(:include, HydraAttribute::Model::Mediator)
+        CustomProduct.send(:include, HydraAttribute::Model::Notifiable)
 
-      Class.new do
-        include HydraAttribute::Model::Mediator
-        observe 'CustomProduct', after_destroy: :after_destroy
-        def self.after_destroy(*) raise Exception, 'Testing rollback' end
+        class CustomProductObserverClass
+          include HydraAttribute::Model::Mediator
+          observe 'CustomProduct', after_destroy: :after_destroy
+          def self.after_destroy(*) raise Exception, 'Testing rollback' end
+        end
       end
 
-      ActiveRecord::Base.connection.insert(%q[INSERT INTO custom_products(id, created_at, updated_at) VALUES (1, '2012-12-12', '2012-12-12')])
-      product = CustomProduct.new(id: 1)
-      lambda { product.destroy }.should raise_error(Exception, 'Testing rollback')
-      ActiveRecord::Base.connection.select_value('SELECT COUNT(*) FROM custom_products WHERE id=1').to_i.should be(1)
+      after do
+        Object.send(:remove_const, 'CustomProductObserverClass')
+      end
+
+      it 'should not commit delete query if error was raised during destroying' do
+        ActiveRecord::Base.connection.insert(%q[INSERT INTO custom_products(id, created_at, updated_at) VALUES (1, '2012-12-12', '2012-12-12')])
+        product = CustomProduct.new(id: 1)
+        lambda { product.destroy }.should raise_error(Exception, 'Testing rollback')
+        ActiveRecord::Base.connection.select_value('SELECT COUNT(*) FROM custom_products WHERE id=1').to_i.should be(1)
+      end
     end
   end
 

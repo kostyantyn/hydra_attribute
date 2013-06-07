@@ -17,7 +17,7 @@ module HydraAttribute
 
         # Subscribes listeners for reporter event
         #
-        # @param [Class] listener
+        # @param [String] listener the name of the class which listens the event
         # @param [String] reporter
         # @param [Hash] events
         # @return [NilClass]
@@ -35,7 +35,7 @@ module HydraAttribute
         # @return [NilClass]
         def notify(reporter, event, object)
           subscriptions[reporter][event].each do |listener, callback|
-            listener.send(callback, object)
+            listener.constantize.send(callback, object)
           end
         end
 
@@ -66,7 +66,7 @@ module HydraAttribute
         # @param [Hash] events
         # @return [NilClass]
         def observe(class_name, events)
-          Mediator.subscribe(self, class_name, events)
+          Mediator.subscribe(name, class_name, events)
         end
       end
 
