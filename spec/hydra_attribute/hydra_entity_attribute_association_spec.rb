@@ -129,4 +129,47 @@ describe HydraAttribute::HydraEntityAttributeAssociation do
       lambda { association.delegate(:color) }.should raise_error(HydraAttribute::HydraEntityAttributeAssociation::WrongProxyMethodError)
     end
   end
+
+  describe '#hydra_attributes' do
+    let(:entity) { Product.new }
+    let!(:attr1) { HydraAttribute::HydraAttribute.create(entity_type: entity.class.name, name: 'color', backend_type: 'string', default_value: 'red') }
+    let!(:attr2) { HydraAttribute::HydraAttribute.create(entity_type: entity.class.name, name: 'title', backend_type: 'string') }
+    let!(:attr3) { HydraAttribute::HydraAttribute.create(entity_type: entity.class.name, name: 'total', backend_type: 'decimal') }
+
+    let(:hydra_attribute_association) { entity.hydra_attribute_association }
+
+    describe 'entity does not have a hydra set' do
+      describe 'entity is persisted' do
+        before do
+          entity.color = 'green'
+          entity.total = 5
+          entity.save
+        end
+
+        it 'should return all attributes with their values' do
+          hydra_attribute_association.hydra_attributes.should == {'color' => 'green', 'title' => nil, 'total' => 5}
+        end
+      end
+
+      describe 'entity is not persisted' do
+        it 'should return all attributes with their values' do
+          hydra_attribute_association.hydra_attributes.should == {'color' => 'red', 'title' => nil, 'total' => nil}
+        end
+      end
+    end
+
+    describe 'entity has a hydra set' do
+      let(:hydra_set) { HydraAttribute::HydraSet.create(entity_type: entity.class.name, name: 'default') }
+
+      before do
+        HydraAttribute::HydraAttributeSet.create(hydra_attribute_id: attr1.id, hydra_set_id: hydra_set.id)
+        HydraAttribute::HydraAttributeSet.create(hydra_attribute_id: attr3.id, hydra_set_id: hydra_set.id)
+        entity.hydra_set_id = hydra_set.id
+      end
+
+      it 'should return only attributes which are in the hydra set' do
+        hydra_attribute_association.hydra_attributes.should == {'color' => 'red', 'total' => nil}
+      end
+    end
+  end
 end

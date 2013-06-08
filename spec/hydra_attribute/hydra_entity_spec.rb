@@ -52,4 +52,12 @@ describe HydraAttribute::HydraEntity do
       Category.hydra_sets.map(&:name).should =~ %w[default3]
     end
   end
+
+  describe '#hydra_attributes' do
+    it 'should delegate the method to the hydra_attribute_association object' do
+      product = Product.new
+      product.hydra_attribute_association.should_receive(:hydra_attributes).once.and_return(name: :value)
+      product.hydra_attributes.should == {name: :value}
+    end
+  end
 end

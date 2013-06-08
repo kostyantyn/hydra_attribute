@@ -1,3 +1,4 @@
+require 'hydra_attribute/active_record/attribute_methods'
 require 'hydra_attribute/active_record/migration'
 require 'hydra_attribute/active_record/relation'
 require 'hydra_attribute/active_record/scoping'
@@ -18,5 +19,6 @@ module HydraAttribute
 
     include ::HydraAttribute::HydraEntity
     include ::HydraAttribute::ActiveRecord::Scoping
+    include ::HydraAttribute::ActiveRecord::AttributeMethods
   end
 end

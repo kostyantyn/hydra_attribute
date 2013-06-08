@@ -68,6 +68,13 @@ module HydraAttribute
       HydraSet.find(hydra_set_id) if hydra_set_id
     end
 
+    # Returns hydra attribute names with theirs values
+    #
+    # @return [Hash] where key is an attribute name the values is its value
+    def hydra_attributes
+      hydra_attribute_association.hydra_attributes
+    end
+
     def respond_to?(method, include_private = false)
       hydra_attribute_association.has_proxy_method?(method) || super
     end

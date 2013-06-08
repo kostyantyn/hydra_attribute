@@ -100,6 +100,14 @@ module HydraAttribute
       end
     end
 
+    def hydra_attributes
+      hydra_values.each_with_object({}) do |(hydra_attribute_id, hydra_value), hydra_attributes|
+        if has_attribute_id?(hydra_attribute_id)
+          hydra_attributes[hydra_value.hydra_attribute.name] = hydra_value.value
+        end
+      end
+    end
+
     def lock_values
       @hydra_values ||= {}
     end

@@ -518,4 +518,23 @@ describe HydraAttribute::ActiveRecord do
       find_value.(product2.id, attr2).to_i.should == 55
     end
   end
+
+  describe '#attributes' do
+    it 'should return entity attributes with its hydra attributes' do
+      product = Product.new
+      product.attributes.should == {'id'=>nil, 'hydra_set_id'=>nil, 'name'=>nil, 'created_at'=>nil, 'updated_at'=>nil}
+
+      a1 = Product.hydra_attributes.create(name: 'total', backend_type: 'decimal', default_value: 5)
+      a2 = Product.hydra_attributes.create(name: 'title', backend_type: 'string',  default_value: 'one')
+
+      product = Product.new
+      product.attributes.should == {'id'=>nil, 'hydra_set_id'=>nil, 'name'=>nil, 'created_at'=>nil, 'updated_at'=>nil, 'total'=>5, 'title'=>'one'}
+
+      set = Product.hydra_sets.create(name: 'default')
+      HydraAttribute::HydraAttributeSet.create(hydra_attribute_id: a1.id, hydra_set_id: set.id)
+
+      product.hydra_set_id = set.id
+      product.attributes.should == {'id'=>nil, 'hydra_set_id'=>set.id, 'name'=>nil, 'created_at'=>nil, 'updated_at'=>nil, 'total'=>5}
+    end
+  end
 end
