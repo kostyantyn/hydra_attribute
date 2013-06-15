@@ -1,6 +1,17 @@
 require 'spec_helper'
 
 describe HydraAttribute::ActiveRecord do
+  describe '.inspect' do
+    before do
+      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'code',  backend_type: 'string')
+      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'price', backend_type: 'decimal')
+    end
+
+    it 'should include hydra attributes in inspection string too' do
+      Product.inspect.should == 'Product(id: integer, hydra_set_id: integer, name: string, created_at: datetime, updated_at: datetime, code: string, price: decimal)'
+    end
+  end
+
   describe '.new' do
     let!(:attr1) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'code',    backend_type: 'string',   default_value: nil) }
     let!(:attr2) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'info',    backend_type: 'string',   default_value: '') }
@@ -535,6 +546,19 @@ describe HydraAttribute::ActiveRecord do
 
       product.hydra_set_id = set.id
       product.attributes.should == {'id'=>nil, 'hydra_set_id'=>set.id, 'name'=>nil, 'created_at'=>nil, 'updated_at'=>nil, 'total'=>5}
+    end
+  end
+
+  describe '#inspect' do
+    before do
+      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'code',  backend_type: 'string', default_value: 'one')
+      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'price', backend_type: 'float',  default_value: 5)
+    end
+
+    let(:product) { Product.new }
+
+    it 'should include hydra attributes in inspection string too' do
+      product.inspect.should == '#<Product id: nil, hydra_set_id: nil, name: nil, created_at: nil, updated_at: nil, code: "one", price: 5.0>'
     end
   end
 end

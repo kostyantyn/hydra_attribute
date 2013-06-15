@@ -20,5 +20,19 @@ module HydraAttribute
     include ::HydraAttribute::HydraEntity
     include ::HydraAttribute::ActiveRecord::Scoping
     include ::HydraAttribute::ActiveRecord::AttributeMethods
+
+    module ClassMethods
+      def inspect
+        inspection = hydra_attributes.map { |hydra_attribute| "#{hydra_attribute.name}: #{hydra_attribute.backend_type}"}
+        super.sub(/\)$/, ", #{inspection.join(', ')})")
+      end
+    end
+
+    def inspect
+      inspection = hydra_attributes.keys.map do |name|
+        "#{name}: #{attribute_for_inspect(name)}"
+      end
+      super.sub(/>$/, ", #{inspection.join(', ')}>")
+    end
   end
 end
