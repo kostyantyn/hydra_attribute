@@ -172,4 +172,45 @@ describe HydraAttribute::HydraEntityAttributeAssociation do
       end
     end
   end
+
+  describe '#hydra_attributes_before_type_cast' do
+    let(:entity) { Product.new }
+    let!(:attr1) { HydraAttribute::HydraAttribute.create(entity_type: entity.class.name, name: 'purchase_at', backend_type: 'datetime', default_value: '2013-12-04 00:00') }
+    let!(:attr2) { HydraAttribute::HydraAttribute.create(entity_type: entity.class.name, name: 'grand_total', backend_type: 'decimal') }
+
+    let(:hydra_attribute_association) { entity.hydra_attribute_association }
+
+    describe 'entity does not have a hydra set' do
+      describe 'entity is persisted' do
+        before do
+          entity.grand_total = '123456.1234'
+          entity.save
+        end
+
+        it 'should return all attributes with their values' do
+          hydra_attribute_association.hydra_attributes_before_type_cast.should == {'purchase_at' => '2013-12-04 00:00', 'grand_total' => '123456.1234'}
+        end
+      end
+
+      describe 'entity is not persisted' do
+        it 'should return all attributes with their values' do
+          hydra_attribute_association.hydra_attributes_before_type_cast.should == {'purchase_at' => '2013-12-04 00:00', 'grand_total' => nil}
+        end
+      end
+    end
+
+    describe 'entity has a hydra set' do
+      let(:hydra_set) { HydraAttribute::HydraSet.create(entity_type: entity.class.name, name: 'default') }
+
+      before do
+        HydraAttribute::HydraAttributeSet.create(hydra_attribute_id: attr1.id, hydra_set_id: hydra_set.id)
+        entity.hydra_set_id = hydra_set.id
+        entity.save
+      end
+
+      it 'should return only attributes which are in the hydra set' do
+        entity.hydra_attribute_association.hydra_attributes_before_type_cast.should == {'purchase_at' => '2013-12-04 00:00'}
+      end
+    end
+  end
 end

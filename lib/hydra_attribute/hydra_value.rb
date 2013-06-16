@@ -34,10 +34,14 @@ module HydraAttribute
     # @option attributes [Symbol] :value
     def initialize(entity, attributes = {})
       raise HydraAttributeIdIsMissedError unless attributes.has_key?(:hydra_attribute_id)
-
       @entity     = entity
       @attributes = attributes
-      @value      = attributes.has_key?(:value) ? column.type_cast(attributes[:value]) : column.default
+      if attributes.has_key?(:value)
+        @value = column.type_cast(attributes[:value])
+      else
+        @value = column.type_cast(column.default)
+        attributes[:value] = column.default
+      end
     end
 
     class << self

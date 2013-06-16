@@ -81,10 +81,8 @@ module HydraAttribute
 
     def save
       touch = false
-      hydra_values.each do |hydra_attribute_id, hydra_value|
-        if has_attribute_id?(hydra_attribute_id)
-          touch = true if hydra_value.save
-        end
+      accessible_hydra_values do |hydra_value|
+        touch = true if hydra_value.save
       end
       entity.touch if touch
     end
@@ -101,10 +99,14 @@ module HydraAttribute
     end
 
     def hydra_attributes
-      hydra_values.each_with_object({}) do |(hydra_attribute_id, hydra_value), hydra_attributes|
-        if has_attribute_id?(hydra_attribute_id)
-          hydra_attributes[hydra_value.hydra_attribute.name] = hydra_value.value
-        end
+      to_enum(:accessible_hydra_values).each_with_object({}) do |hydra_value, hydra_attributes|
+        hydra_attributes[hydra_value.hydra_attribute.name] = hydra_value.value
+      end
+    end
+
+    def hydra_attributes_before_type_cast
+      to_enum(:accessible_hydra_values).each_with_object({}) do |hydra_value, hydra_attributes|
+        hydra_attributes[hydra_value.hydra_attribute.name] = hydra_value.value_before_type_cast
       end
     end
 
@@ -140,6 +142,14 @@ module HydraAttribute
     private
       def has_attribute_id?(hydra_attribute_id)
         !entity.hydra_set || entity.hydra_set.has_hydra_attribute_id?(hydra_attribute_id)
+      end
+
+      def accessible_hydra_values
+        hydra_values.each do |hydra_attribute_id, hydra_value|
+          if has_attribute_id?(hydra_attribute_id)
+            yield hydra_value
+          end
+        end
       end
   end
 end

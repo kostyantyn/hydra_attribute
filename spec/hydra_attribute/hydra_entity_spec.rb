@@ -60,4 +60,12 @@ describe HydraAttribute::HydraEntity do
       product.hydra_attributes.should == {name: :value}
     end
   end
+
+  describe '#hydra_attributes_before_type_cast' do
+    it 'should delegate the method to the hydra_attribute_association object' do
+      product = Product.new
+      product.hydra_attribute_association.should_receive(:hydra_attributes_before_type_cast).once.and_return(name: :value)
+      product.hydra_attributes_before_type_cast.should == {name: :value}
+    end
+  end
 end

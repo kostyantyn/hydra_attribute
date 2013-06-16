@@ -70,9 +70,16 @@ module HydraAttribute
 
     # Returns hydra attribute names with theirs values
     #
-    # @return [Hash] where key is an attribute name the values is its value
+    # @return [Hash]
     def hydra_attributes
       hydra_attribute_association.hydra_attributes
+    end
+
+    # Returns hydra attribute names with theirs values before type casting
+    #
+    # @return [Hash]
+    def hydra_attributes_before_type_cast
+      hydra_attribute_association.hydra_attributes_before_type_cast
     end
 
     def respond_to?(method, include_private = false)
