@@ -16,15 +16,6 @@ module HydraAttribute
     define_cached_singleton_method :names_by_entity_type,         cache_key: :entity_type, cache_value: :name,         cache_key_cast: :to_s
     define_cached_singleton_method :backend_types_by_entity_type, cache_key: :entity_type, cache_value: :backend_type, cache_key_cast: :to_s
 
-    # Returns collection of hydra sets for this hydra attribute
-    #
-    # @return [Array<HydraAttribute::HydraSet>]
-    def hydra_sets
-      if id?
-        HydraAttributeSet.hydra_sets_by_hydra_attribute_id(id)
-      else
-        []
-      end
-    end
+    has_many :hydra_sets, through: :hydra_attribute_set, copy_attribute: :entity_type
   end
 end

@@ -6,8 +6,12 @@ module HydraAttribute
         @model_class = model_class
       end
 
-      def create(options = {})
-        @model_class.create(options.merge(entity_type: @entity_type))
+      def create(attributes = {})
+        @model_class.create(attributes.merge(entity_type: @entity_type))
+      end
+
+      def build(attributes = {})
+        @model_class.new(attributes.merge(entity_type: @entity_type))
       end
 
       private

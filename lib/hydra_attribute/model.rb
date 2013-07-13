@@ -6,6 +6,7 @@ require 'hydra_attribute/model/notifiable'
 require 'hydra_attribute/model/identity_map'
 require 'hydra_attribute/model/cacheable'
 require 'hydra_attribute/model/dirty'
+require 'hydra_attribute/model/has_many_through'
 
 module HydraAttribute
   module Model
@@ -18,5 +19,6 @@ module HydraAttribute
     include IdentityMap
     include Cacheable
     include Dirty
+    include HasManyThrough
   end
 end

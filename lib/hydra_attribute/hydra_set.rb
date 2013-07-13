@@ -20,19 +20,10 @@ module HydraAttribute
 
     define_cached_singleton_method :all_by_entity_type, cache_key: :entity_type, cache_value: :self, cache_key_cast: :to_s
 
-    validates :entity_type, presence: true
+    validates :entity_type, presence: true # TODO add match validation with its hydra_attributes.entity_type
     validates :name,        presence: true, unique: { scope: :entity_type }
 
-    # Returns collection of hydra attributes for this hydra set
-    #
-    # @return [Array<HydraAttribute::HydraAttribute>]
-    def hydra_attributes
-      if id?
-        HydraAttributeSet.hydra_attributes_by_hydra_set_id(id)
-      else
-        []
-      end
-    end
+    has_many :hydra_attributes, through: :hydra_attribute_set, copy_attribute: :entity_type
 
     def has_hydra_attribute_id?(hydra_attribute_id)
       HydraAttributeSet.has_hydra_attribute_id_in_hydra_set_id?(hydra_attribute_id, id)

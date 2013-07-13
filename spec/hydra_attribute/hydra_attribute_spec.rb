@@ -136,12 +136,12 @@ describe HydraAttribute::HydraAttribute do
 
   describe '#hydra_sets' do
     it 'should return blank array if model has not ID' do
-      HydraAttribute::HydraAttribute.new.hydra_sets.should == []
+      HydraAttribute::HydraAttribute.new.should have(0).hydra_sets
     end
 
     it 'should return blank array if model has not any hydra_sets' do
       hydra_attribute = HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'title', backend_type: 'string')
-      hydra_attribute.hydra_sets.should == []
+      hydra_attribute.should have(0).hydra_sets
     end
 
     it 'should return array of hydra_sets for the current hydra_attribute' do
