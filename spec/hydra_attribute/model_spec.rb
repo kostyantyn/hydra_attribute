@@ -24,4 +24,16 @@ describe HydraAttribute::Model do
       HydraAttribute::HydraAttribute.last.name.should == 'bbb'
     end
   end
+
+  describe '.count' do
+    before do
+      Product.hydra_attributes.create(name: 'yyy', backend_type: 'string')
+      Product.hydra_attributes.create(name: 'aaa', backend_type: 'string')
+      Product.hydra_attributes.create(name: 'bbb', backend_type: 'string')
+    end
+
+    it 'should return number of created models' do
+      HydraAttribute::HydraAttribute.count.should be(3)
+    end
+  end
 end

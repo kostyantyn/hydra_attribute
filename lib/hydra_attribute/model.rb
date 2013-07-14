@@ -35,6 +35,13 @@ module HydraAttribute
       def last
         all.last
       end
+
+      # Returns number of models
+      #
+      # @return [Fixnum]
+      def count
+        all.count
+      end
     end
   end
 end
