@@ -274,6 +274,23 @@ describe HydraAttribute::Model::Persistence do
     end
   end
 
+  describe '.destroy_all' do
+    let!(:attr1) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'a1', backend_type: 'string') }
+    let!(:attr2) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'a2', backend_type: 'string') }
+    let!(:attr3) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'a3', backend_type: 'string') }
+
+    it 'should delete all models' do
+      HydraAttribute::HydraAttribute.count.should be(3)
+      HydraAttribute::HydraAttribute.destroy_all
+      HydraAttribute::HydraAttribute.count.should be(0)
+    end
+
+    it 'should return result for every deleted object' do
+      result = HydraAttribute::HydraAttribute.destroy_all
+      result.should == {attr1.id => true, attr2.id => true, attr3.id => true}
+    end
+  end
+
   describe '#attributes' do
     it 'should return all attributes' do
       product = CustomProduct.new(name: 'a', price: 2)

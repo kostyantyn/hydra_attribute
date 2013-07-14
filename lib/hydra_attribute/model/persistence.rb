@@ -198,6 +198,15 @@ module HydraAttribute
           find(id).destroy
         end
 
+        # Destroys all models
+        #
+        # @return [Hash] result for each deleted object
+        def destroy_all
+          all.map(&:id).each_with_object({}) do |model_id, result|
+            result[model_id] = destroy(model_id)
+          end
+        end
+
         # Compiles attributes for performing +SELECT+ query
         #
         # @param [Hash] attributes
