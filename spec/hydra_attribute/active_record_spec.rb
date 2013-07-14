@@ -79,6 +79,19 @@ describe HydraAttribute::ActiveRecord do
         product.active.should be_true
         lambda { product.started }.should raise_error HydraAttribute::HydraSet::MissingAttributeInHydraSetError, "Attribute ID #{attr6.id} is missed in Set ID #{hydra_set_id}"
       end
+
+      it 'should not raise an error when missing attribute in set was passed' do
+        lambda do
+          Product.new(
+            :hydra_set_id => hydra_set_id,
+            attr1.name    => 1,
+            attr2.name    => 2,
+            attr3.name    => 3,
+            attr4.name    => 4,
+            attr5.name    => 5,
+            attr6.name    => 5)
+        end.should_not raise_error
+      end
     end
   end
 

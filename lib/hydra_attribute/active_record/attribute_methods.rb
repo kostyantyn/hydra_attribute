@@ -29,6 +29,19 @@ module HydraAttribute
           super
         end
       end
+
+      # Assigns attributes to the model
+      #
+      # @param [Hash] new_attributes
+      # @param [Hash] options
+      # @return [NilClass]
+      def assign_attributes(new_attributes, options = {})
+        if new_attributes[:hydra_set_id]
+          # set :hydra_set_id attribute as a last attribute to avoid HydraAttribute::HydraSet::MissingAttributeInHydraSetError error
+          new_attributes[:hydra_set_id] = new_attributes.delete(:hydra_set_id)
+        end
+        super
+      end
     end
   end
 end
