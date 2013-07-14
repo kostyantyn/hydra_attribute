@@ -20,5 +20,21 @@ module HydraAttribute
     include Cacheable
     include Dirty
     include HasManyThrough
+
+    module ClassMethods
+      # Find first model
+      #
+      # @return [HydraAttribute::Model]
+      def first
+        all.first
+      end
+
+      # Find last model
+      #
+      # @return [HydraAttribute::Model]
+      def last
+        all.last
+      end
+    end
   end
 end
