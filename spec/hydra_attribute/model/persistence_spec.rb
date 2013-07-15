@@ -274,6 +274,26 @@ describe HydraAttribute::Model::Persistence do
     end
   end
 
+  describe '.destroy' do
+    let!(:attr1) { Product.hydra_attributes.create(name: 'a1', backend_type: 'string') }
+    let!(:attr2) { Product.hydra_attributes.create(name: 'a2', backend_type: 'string') }
+
+    it 'should destroy model by ID' do
+      lambda { HydraAttribute::HydraAttribute.find(attr1.id) }.should_not raise_error(HydraAttribute::RecordNotFound)
+      lambda { HydraAttribute::HydraAttribute.find(attr2.id) }.should_not raise_error(HydraAttribute::RecordNotFound)
+
+      HydraAttribute::HydraAttribute.destroy(attr1.id)
+
+      lambda { HydraAttribute::HydraAttribute.find(attr1.id) }.should     raise_error(HydraAttribute::RecordNotFound)
+      lambda { HydraAttribute::HydraAttribute.find(attr2.id) }.should_not raise_error(HydraAttribute::RecordNotFound)
+
+      HydraAttribute::HydraAttribute.destroy(attr2.id)
+
+      lambda { HydraAttribute::HydraAttribute.find(attr1.id) }.should raise_error(HydraAttribute::RecordNotFound)
+      lambda { HydraAttribute::HydraAttribute.find(attr2.id) }.should raise_error(HydraAttribute::RecordNotFound)
+    end
+  end
+
   describe '.destroy_all' do
     let!(:attr1) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'a1', backend_type: 'string') }
     let!(:attr2) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'a2', backend_type: 'string') }
