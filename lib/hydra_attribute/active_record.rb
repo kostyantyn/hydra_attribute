@@ -23,16 +23,26 @@ module HydraAttribute
 
     module ClassMethods
       def inspect
-        inspection = hydra_attributes.map { |hydra_attribute| "#{hydra_attribute.name}: #{hydra_attribute.backend_type}"}
-        super.sub(/\)$/, ", #{inspection.join(', ')})")
+        if hydra_attributes.any?
+          inspection = hydra_attributes.map do |hydra_attribute|
+            "#{hydra_attribute.name}: #{hydra_attribute.backend_type}"
+          end
+          super.sub(/\)$/, ", #{inspection.join(', ')})")
+        else
+          super
+        end
       end
     end
 
     def inspect
-      inspection = hydra_attributes.keys.map do |name|
-        "#{name}: #{attribute_for_inspect(name)}"
+      if hydra_attributes.any?
+        inspection = hydra_attributes.keys.map do |name|
+          "#{name}: #{attribute_for_inspect(name)}"
+        end
+        super.sub(/>$/, ", #{inspection.join(', ')}>")
+      else
+        super
       end
-      super.sub(/>$/, ", #{inspection.join(', ')}>")
     end
   end
 end
