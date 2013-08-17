@@ -1,4 +1,5 @@
 module HydraAttribute
+  # TODO add #build_entity and #create_entity methods
   class HydraSet
 
     # This error is raised when called method for attribute which doesn't exist in current hydra set
