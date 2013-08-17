@@ -3,8 +3,8 @@ require 'spec_helper'
 describe HydraAttribute::ActiveRecord do
   describe '.inspect' do
     before do
-      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'code',  backend_type: 'string')
-      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'price', backend_type: 'decimal')
+      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'code',  backend_type: 'string', white_list: true)
+      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'price', backend_type: 'decimal', white_list: true)
     end
 
     it 'should include hydra attributes in inspection string too' do
@@ -13,12 +13,12 @@ describe HydraAttribute::ActiveRecord do
   end
 
   describe '.new' do
-    let!(:attr1) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'code',    backend_type: 'string',   default_value: nil) }
-    let!(:attr2) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'info',    backend_type: 'string',   default_value: '') }
-    let!(:attr3) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'total',   backend_type: 'integer',  default_value: 0) }
-    let!(:attr4) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'price',   backend_type: 'float',    default_value: 0) }
-    let!(:attr5) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'active',  backend_type: 'boolean',  default_value: 0) }
-    let!(:attr6) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'started', backend_type: 'datetime', default_value: '2013-01-01') }
+    let!(:attr1) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'code',    backend_type: 'string',   default_value: nil, white_list: true) }
+    let!(:attr2) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'info',    backend_type: 'string',   default_value: '', white_list: true) }
+    let!(:attr3) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'total',   backend_type: 'integer',  default_value: 0, white_list: true) }
+    let!(:attr4) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'price',   backend_type: 'float',    default_value: 0, white_list: true) }
+    let!(:attr5) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'active',  backend_type: 'boolean',  default_value: 0, white_list: true) }
+    let!(:attr6) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'started', backend_type: 'datetime', default_value: '2013-01-01', white_list: true) }
 
     let(:product) { Product.new(attributes) }
 
@@ -96,12 +96,12 @@ describe HydraAttribute::ActiveRecord do
   end
 
   describe '.create' do
-    let!(:attr1) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'code',    backend_type: 'string',   default_value: nil) }
-    let!(:attr2) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'info',    backend_type: 'string',   default_value: '') }
-    let!(:attr3) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'total',   backend_type: 'integer',  default_value: 0) }
-    let!(:attr4) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'price',   backend_type: 'float',    default_value: 0) }
-    let!(:attr5) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'active',  backend_type: 'boolean',  default_value: 0) }
-    let!(:attr6) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'started', backend_type: 'datetime', default_value: '2013-01-01') }
+    let!(:attr1) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'code',    backend_type: 'string',   default_value: nil, white_list: true) }
+    let!(:attr2) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'info',    backend_type: 'string',   default_value: '', white_list: true) }
+    let!(:attr3) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'total',   backend_type: 'integer',  default_value: 0, white_list: true) }
+    let!(:attr4) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'price',   backend_type: 'float',    default_value: 0, white_list: true) }
+    let!(:attr5) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'active',  backend_type: 'boolean',  default_value: 0, white_list: true) }
+    let!(:attr6) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'started', backend_type: 'datetime', default_value: '2013-01-01', white_list: true) }
 
     let(:product) { Product.find(Product.create(attributes).id) }
 
@@ -169,8 +169,8 @@ describe HydraAttribute::ActiveRecord do
 
   describe '.find' do
     before do
-      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'title', backend_type: 'string')
-      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'code', backend_type: 'integer')
+      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'title', backend_type: 'string', white_list: true)
+      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'code', backend_type: 'integer', white_list: true)
     end
 
     it 'should have hydra attributes' do
@@ -184,8 +184,8 @@ describe HydraAttribute::ActiveRecord do
 
   describe '.count' do
     before do
-      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'title', backend_type: 'string')
-      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'code', backend_type: 'integer')
+      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'title', backend_type: 'string', white_list: true)
+      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'code', backend_type: 'integer', white_list: true)
       Product.create(name: 'one', title: 'abc', code: 42)
       Product.create(name: 'two', title: 'qwe', code: 52)
     end
@@ -197,9 +197,9 @@ describe HydraAttribute::ActiveRecord do
 
   describe '.group' do
     before do
-      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'code', backend_type: 'integer')
-      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'title', backend_type: 'string')
-      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'total', backend_type: 'integer')
+      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'code', backend_type: 'integer', white_list: true)
+      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'title', backend_type: 'string', white_list: true)
+      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'total', backend_type: 'integer', white_list: true)
 
       Product.create(name: 'a', code: 1, title: 'q', total: 5)
       Product.create(name: 'b', code: 2, title: 'w', total: 5)
@@ -228,8 +228,8 @@ describe HydraAttribute::ActiveRecord do
 
   describe '.order' do
     before do
-      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'state', backend_type: 'integer')
-      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'title', backend_type: 'string')
+      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'state', backend_type: 'integer', white_list: true)
+      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'title', backend_type: 'string', white_list: true)
 
       Product.create(name: 'a', state: 3, title: 'c')
       Product.create(name: 'b', state: 2, title: 'b')
@@ -254,8 +254,8 @@ describe HydraAttribute::ActiveRecord do
 
   describe '.reverse_order' do
     before do
-      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'state', backend_type: 'integer')
-      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'title', backend_type: 'string')
+      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'state', backend_type: 'integer', white_list: true)
+      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'title', backend_type: 'string', white_list: true)
 
       Product.create(name: 'a', state: 3, title: 'c')
       Product.create(name: 'b', state: 2, title: 'b')
@@ -280,8 +280,8 @@ describe HydraAttribute::ActiveRecord do
 
   describe '.reorder' do
     before do
-      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'state', backend_type: 'integer')
-      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'title', backend_type: 'string')
+      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'state', backend_type: 'integer', white_list: true)
+      HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'title', backend_type: 'string', white_list: true)
 
       Product.create(name: 'a', state: 3, title: 'c')
       Product.create(name: 'b', state: 2, title: 'b')
@@ -305,11 +305,11 @@ describe HydraAttribute::ActiveRecord do
   end
 
   describe '.where' do
-    let!(:attr1) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'info',    backend_type: 'string')   }
-    let!(:attr2) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'total',   backend_type: 'integer')  }
-    let!(:attr3) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'price',   backend_type: 'float')    }
-    let!(:attr4) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'active',  backend_type: 'boolean')  }
-    let!(:attr5) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'started', backend_type: 'datetime') }
+    let!(:attr1) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'info',    backend_type: 'string',   white_list: true)   }
+    let!(:attr2) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'total',   backend_type: 'integer',  white_list: true)  }
+    let!(:attr3) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'price',   backend_type: 'float',    white_list: true)    }
+    let!(:attr4) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'active',  backend_type: 'boolean',  white_list: true)  }
+    let!(:attr5) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'started', backend_type: 'datetime', white_list: true) }
 
     describe 'without attribute sets' do
       before do
@@ -394,10 +394,10 @@ describe HydraAttribute::ActiveRecord do
   end
 
   describe '.select' do
-    let!(:attr1) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'code',     backend_type: 'string') }
-    let!(:attr2) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'quantity', backend_type: 'integer') }
-    let!(:attr3) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'title',    backend_type: 'string') }
-    let!(:attr4) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'active',   backend_type: 'boolean') }
+    let!(:attr1) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'code',     backend_type: 'string',  white_list: true) }
+    let!(:attr2) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'quantity', backend_type: 'integer', white_list: true) }
+    let!(:attr3) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'title',    backend_type: 'string',  white_list: true) }
+    let!(:attr4) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'active',   backend_type: 'boolean', white_list: true) }
     let!(:set1)  { HydraAttribute::HydraSet.create(entity_type: 'Product', name: 'default') }
     let!(:set2)  { HydraAttribute::HydraSet.create(entity_type: 'Product', name: 'second') }
 
@@ -485,7 +485,7 @@ describe HydraAttribute::ActiveRecord do
       end
 
       it 'should save only attributes which are belong to hydra set' do
-        attr_id2 = HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'color', backend_type: 'string').id
+        attr_id2 = HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'color', backend_type: 'string', white_list: true).id
         set_id   = HydraAttribute::HydraSet.create(entity_type: 'Product', name: 'default').id
         HydraAttribute::HydraAttributeSet.create(hydra_set_id: set_id, hydra_attribute_id: attr_id2)
 
@@ -521,8 +521,8 @@ describe HydraAttribute::ActiveRecord do
   end
 
   describe '#destroy' do
-    let!(:attr1) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'title', backend_type: 'string') }
-    let!(:attr2) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'code', backend_type: 'integer') }
+    let!(:attr1) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'title', backend_type: 'string', white_list: true) }
+    let!(:attr2) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'code', backend_type: 'integer', white_list: true) }
 
     let(:find_query) { ->(entity_id, attr) { "SELECT value FROM hydra_#{attr.backend_type}_products WHERE entity_id = #{entity_id} AND hydra_attribute_id = #{attr.id}" } }
     let(:find_value) { ->(entity_id, attr) { ::ActiveRecord::Base.connection.select_value(find_query.(entity_id, attr)) } }
