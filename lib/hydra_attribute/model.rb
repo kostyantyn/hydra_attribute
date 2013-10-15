@@ -7,6 +7,7 @@ require 'hydra_attribute/model/identity_map'
 require 'hydra_attribute/model/cacheable'
 require 'hydra_attribute/model/dirty'
 require 'hydra_attribute/model/has_many_through'
+require 'hydra_attribute/model/attribute_methods'
 
 module HydraAttribute
   module Model
@@ -20,6 +21,7 @@ module HydraAttribute
     include Cacheable
     include Dirty
     include HasManyThrough
+    include AttributeMethods
 
     module ClassMethods
       # Find first model
