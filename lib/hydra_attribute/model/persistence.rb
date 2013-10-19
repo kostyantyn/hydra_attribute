@@ -59,7 +59,7 @@ module HydraAttribute
         #
         # @return [ActiveRecord::ConnectionAdapters::AbstractAdapter]
         def connection
-          @connection ||= ::ActiveRecord::Base.connection
+          ::ActiveRecord::Base.connection
         end
 
         # Returns table name
