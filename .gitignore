@@ -17,6 +17,7 @@ test/tmp
 test/version_tmp
 tmp
 .idea
-.rvmrc
+.ruby-version
+.ruby-gemset
 bin/
 gemfiles/*.lock
