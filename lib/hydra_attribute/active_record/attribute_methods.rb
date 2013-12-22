@@ -42,6 +42,19 @@ module HydraAttribute
         end
         super
       end
+
+      # Returns the column object for the named attribute.
+      #
+      # @param [String, Symbol] name
+      # @return [ActiveRecord::ConnectionAdapters::Column]
+      def column_for_attribute(name)
+        hydra_attribute = self.class.hydra_attributes.find { |hydra_attribute| hydra_attribute.name == name.to_s } # TODO should be cached
+        if hydra_attribute
+          HydraValue.column(hydra_attribute.id)
+        else
+          super
+        end
+      end
     end
   end
 end

@@ -25,8 +25,12 @@ module HydraAttribute
           # TODO should be optimized. List of allowed attributes should be cached
           def hydra_attribute_by_name(attribute_name)
             ::HydraAttribute::HydraAttribute.all_by_entity_type(@entity.class.name).find do |attribute|
-              attribute.name == attribute_name
+              attribute.name == remove_multiparameter_id(attribute_name)
             end
+          end
+
+          def remove_multiparameter_id(attribute_name)
+            attribute_name.to_s.gsub(/\(.+/m, '')
           end
       end
 
