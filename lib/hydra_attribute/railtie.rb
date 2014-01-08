@@ -5,5 +5,10 @@ module HydraAttribute
         ::ActiveRecord::Migration.send(:include, ::HydraAttribute::ActiveRecord::Migration)
       end
     end
+
+    initializer 'hydra_attribute.middleware' do |app|
+      require 'hydra_attribute/middleware/identity_map'
+      app.middleware.use ::HydraAttribute::Middleware::IdentityMap
+    end
   end
 end
