@@ -1,6 +1,6 @@
 # hydra_attribute [![Gem Version](https://fury-badge.herokuapp.com/rb/hydra_attribute.png)](http://badge.fury.io/rb/hydra_attribute) [![Build Status](https://travis-ci.org/kostyantyn/hydra_attribute.png?branch=value_model_optimization)](https://travis-ci.org/kostyantyn/hydra_attribute)
 
-[Wiki](https://github.com/kostyantyn/hydra_attribute/wiki) | [RDoc](http://rdoc.info/github/kostyantyn/hydra_attribute)
+[Demo](http://ec2-54-229-138-34.eu-west-1.compute.amazonaws.com) | [Wiki](https://github.com/kostyantyn/hydra_attribute/wiki) | [RDoc](http://rdoc.info/github/kostyantyn/hydra_attribute)
 
 hydra_attribute is an implementation of
 [EAV (Entity-Attribute-Value) pattern](http://en.wikipedia.org/wiki/Entity–attribute–value_model) for ActiveRecord models. It allows to create or remove attributes in runtime. Also each record may have different sets of attributes, for example: Product with ID 1 can have different set of attributes than Product with ID 2.
