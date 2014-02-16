@@ -1,4 +1,4 @@
-# hydra_attribute <a href="http://badge.fury.io/rb/hydra_attribute"><img src="https://badge.fury.io/rb/hydra_attribute@2x.png" alt="Gem Version" height="18"></a> <a href="https://travis-ci.org/kostyantyn/hydra_attribute"><img src="https://travis-ci.org/kostyantyn/hydra_attribute.png?branch=master" alt="Build Status" height="18"></a> <a href="https://coveralls.io/r/kostyantyn/hydra_attribute"><img src="https://coveralls.io/repos/kostyantyn/hydra_attribute/badge.png" alt="Coverage Status" /></a>
+# hydra_attribute <a href="http://badge.fury.io/rb/hydra_attribute"><img src="https://badge.fury.io/rb/hydra_attribute@2x.png" alt="Gem Version" height="18"></a> [![Build Status](https://travis-ci.org/kostyantyn/hydra_attribute.png)](https://travis-ci.org/kostyantyn/hydra_attribute) [![Coverage Status](https://coveralls.io/repos/kostyantyn/hydra_attribute/badge.png)](https://coveralls.io/r/kostyantyn/hydra_attribute)
 
 [Demo](http://ec2-54-229-138-34.eu-west-1.compute.amazonaws.com) | [Wiki](https://github.com/kostyantyn/hydra_attribute/wiki) | [RDoc](http://rdoc.info/github/kostyantyn/hydra_attribute)
 
