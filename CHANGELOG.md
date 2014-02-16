@@ -1,5 +1,6 @@
-**0.5.0 (...)**
+**0.5.0 (February 16, 2014)**
 * Cache all hydra attributes per request
+* Replace `ActiveRecord` with plain database connection to fetch hydra attributes
 * Add support of `decimal` backend type
 * Add `id` to `hydra_attribute_sets` table
 * Use new index name pattern `*_idx` instead of `*_index`

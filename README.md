@@ -8,7 +8,6 @@ hydra_attribute is an implementation of
 ## Notice
 Until the first major version is released:
 * each new minor version doesn't guarantee back compatibility with previous one
-* gem isn't stable enough for using in production
 
 ## Requirements
 * ruby >= 1.9.2
