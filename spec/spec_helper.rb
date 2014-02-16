@@ -5,6 +5,13 @@ ActiveSupport.on_load(:active_record) do
   self.mass_assignment_sanitizer = :strict
 end
 
+if ENV['CI']
+  require 'coveralls'
+  Coveralls.wear! do
+    add_filter 'spec'
+  end
+end
+
 ENV['DB'] ||= 'sqlite'
 require File.expand_path("../environments/#{ENV['DB']}", __FILE__)
 
