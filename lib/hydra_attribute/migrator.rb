@@ -70,7 +70,7 @@ module HydraAttribute
           t.string  :backend_type, limit: 16, null: false
           t.string  :default_value
           t.boolean :white_list,              null: false, default: false
-          t.timestamps
+          t.timestamps                        null: false
         end
         add_index :hydra_attributes, [:entity_type, :name], unique: true, name: 'hydra_attributes_idx'
       end
@@ -79,14 +79,14 @@ module HydraAttribute
         create_table :hydra_sets do |t|
           t.string :entity_type,  limit: 32, null: false
           t.string :name,         limit: 32, null: false
-          t.timestamps
+          t.timestamps                       null: false
         end
         add_index :hydra_sets, [:entity_type, :name], unique: true, name: 'hydra_sets_idx'
 
         create_table :hydra_attribute_sets do |t|
           t.integer :hydra_attribute_id, null: false
           t.integer :hydra_set_id,       null: false
-          t.timestamps
+          t.timestamps                   null: false
         end
         add_index :hydra_attribute_sets, [:hydra_attribute_id, :hydra_set_id], unique: true, name: 'hydra_attribute_sets_idx'
       end
@@ -103,7 +103,7 @@ module HydraAttribute
             else
               t.send type, :value, null: true
             end
-            t.timestamps
+            t.timestamps null: false
           end
           add_index table_name, [:entity_id, :hydra_attribute_id], unique: true, name: "#{table_name}_idx"
         end
