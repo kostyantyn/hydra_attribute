@@ -2,7 +2,6 @@ require 'hydra_attribute/active_record/attribute_methods'
 require 'hydra_attribute/active_record/migration'
 require 'hydra_attribute/active_record/relation'
 require 'hydra_attribute/active_record/scoping'
-require 'hydra_attribute/active_record/mass_assignment_security'
 
 module HydraAttribute
   module ActiveRecord
@@ -21,7 +20,6 @@ module HydraAttribute
     include ::HydraAttribute::HydraEntity
     include ::HydraAttribute::ActiveRecord::Scoping
     include ::HydraAttribute::ActiveRecord::AttributeMethods
-    include ::HydraAttribute::ActiveRecord::MassAssignmentSecurity
 
     module ClassMethods
       def inspect

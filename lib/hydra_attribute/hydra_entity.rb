@@ -40,14 +40,14 @@ module HydraAttribute
       #
       # @return [HydraAttribute::HydraEntity::RelationDecorator]
       def hydra_attributes
-        @hydra_attributes ||= RelationDecorator.new(model_name, ::HydraAttribute::HydraAttribute)
+        @hydra_attributes ||= RelationDecorator.new(name, ::HydraAttribute::HydraAttribute)
       end
 
       # Returns collection of hydra sets for current entity
       #
       # @return [HydraAttribute::HydraEntity::RelationDecorator]
       def hydra_sets
-        @hydra_sets ||= RelationDecorator.new(model_name, ::HydraAttribute::HydraSet)
+        @hydra_sets ||= RelationDecorator.new(name, ::HydraAttribute::HydraSet)
       end
     end
 

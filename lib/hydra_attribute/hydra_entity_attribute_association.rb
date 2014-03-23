@@ -92,7 +92,7 @@ module HydraAttribute
     end
 
     def hydra_values
-      @hydra_values ||= ::HydraAttribute::HydraAttribute.ids_by_entity_type(entity.class.model_name).inject({}) do |hydra_values, hydra_attribute_id|
+      @hydra_values ||= ::HydraAttribute::HydraAttribute.ids_by_entity_type(entity.class.name).inject({}) do |hydra_values, hydra_attribute_id|
         hydra_values[hydra_attribute_id] = HydraValue.new(entity, hydra_attribute_id: hydra_attribute_id)
         hydra_values
       end
@@ -120,16 +120,16 @@ module HydraAttribute
 
     def has_proxy_method?(method)
       self.class.generate_methods unless self.class.methods_generated?
-      identity_map = self.class.identity_map[entity.class.model_name]
+      identity_map = self.class.identity_map[entity.class.name]
       return false unless identity_map
       !!identity_map[:names_as_hash][method.to_sym]
     end
 
     def delegate(method, *args, &block)
       self.class.generate_methods unless self.class.methods_generated?
-      identity_map     = self.class.identity_map[entity.class.model_name] or raise WrongProxyMethodError, method
-      attribute_id     = identity_map[:ids_as_hash][method]               or raise WrongProxyMethodError, method
-      attribute_method = identity_map[:names_as_hash][method]             or raise WrongProxyMethodError, method
+      identity_map     = self.class.identity_map[entity.class.name] or raise WrongProxyMethodError, method
+      attribute_id     = identity_map[:ids_as_hash][method]         or raise WrongProxyMethodError, method
+      attribute_method = identity_map[:names_as_hash][method]       or raise WrongProxyMethodError, method
 
       if has_attribute_id?(attribute_id)
         hydra_value = hydra_values[attribute_id] or raise AttributeWasNotSelectedError, attribute_id

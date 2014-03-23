@@ -23,9 +23,9 @@ module HydraAttribute
 
     included do
       # Compatibility with Rails' helpers
-      include ActiveModel::Conversion
       extend ActiveModel::Naming
       extend ActiveModel::Translation
+      include ActiveModel::Conversion
     end
 
     module ClassMethods

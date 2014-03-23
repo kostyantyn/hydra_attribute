@@ -23,7 +23,7 @@ module HydraAttribute
 
           if opts.is_a?(Hash)
             opts.inject(self) do |relation, (name, value)|
-              if ::HydraAttribute::HydraAttribute.names_by_entity_type(klass.model_name).include?(name.to_s)
+              if ::HydraAttribute::HydraAttribute.names_by_entity_type(klass.name).include?(name.to_s)
                 relation, name = relation.clone, name.to_s
                 relation.hydra_attributes    << name
                 relation.hydra_joins_aliases << hydra_helper.ref_alias(name, value)
@@ -45,7 +45,7 @@ module HydraAttribute
           @order_values = hydra_helper.quote_columns(@order_values.uniq.reject(&:blank?))
 
           # detect hydra attributes from select list
-          @hydra_select_values, @select_values = @select_values.partition { |value| ::HydraAttribute::HydraAttribute.names_by_entity_type(klass.model_name).include?(value.to_s) }
+          @hydra_select_values, @select_values = @select_values.partition { |value| ::HydraAttribute::HydraAttribute.names_by_entity_type(klass.name).include?(value.to_s) }
           @hydra_select_values.map!(&:to_s)
           @select_values.map!{ |value| hydra_helper.prepend_table_name(value) }
 
@@ -61,7 +61,7 @@ module HydraAttribute
           if hydra_attributes.any? or @hydra_select_values.any?
             hydra_attribute_ids = (hydra_attributes | hydra_select_values).map { |name| hydra_helper.hydra_attribute_id(name) }
 
-            hydra_sets = ::HydraAttribute::HydraSet.all_by_entity_type(klass.model_name).select do |hydra_set|
+            hydra_sets = ::HydraAttribute::HydraSet.all_by_entity_type(klass.name).select do |hydra_set|
               hydra_attribute_ids.all? do |hydra_attribute_id|
                 hydra_set.has_hydra_attribute_id?(hydra_attribute_id)
               end
@@ -151,7 +151,7 @@ module HydraAttribute
           end
 
           def hydra_attribute_by_name(name)
-            ::HydraAttribute::HydraAttribute.all_by_entity_type(klass.model_name).find do |hydra_attribute|
+            ::HydraAttribute::HydraAttribute.all_by_entity_type(klass.name).find do |hydra_attribute|
               hydra_attribute.name == name.to_s
             end
           end
@@ -159,7 +159,7 @@ module HydraAttribute
           def quote_columns(columns)
             columns.map do |column|
               column = column.respond_to?(:to_sql) ? column.to_sql : column.to_s
-              if ::HydraAttribute::HydraAttribute.names_by_entity_type(klass.model_name).include?(column)
+              if ::HydraAttribute::HydraAttribute.names_by_entity_type(klass.name).include?(column)
                 join_alias = ref_alias(column, 'inner') # alias for inner join
                 join_alias = ref_alias(column, nil) unless relation.hydra_joins_aliases.include?(join_alias) # alias for left join
 

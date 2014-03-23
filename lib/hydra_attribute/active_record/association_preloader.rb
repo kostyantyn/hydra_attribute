@@ -66,7 +66,7 @@ module HydraAttribute
 
         def grouped_hydra_attribute_ids
           @grouped_hydra_attribute_ids ||= begin
-            hydra_attributes = ::HydraAttribute::HydraAttribute.all_by_entity_type(klass.model_name)
+            hydra_attributes = ::HydraAttribute::HydraAttribute.all_by_entity_type(klass.name)
             if attribute_limit?
               map = hydra_attributes.map(&:backend_type).each_with_object({}) { |backend_type, hash| hash[backend_type] = [] }
               relation.hydra_select_values.each_with_object(map) do |name, grouped_ids|
