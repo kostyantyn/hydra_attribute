@@ -13,7 +13,6 @@ module HydraAttribute
       end
 
       def exec_queries
-        return @records if loaded?
         records = super
         return records if records.empty?
 

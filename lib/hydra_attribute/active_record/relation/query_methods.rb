@@ -4,7 +4,12 @@ module HydraAttribute
       module QueryMethods
         extend ActiveSupport::Concern
 
-        MULTI_VALUE_METHODS = [:hydra_joins_aliases, :hydra_select_values, :hydra_attributes]
+        MULTI_VALUE_METHODS = [
+          :hydra_joins_aliases,
+          :hydra_select_values,
+          :hydra_attributes,
+          :hydra_order_values
+        ]
 
         included do
           attr_writer *MULTI_VALUE_METHODS
@@ -14,51 +19,70 @@ module HydraAttribute
               def #{value}; @#{value} ||= [] end
             EOS
           end
-
-          alias_method_chain :where, :hydra_attribute
         end
 
-        def where_with_hydra_attribute(opts, *rest)
-          return self if opts.blank?
-
+        def where!(opts = :chain, *rest)
           if opts.is_a?(Hash)
             opts.inject(self) do |relation, (name, value)|
               if ::HydraAttribute::HydraAttribute.names_by_entity_type(klass.name).include?(name.to_s)
-                relation, name = relation.clone, name.to_s
+                name = name.to_s
                 relation.hydra_attributes    << name
                 relation.hydra_joins_aliases << hydra_helper.ref_alias(name, value)
                 relation.joins_values += hydra_helper.build_joins(name, value)
                 relation.where_values += build_where(hydra_helper.where_options(name, value))
                 relation
               else
-                relation.where_without_hydra_attribute(name => value)
+                super(name => value)
               end
             end
           else
-            where_without_hydra_attribute(opts, *rest)
+            super(opts, *rest)
           end
+        end
+
+        def order!(*args)
+          args.flatten.each do |condition|
+            name = condition.to_s
+            if ::HydraAttribute::HydraAttribute.names_by_entity_type(klass.name).include?(name)
+              hydra_order_values << name
+            else
+              super(condition)
+              self.hydra_order_values += order_values # keep order of hydra and static attributes
+            end
+          end
+          self
+        end
+
+        def reorder!(*args)
+          self.order_values       = []
+          self.reordering_value   = true
+          self.hydra_order_values = []
+          order!(*args)
         end
 
         def build_arel
           # remove duplicate columns and add table prefix to all of them
-          @group_values = hydra_helper.quote_columns(@group_values.uniq.reject(&:blank?))
-          @order_values = hydra_helper.quote_columns(@order_values.uniq.reject(&:blank?))
+          self.group_values = hydra_helper.quote_columns(group_values.uniq.reject(&:blank?))
+          self.order_values = hydra_helper.quote_columns(hydra_order_values.uniq.reject(&:blank?))
 
           # detect hydra attributes from select list
-          @hydra_select_values, @select_values = @select_values.partition { |value| ::HydraAttribute::HydraAttribute.names_by_entity_type(klass.name).include?(value.to_s) }
-          @hydra_select_values.map!(&:to_s)
-          @select_values.map!{ |value| hydra_helper.prepend_table_name(value) }
+          self.hydra_select_values, self.select_values = select_values.partition { |value| ::HydraAttribute::HydraAttribute.names_by_entity_type(klass.name).include?(value.to_s) }
+          hydra_select_values.map!(&:to_s)
+          select_values.map!{ |value| hydra_helper.prepend_table_name(value) }
 
           # attributes "id" and "hydra_set_id" are required for models which use HydraAttribute::ActiveRecord model
           # but if calculation method is performed, obtained data from database aren't converted to models
           # so these attributes should not be forcibly added to query
-          if !hydra_attribute_performs_calculation && (@hydra_select_values.any? or @select_values.any?)
-            @select_values << hydra_helper.prepend_table_name(klass.primary_key)
-            @select_values << hydra_helper.prepend_table_name('hydra_set_id')
+          if !hydra_attribute_performs_calculation && (hydra_select_values.any? or select_values.any?)
+            self.select_values += [
+              hydra_helper.prepend_table_name(klass.primary_key),
+              hydra_helper.prepend_table_name('hydra_set_id')
+            ]
           end
 
-          # Add filter by hydra sets which have all these attributes
-          if hydra_attributes.any? or @hydra_select_values.any?
+          # Add filter by hydra sets which have all required hydra attributes
+          # Entities without hydra_set_id have all hydra_attributes
+          if hydra_attributes.any? or hydra_select_values.any?
             hydra_attribute_ids = (hydra_attributes | hydra_select_values).map { |name| hydra_helper.hydra_attribute_id(name) }
 
             hydra_sets = ::HydraAttribute::HydraSet.all_by_entity_type(klass.name).select do |hydra_set|
@@ -67,7 +91,9 @@ module HydraAttribute
               end
             end
 
-            @where_values << table[:hydra_set_id].in(hydra_sets.map(&:id)).or(table[:hydra_set_id].eq(nil))
+            hydra_set_filter = table[:hydra_set_id].eq(nil)
+            hydra_set_filter = hydra_set_filter.or(table[:hydra_set_id].in(hydra_sets.map(&:id))) if hydra_sets.any?
+            self.where_values += [hydra_set_filter]
           end
 
           super
@@ -174,7 +200,7 @@ module HydraAttribute
 
         private
           def hydra_helper
-            @hydra_helper ||= Helper.new(self)
+            Helper.new(self)
           end
       end
     end

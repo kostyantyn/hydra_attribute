@@ -415,6 +415,7 @@ describe HydraAttribute::ActiveRecord do
 
     it 'should select only specific attributes and return models which have all these attributes in the attribute set' do
       relation = Product.select([:name, :code])
+
       relation.map(&:name).should =~ %w[name1 name2 name4]
       relation.map(&:code).should =~ %w[code1 code2 code4]
 

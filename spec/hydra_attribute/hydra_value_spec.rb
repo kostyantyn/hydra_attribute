@@ -242,7 +242,7 @@ describe HydraAttribute::HydraValue do
         hydra_value = HydraAttribute::HydraValue.new(product, hydra_attribute_id: hydra_attribute.id)
         hydra_value.save
 
-        value = product.connection.select_value("SELECT value FROM hydra_float_products WHERE entity_id=#{product.id} AND hydra_attribute_id=#{hydra_attribute.id}")
+        value = product.class.connection.select_value("SELECT value FROM hydra_float_products WHERE entity_id=#{product.id} AND hydra_attribute_id=#{hydra_attribute.id}")
         value.to_f.should == 0.1
       end
 
@@ -251,7 +251,7 @@ describe HydraAttribute::HydraValue do
         hydra_value.value = 2.5
         hydra_value.save
 
-        value = product.connection.select_value("SELECT value FROM hydra_float_products WHERE id=#{hydra_value.id}")
+        value = product.class.connection.select_value("SELECT value FROM hydra_float_products WHERE id=#{hydra_value.id}")
         value.to_f.should == 2.5
       end
     end
@@ -265,7 +265,7 @@ describe HydraAttribute::HydraValue do
         hydra_value.value = 5.5
         hydra_value.save
 
-        value = product.connection.select_value("SELECT value FROM hydra_float_products WHERE id=#{hydra_value.id}")
+        value = product.class.connection.select_value("SELECT value FROM hydra_float_products WHERE id=#{hydra_value.id}")
         value.to_f.should == 5.5
       end
     end
