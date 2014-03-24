@@ -13,13 +13,15 @@ Until the first major version is released:
 
 ## Requirements
 * ruby >= 1.9.2
-* active_record ~> 3.2
+* active_record >= 3.2
 
 ## Installation
 
 Add the following line to Gemfile:
 ```ruby
 gem 'hydra_attribute'
+# or for rails 4
+# gem 'hydra_attribute', github: 'kostyantyn/hydra_attribute', branch: 'rails4'
 ```
 and run `bundle install` from your shell.
     
