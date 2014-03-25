@@ -1,6 +1,12 @@
 # hydra_attribute 
+[![Gem Version](http://img.shields.io/gem/v/hydra_attribute.svg)](http://rubygems.org/gems/hydra_attribute)
+[![Build Status](http://img.shields.io/travis/kostyantyn/hydra_attribute.svg)](https://travis-ci.org/kostyantyn/hydra_attribute)
+[![Coverage Status](http://img.shields.io/coveralls/kostyantyn/hydra_attribute.svg)](https://coveralls.io/r/kostyantyn/hydra_attribute?branch=master) 
+[![Code Climate](http://img.shields.io/codeclimate/github/kostyantyn/hydra_attribute.svg)](https://codeclimate.com/github/kostyantyn/hydra_attribute)
+[![Dependency Status](http://img.shields.io/gemnasium/kostyantyn/hydra_attribute.svg)](https://gemnasium.com/kostyantyn/hydra_attribute)
+[![Inline docs](http://inch-pages.github.io/github/kostyantyn/hydra_attribute.png)](http://inch-pages.github.io/github/kostyantyn/hydra_attribute)
 
-<a href="http://badge.fury.io/rb/hydra_attribute"><img src="https://badge.fury.io/rb/hydra_attribute@2x.png" alt="Gem Version" height="18"></a> [![Build Status](https://travis-ci.org/kostyantyn/hydra_attribute.svg)](https://travis-ci.org/kostyantyn/hydra_attribute) [![Coverage Status](https://coveralls.io/repos/kostyantyn/hydra_attribute/badge.png?branch=master)](https://coveralls.io/r/kostyantyn/hydra_attribute?branch=master) [![Code Climate](https://codeclimate.com/github/kostyantyn/hydra_attribute.png)](https://codeclimate.com/github/kostyantyn/hydra_attribute) [![Inline docs](http://inch-pages.github.io/github/kostyantyn/hydra_attribute.png)](http://inch-pages.github.io/github/kostyantyn/hydra_attribute)
+
 
 [Demo](http://ec2-54-229-138-34.eu-west-1.compute.amazonaws.com) | [Wiki](https://github.com/kostyantyn/hydra_attribute/wiki) | [RDoc](http://rdoc.info/github/kostyantyn/hydra_attribute)
 
