@@ -279,13 +279,13 @@ describe HydraAttribute::Model::Persistence do
     let!(:attr2) { Product.hydra_attributes.create(name: 'a2', backend_type: 'string') }
 
     it 'should destroy model by ID' do
-      lambda { HydraAttribute::HydraAttribute.find(attr1.id) }.should_not raise_error(HydraAttribute::RecordNotFound)
-      lambda { HydraAttribute::HydraAttribute.find(attr2.id) }.should_not raise_error(HydraAttribute::RecordNotFound)
+      lambda { HydraAttribute::HydraAttribute.find(attr1.id) }.should_not raise_error
+      lambda { HydraAttribute::HydraAttribute.find(attr2.id) }.should_not raise_error
 
       HydraAttribute::HydraAttribute.destroy(attr1.id)
 
       lambda { HydraAttribute::HydraAttribute.find(attr1.id) }.should     raise_error(HydraAttribute::RecordNotFound)
-      lambda { HydraAttribute::HydraAttribute.find(attr2.id) }.should_not raise_error(HydraAttribute::RecordNotFound)
+      lambda { HydraAttribute::HydraAttribute.find(attr2.id) }.should_not raise_error
 
       HydraAttribute::HydraAttribute.destroy(attr2.id)
 
