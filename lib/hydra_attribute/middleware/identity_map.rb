@@ -8,7 +8,7 @@ module HydraAttribute
       def call(env)
         @app.call(env)
       ensure
-        HydraAttribute.identity_map.clear
+        ::HydraAttribute.identity_map.clear
       end
     end
   end
