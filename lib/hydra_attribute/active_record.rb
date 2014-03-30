@@ -1,6 +1,7 @@
 require 'hydra_attribute/active_record/attribute_methods'
 require 'hydra_attribute/active_record/migration'
 require 'hydra_attribute/active_record/relation'
+require 'hydra_attribute/active_record/associations'
 
 module HydraAttribute
   module ActiveRecord
@@ -18,6 +19,7 @@ module HydraAttribute
 
     include ::HydraAttribute::HydraEntity
     include ::HydraAttribute::ActiveRecord::AttributeMethods
+    include ::HydraAttribute::ActiveRecord::Associations
 
     module ClassMethods
       def inspect

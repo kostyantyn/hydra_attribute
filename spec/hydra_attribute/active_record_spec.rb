@@ -1,6 +1,112 @@
 require 'spec_helper'
 
 describe HydraAttribute::ActiveRecord do
+  describe '.has_many' do
+    context 'dependent: :destroy' do
+      before do
+        Room.hydra_attributes.create(name: 'length', backend_type: 'integer')
+        Room.hydra_attributes.create(name: 'width',  backend_type: 'integer')
+      end
+
+      context 'find' do
+        let!(:flat)  { Flat.create! }
+        let!(:room1) { Room.create!(flat_id: flat.id, square: 40, length: 5, width: 8) }
+        let!(:room2) { Room.create!(flat_id: flat.id, square: 45, length: 5, width: 9) }
+
+        it 'returns hydra associations with loaded hydra attributes' do
+          rooms = flat.rooms
+          expect(rooms).to match_array([room1, room2])
+          expect(rooms.map(&:attributes)).to match_array([room1.attributes, room2.attributes])
+        end
+
+        it 'returns hydra associations filtered by hydra attribute' do
+          rooms = flat.rooms.where(length: 5, width: 9)
+          expect(rooms).to match_array([room2])
+          expect(rooms.first.attributes).to eq(room2.attributes)
+        end
+
+        it 'returns hydra associations with filter by static attribute' do
+          rooms = flat.rooms.where(square: 40)
+          expect(rooms).to match_array([room1])
+          expect(rooms.first.attributes).to eq(room1.attributes)
+        end
+      end
+
+      context 'build' do
+        let(:flat) { Flat.new }
+
+        it 'returns new hydra association with hydra attributes' do
+          room = flat.rooms.build(square: 20, length: 2, width: 10)
+          expect(room.square).to eq(20)
+          expect(room.length).to eq(2)
+          expect(room.width).to  eq(10)
+        end
+      end
+
+      context 'create' do
+        let(:flat) { Flat.create! }
+
+        it 'saves hydra associations with hydra attributes' do
+          room = flat.rooms.create!(square: 20, length: 2, width: 10)
+          expect(room.square).to eq(20)
+          expect(room.length).to eq(2)
+          expect(room.width).to  eq(10)
+        end
+      end
+
+      context 'destroy' do
+        let!(:flat)  { Flat.create! }
+        let!(:room1) { Room.create!(flat_id: flat.id, square: 40, length: 5, width: 8) }
+        let!(:room2) { Room.create!(flat_id: flat.id, square: 45, length: 5, width: 9) }
+
+        it 'removes hydra associations and theirs hydra values' do
+          flat.destroy
+          expect(Room.count).to be(0)
+
+          query = HydraAttribute::HydraValue.arel_tables[Room.table_name]['integer'].project(Arel.star.count)
+          count = ActiveRecord::Base.connection.select_value(query)
+          expect(count).to be(0)
+        end
+      end
+    end
+  end
+
+  describe '.belongs_to' do
+    before do
+      Flat.hydra_attributes.create(name: 'floor', backend_type: 'integer')
+    end
+
+    context 'find' do
+      let!(:flat) { Flat.create!(number: 100, floor: 5) }
+      let!(:room) { Room.create!(flat_id: flat.id) }
+
+      it 'returns hydra association' do
+        expect(room.flat).to eq(flat)
+        expect(room.flat.attributes).to eq(flat.attributes)
+      end
+    end
+
+    context 'build' do
+      let(:room) { Room.new }
+
+      it 'returns hydra association' do
+        flat = room.build_flat(number: 100, floor: 3)
+        expect(flat.number).to be(100)
+        expect(flat.floor).to  be(3)
+      end
+    end
+
+    context 'create' do
+      let(:room) { Room.create! }
+
+      it 'returns hydra association' do
+        flat = room.create_flat!(number: 100, floor: 3)
+        expect(flat.number).to be(100)
+        expect(flat.floor).to  be(3)
+      end
+    end
+  end
+
   describe '.inspect' do
     before do
       HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'code',  backend_type: 'string', white_list: true)
