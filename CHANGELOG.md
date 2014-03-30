@@ -1,3 +1,18 @@
+**0.6.0 (...)**
+* Support `ActiveRecord` 4 and remove supporting version 3
+* Support associations between entities
+  ```ruby
+    class Category < ActiveRecord::Base
+      include HydraAttribute::ActiveRecord
+      has_many :products, dependent: :destroy
+    end
+
+    class Product < ActiveRecord::Base
+      include HydraAttribute::ActiveRecord
+      belongs_to :category
+    end
+  ```
+
 **0.5.1 (March 27, 2014)**
 * Fix `HydraAttribute::Middleware::IdentityMap`. Clear all cached values after request.
 
