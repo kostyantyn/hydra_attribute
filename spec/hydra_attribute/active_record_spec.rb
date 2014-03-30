@@ -16,19 +16,29 @@ describe HydraAttribute::ActiveRecord do
         it 'returns hydra associations with loaded hydra attributes' do
           rooms = flat.rooms
           expect(rooms).to match_array([room1, room2])
-          expect(rooms.map(&:attributes)).to match_array([room1.attributes, room2.attributes])
+
+          attributes = [rooms[0].attributes.except('updated_at', 'created_at')]
+          attributes << rooms[1].attributes.except('updated_at', 'created_at')
+          expect(attributes).to match_array([
+            room1.attributes.except('updated_at', 'created_at'),
+            room2.attributes.except('updated_at', 'created_at')
+          ])
         end
 
         it 'returns hydra associations filtered by hydra attribute' do
           rooms = flat.rooms.where(length: 5, width: 9)
           expect(rooms).to match_array([room2])
-          expect(rooms.first.attributes).to eq(room2.attributes)
+          expect(rooms.first.length).to eq(5)
+          expect(rooms.first.width).to  eq(9)
+          expect(rooms.first.square).to eq(45)
         end
 
         it 'returns hydra associations with filter by static attribute' do
           rooms = flat.rooms.where(square: 40)
           expect(rooms).to match_array([room1])
-          expect(rooms.first.attributes).to eq(room1.attributes)
+          expect(rooms.first.length).to eq(5)
+          expect(rooms.first.width).to  eq(8)
+          expect(rooms.first.square).to eq(40)
         end
       end
 
@@ -82,7 +92,8 @@ describe HydraAttribute::ActiveRecord do
 
       it 'returns hydra association' do
         expect(room.flat).to eq(flat)
-        expect(room.flat.attributes).to eq(flat.attributes)
+        expect(room.flat.number).to be(100)
+        expect(room.flat.floor).to  be(5)
       end
     end
 
