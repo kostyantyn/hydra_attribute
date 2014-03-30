@@ -1,3 +1,6 @@
+**0.5.1 (March 27, 2014)**
+* Fix `HydraAttribute::Middleware::IdentityMap`. Clear all cached values after request.
+
 **0.5.0 (February 16, 2014)**
 * Cache all hydra attributes per request
 * Replace `ActiveRecord` with plain database connection to fetch hydra attributes
