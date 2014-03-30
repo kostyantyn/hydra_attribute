@@ -74,7 +74,7 @@ describe HydraAttribute::ActiveRecord do
           expect(Room.count).to be(0)
 
           query = HydraAttribute::HydraValue.arel_tables[Room.table_name]['integer'].project(Arel.star.count)
-          count = ActiveRecord::Base.connection.select_value(query)
+          count = ActiveRecord::Base.connection.select_value(query).to_i
           expect(count).to be(0)
         end
       end
