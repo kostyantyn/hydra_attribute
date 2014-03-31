@@ -158,9 +158,9 @@ module HydraAttribute
 
       if persisted?
         return false unless changed?
-        update
+        value.nil? ? delete : update
       else
-        create
+        create unless value.nil?
       end
 
       @previously_changed = changes
@@ -205,6 +205,13 @@ module HydraAttribute
       # @return [NilClass]
       def update
         self.class.connection.update(arel_update, 'SQL')
+      end
+
+      def delete
+        table = self.class.arel_tables[entity.class.table_name][hydra_attribute.backend_type]
+        where = table['hydra_attribute_id'].eq(hydra_attribute.id).and(table['entity_id'].eq(entity.id))
+        arel  = table.from(table)
+        self.class.connection.delete(arel.where(where).compile_delete, 'SQL')
       end
   end
 end
