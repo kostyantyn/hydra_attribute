@@ -228,10 +228,11 @@ describe HydraAttribute::HydraValue do
 
   describe '#save' do
     let(:product)         { Product.create! }
-    let(:hydra_attribute) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'price', backend_type: 'float', default_value: 0.1) }
+    let(:hydra_attr_w_default) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'price', backend_type: 'float', default_value: 0.1) }
+    let(:hydra_attr_wo_default) { HydraAttribute::HydraAttribute.create(entity_type: 'Product', name: 'color', backend_type: 'string') }
 
     it 'should raise an error if entity model is not persisted' do
-      hydra_value = HydraAttribute::HydraValue.new(Product.new, hydra_attribute_id: hydra_attribute.id)
+      hydra_value = HydraAttribute::HydraValue.new(Product.new, hydra_attribute_id: hydra_attr_w_default.id)
       lambda do
         hydra_value.save
       end.should raise_error(HydraAttribute::HydraValue::EntityModelIsNotPersistedError, 'HydraValue model cannot be saved is entity model is not persisted')
@@ -239,35 +240,57 @@ describe HydraAttribute::HydraValue do
 
     describe 'create' do
       it 'should create model with default value' do
-        hydra_value = HydraAttribute::HydraValue.new(product, hydra_attribute_id: hydra_attribute.id)
+        hydra_value = HydraAttribute::HydraValue.new(product, hydra_attribute_id: hydra_attr_w_default.id)
         hydra_value.save
 
-        value = product.connection.select_value("SELECT value FROM hydra_float_products WHERE entity_id=#{product.id} AND hydra_attribute_id=#{hydra_attribute.id}")
+        value = product.connection.select_value("SELECT value FROM hydra_float_products WHERE entity_id=#{product.id} AND hydra_attribute_id=#{hydra_attr_w_default.id}")
         value.to_f.should == 0.1
       end
 
       it 'should create model with changed value' do
-        hydra_value = HydraAttribute::HydraValue.new(product, hydra_attribute_id: hydra_attribute.id)
+        hydra_value = HydraAttribute::HydraValue.new(product, hydra_attribute_id: hydra_attr_w_default.id)
         hydra_value.value = 2.5
         hydra_value.save
 
         value = product.connection.select_value("SELECT value FROM hydra_float_products WHERE id=#{hydra_value.id}")
         value.to_f.should == 2.5
       end
+
+      it 'should not create a hydra value if there is no default value' do
+        hydra_value = HydraAttribute::HydraValue.new(product, hydra_attribute_id: hydra_attr_wo_default.id)
+        hydra_value.save
+
+        count = product.connection.select_value("SELECT count(*) FROM hydra_float_products WHERE entity_id=#{product.id} AND hydra_attribute_id=#{hydra_attr_wo_default.id}")
+        count.should eq 0
+      end
     end
 
     describe 'update' do
       it 'should update hydra value in database' do
-        hydra_value = HydraAttribute::HydraValue.new(product, hydra_attribute_id: hydra_attribute.id)
+        hydra_value = HydraAttribute::HydraValue.new(product, hydra_attribute_id: hydra_attr_w_default.id)
         hydra_value.value = 2.5
         hydra_value.save
 
         hydra_value.value = 5.5
         hydra_value.save
 
-        value = product.connection.select_value("SELECT value FROM hydra_float_products WHERE id=#{hydra_value.id}")
-        value.to_f.should == 5.5
+        count = product.connection.select_value("SELECT value FROM hydra_float_products WHERE id=#{hydra_value.id}")
+        count.to_f.should == 5.5
       end
+
+      it 'should delete hydra value when changed from a non-nil value to a nil value' do
+        hydra_value = HydraAttribute::HydraValue.new(product, hydra_attribute_id: hydra_attr_w_default.id)
+        hydra_value.value = 2.5
+        hydra_value.save
+
+        hydra_value.value = nil
+        hydra_value.save
+
+        count = product.connection.select_value("SELECT count(*) FROM hydra_float_products WHERE id=#{hydra_value.id}")
+        count.should eq 0
+      end
+
+
     end
   end
 
