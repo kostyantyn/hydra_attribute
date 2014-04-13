@@ -12,6 +12,7 @@
       belongs_to :category
     end
   ```
+* Validate hydra attribute name. It must include only word characters and entity class must not have corresponding method.
 
 **0.5.1 (March 27, 2014)**
 * Fix `HydraAttribute::Middleware::IdentityMap`. Clear all cached values after request.
