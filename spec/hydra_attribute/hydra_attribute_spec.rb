@@ -186,6 +186,31 @@ describe HydraAttribute::HydraAttribute do
       hydra_attribute.errors.should_not include(:price)
     end
 
+    its 'name must not be defined in entity class' do
+      hydra_attribute = HydraAttribute::HydraAttribute.new(entity_type: 'Product')
+      %w[method_missing id created_at].each do |method_name|
+        hydra_attribute.name = method_name
+        hydra_attribute.valid?
+        expect(hydra_attribute.errors).to include(:name)
+      end
+
+      hydra_attribute.name = 'id2'
+      hydra_attribute.valid?
+      expect(hydra_attribute.errors).not_to include(:name)
+    end
+
+    its 'name must include only word characters' do
+      hydra_attribute = HydraAttribute::HydraAttribute.new
+
+      hydra_attribute.name = 'abc_at2='
+      hydra_attribute.valid?
+      expect(hydra_attribute.errors).to include(:name)
+
+      hydra_attribute.name = 'abc_at2'
+      hydra_attribute.valid?
+      expect(hydra_attribute.errors).not_to include(:name)
+    end
+
     it 'should have a unique entity_type and name' do
       HydraAttribute::HydraAttribute.create(name: 'price', entity_type: 'Product', backend_type: 'float').should be_persisted
       HydraAttribute::HydraAttribute.create(name: 'price', entity_type: 'Product', backend_type: 'float').should_not be_persisted
