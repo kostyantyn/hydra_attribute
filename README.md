@@ -4,7 +4,7 @@
 [![Coverage Status](http://img.shields.io/coveralls/kostyantyn/hydra_attribute.svg)](https://coveralls.io/r/kostyantyn/hydra_attribute?branch=master) 
 [![Code Climate](http://img.shields.io/codeclimate/github/kostyantyn/hydra_attribute.svg)](https://codeclimate.com/github/kostyantyn/hydra_attribute)
 [![Dependency Status](http://img.shields.io/gemnasium/kostyantyn/hydra_attribute.svg)](https://gemnasium.com/kostyantyn/hydra_attribute)
-[![Inline docs](http://inch-ci.org/github/kostyantyn/hydra_attribute.png)](http://inch-ci.org/github/kostyantyn/hydra_attribute)
+[![Inline docs](http://inch-ci.org/github/kostyantyn/hydra_attribute.svg)](http://inch-ci.org/github/kostyantyn/hydra_attribute)
 
 
 
