@@ -237,7 +237,7 @@ module HydraAttribute
         # @return [Arel::UpdateManager]
         def compile_update(id, attributes = {})
           fields = attributes_to_columns(attributes)
-          compile_select(id: id).compile_update(fields)
+          compile_select(id: id).compile_update(fields, id)
         end
 
         # Compiles attributes for performing +DELETE+ query
