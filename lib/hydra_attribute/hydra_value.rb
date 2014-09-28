@@ -190,7 +190,7 @@ module HydraAttribute
       def arel_update
         table = self.class.arel_tables[entity.class.table_name][hydra_attribute.backend_type]
         arel  = table.from(table)
-        arel.where(table[:id].eq(id)).compile_update(table[:value] => value, table[:updated_at] => Time.now)
+        arel.where(table[:id].eq(id)).compile_update({table[:value] => value, table[:updated_at] => Time.now}, id)
       end
 
       # Performs sql insert query

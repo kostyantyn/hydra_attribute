@@ -3,7 +3,7 @@ rvm:
   - 1.9.3
   - 2.0.0
 gemfile:
-  - gemfiles/activerecord-4.0.gemfile
+  - gemfiles/activerecord-4.1.gemfile
 env:
   - DB=sqlite
   - DB=mysql
