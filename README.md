@@ -25,12 +25,10 @@ Until the first major version is released:
 
 Add the following line to Gemfile:
 ```ruby
+# for rails 3.2
 gem 'hydra_attribute'
-# or for rails 4
-# gem 'hydra_attribute', github: 'kostyantyn/hydra_attribute', branch: 'rails4'
-
-# or for rails 4.1
-# gem 'hydra_attribute', github: 'kostyantyn/hydra_attribute', branch: 'rails4.1'
+# or for rails 4.x
+gem 'hydra_attribute', github: 'kostyantyn/hydra_attribute', branch: 'rails4.x'
 ```
 ```
 and run `bundle install` from your shell.

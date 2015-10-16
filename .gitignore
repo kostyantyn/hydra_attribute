@@ -20,4 +20,4 @@ tmp
 .ruby-version
 .ruby-gemset
 bin/
-gemfiles/*.lock
+#gemfiles/*.lock
