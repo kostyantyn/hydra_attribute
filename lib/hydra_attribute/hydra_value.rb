@@ -36,10 +36,11 @@ module HydraAttribute
       raise HydraAttributeIdIsMissedError unless attributes.has_key?(:hydra_attribute_id)
       @entity     = entity
       @attributes = attributes
+      type_cast = column.respond_to?(:type_cast) ? :type_cast : :type_cast_from_database
       if attributes.has_key?(:value)
-        @value = column.type_cast(attributes[:value])
+        @value = column.send(type_cast, attributes[:value])
       else
-        @value = column.type_cast(column.default)
+        @value = column.send(type_cast, column.default)
         attributes[:value] = column.default
       end
     end
@@ -70,7 +71,9 @@ module HydraAttribute
       def column(hydra_attribute_id)
         nested_identity_map(:column).cache(hydra_attribute_id.to_i) do
           hydra_attribute = ::HydraAttribute::HydraAttribute.find(hydra_attribute_id)
-          ::ActiveRecord::ConnectionAdapters::Column.new(hydra_attribute.name, hydra_attribute.default_value, hydra_attribute.backend_type)
+          backend_type = hydra_attribute.backend_type
+          backend_type = connection.lookup_cast_type(backend_type) if connection.respond_to? :lookup_cast_type
+          ::ActiveRecord::ConnectionAdapters::Column.new(hydra_attribute.name, hydra_attribute.default_value, backend_type)
         end
       end
 
@@ -111,7 +114,8 @@ module HydraAttribute
     def value=(new_value)
       value_will_change! unless value == new_value
       @attributes[:value] = new_value
-      @value = column.type_cast(new_value)
+      type_cast = column.respond_to?(:type_cast) ? :type_cast : :type_cast_from_database
+      @value = column.send(type_cast, new_value)
     end
 
     # Returns not type cased value
