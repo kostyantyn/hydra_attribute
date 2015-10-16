@@ -35,5 +35,6 @@ require 'hydra_attribute/hydra_value'
 require 'hydra_attribute/hydra_entity'
 require 'hydra_attribute/hydra_entity_attribute_association'
 require 'hydra_attribute/active_record'
+require 'hydra_attribute/monkey_patch'
 
 require 'hydra_attribute/railtie' if defined?(Rails)
