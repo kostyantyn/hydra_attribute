@@ -11,3 +11,14 @@ module ActiveRecord
     end
   end
 end
+
+module ActiveRecord
+  module Core
+    module ClassMethods #:nodoc:
+      alias_method :original_find, :find
+      def find(*ids)
+        self.ancestors.include?(::HydraAttribute::ActiveRecord) ? super(*ids) : original_find(*ids)
+      end
+    end
+  end
+end

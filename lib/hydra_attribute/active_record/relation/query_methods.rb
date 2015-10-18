@@ -53,6 +53,15 @@ module HydraAttribute
           self
         end
 
+        def reverse_order!
+          return super if ::ActiveRecord.version < ::Gem::Version.new('4.2.0')
+          orders = hydra_order_values.uniq
+          orders.reject!(&:blank?)
+          orders = hydra_helper.quote_columns(orders)
+          self.hydra_order_values = reverse_sql_order(orders)
+          self
+        end
+
         def reorder!(*args)
           self.order_values       = []
           self.reordering_value   = true

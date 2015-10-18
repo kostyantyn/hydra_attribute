@@ -71,9 +71,15 @@ module HydraAttribute
       def column(hydra_attribute_id)
         nested_identity_map(:column).cache(hydra_attribute_id.to_i) do
           hydra_attribute = ::HydraAttribute::HydraAttribute.find(hydra_attribute_id)
-          backend_type = hydra_attribute.backend_type
-          backend_type = connection.lookup_cast_type(backend_type) if connection.respond_to? :lookup_cast_type
-          ::ActiveRecord::ConnectionAdapters::Column.new(hydra_attribute.name, hydra_attribute.default_value, backend_type)
+          if ::ActiveRecord.version >= ::Gem::Version.new('4.2.0')
+            backend_type = sql_type = hydra_attribute.backend_type
+            backend_type = connection.lookup_cast_type(backend_type) if connection.respond_to? :lookup_cast_type
+            default_value = hydra_attribute.default_value
+            default_value = backend_type.type_cast_from_database(default_value) if backend_type.respond_to? :type_cast_from_database
+            ::ActiveRecord::ConnectionAdapters::Column.new(hydra_attribute.name, default_value, backend_type, sql_type)
+          else
+            ::ActiveRecord::ConnectionAdapters::Column.new(hydra_attribute.name, hydra_attribute.default_value, hydra_attribute.backend_type)
+          end
         end
       end
 
