@@ -41,7 +41,7 @@ GEM
     mime-types (2.6.2)
     minitest (4.7.5)
     multi_json (1.11.2)
-    mysql2 (0.4.1)
+    mysql2 (0.3.20)
     netrc (0.10.3)
     pg (0.18.3)
     rake (10.4.2)
@@ -80,7 +80,7 @@ DEPENDENCIES
   activerecord (~> 4.0.0)
   coveralls
   hydra_attribute!
-  mysql2
+  mysql2 (~> 0.3.20)
   pg
   rake
   rspec (~> 2.14.1)
