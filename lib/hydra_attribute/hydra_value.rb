@@ -73,7 +73,7 @@ module HydraAttribute
           hydra_attribute = ::HydraAttribute::HydraAttribute.find(hydra_attribute_id)
           if ::ActiveRecord.version >= ::Gem::Version.new('4.2.0')
             backend_type = sql_type = hydra_attribute.backend_type
-            backend_type = connection.lookup_cast_type(connection.native_database_types[backend_type.to_sym][:name])
+            backend_type = ::HydraAttribute::BACKEND_TYPE_MAP[backend_type.to_sym].new
             default_value = hydra_attribute.default_value
             default_value = backend_type.type_cast_from_database(default_value) if backend_type.respond_to? :type_cast_from_database
             ::ActiveRecord::ConnectionAdapters::Column.new(hydra_attribute.name, default_value, backend_type, sql_type)
