@@ -13,6 +13,12 @@ describe HydraAttribute::ActiveRecord do
         let!(:room1) { Room.create!(flat_id: flat.id, square: 40, length: 5, width: 8) }
         let!(:room2) { Room.create!(flat_id: flat.id, square: 45, length: 5, width: 9) }
 
+        it 'reload does not break hydra attributes' do
+          rooms = flat.rooms
+          rooms.reload
+          expect(rooms.first.length).to eq 5
+        end
+
         it 'returns hydra associations with loaded hydra attributes' do
           rooms = flat.rooms
           expect(rooms).to match_array([room1, room2])

@@ -3,6 +3,18 @@ require 'active_record'
 module HydraAttribute
   SUPPORTED_BACKEND_TYPES = %w[string text integer float decimal boolean datetime].freeze
 
+  if ActiveRecord.version >= Gem::Version.new('4.2.0')
+    BACKEND_TYPE_MAP = {
+        string:   ::ActiveRecord::Type::String,
+        text:     ::ActiveRecord::Type::Text,
+        integer:  ::ActiveRecord::Type::Integer,
+        float:    ::ActiveRecord::Type::Float,
+        decimal:  ::ActiveRecord::Type::Decimal,
+        boolean:  ::ActiveRecord::Type::Boolean,
+        datetime: ::ActiveRecord::Type::DateTime,
+    }.freeze
+  end
+
   class << self
     def config
       @config ||= Configuration.new
@@ -35,5 +47,6 @@ require 'hydra_attribute/hydra_value'
 require 'hydra_attribute/hydra_entity'
 require 'hydra_attribute/hydra_entity_attribute_association'
 require 'hydra_attribute/active_record'
+require 'hydra_attribute/monkey_patch'
 
 require 'hydra_attribute/railtie' if defined?(Rails)

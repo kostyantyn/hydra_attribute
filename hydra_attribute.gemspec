@@ -14,11 +14,11 @@ Gem::Specification.new do |gem|
   gem.required_ruby_version = Gem::Requirement.new('>= 1.9.2')
   gem.version               = HydraAttribute::VERSION
 
-  gem.add_dependency('activerecord', '~> 4.1.0')
+  gem.add_dependency('activerecord', '>= 4.0', '< 5')
 
   gem.add_development_dependency('rspec', '~> 2.14.1')
   gem.add_development_dependency('sqlite3')
-  gem.add_development_dependency('mysql2')
+  gem.add_development_dependency('mysql2', '~> 0.3.20')
   gem.add_development_dependency('pg')
   gem.add_development_dependency('rake')
   gem.add_development_dependency('simplecov')
