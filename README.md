@@ -1,3 +1,6 @@
+# Looking for contributors
+Unfortunately, I don't have enough time to work on this gem now. If you feel you can contribute to it, please, reach me via email, and I'll grant permissions to this project.
+
 # hydra_attribute 
 [![Gem Version](http://img.shields.io/gem/v/hydra_attribute.svg)](http://rubygems.org/gems/hydra_attribute)
 [![Build Status](http://img.shields.io/travis/kostyantyn/hydra_attribute.svg)](https://travis-ci.org/kostyantyn/hydra_attribute)
